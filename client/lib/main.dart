@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:client/screens/hub.dart';
-import 'package:client/screens/splash.dart';
+import 'package:client/screens/hubs/hub.dart';
+import 'screens/logins/logins.dart';
 
 void main() {
   runApp(const MainApp());
 }
 
 final GoRouter _router = GoRouter(routes: [
-  GoRoute(path: "/", builder: (context, stage) => const Splash()),
+  GoRoute(path: "/", builder: (context, stage) => const Logins()),
   GoRoute(path: "/hub", builder: (context, stage) => const Hub()),
 ]);
 
