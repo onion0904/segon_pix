@@ -1,15 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:convex_bottom_bar/convex_bottom_bar.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
-import 'package:client/screens/home.dart';
-import 'package:client/screens/profile.dart';
-import 'package:client/screens/search.dart';
-import 'package:client/screens/notification.dart';
+import 'package:client/screens/hubs/home.dart';
+import 'package:client/screens/hubs/profile.dart';
+import 'package:client/screens/hubs/search.dart';
+import 'package:client/screens/hubs/notification.dart';
 
 const hubList = [
   HubUI(),
-  NotificationUI(),
   SearchUI(),
+  NotificationUI(),
   ProfileUI(),
 ];
 
@@ -41,7 +41,10 @@ class Hub extends HookWidget {
       drawer: Drawer(
         child: ListView(children: [
           const DrawerHeader(child: Center(child: Text("Menu"))),
-          for (int i = 0; i < hubList.length; i++) listTile(i),
+          for (int i = 0; i < hubList.length; i++)
+            listTile(i, () {
+              index.value = i;
+            }),
         ]),
       ),
       body: hubList[index.value],
@@ -65,7 +68,7 @@ class Hub extends HookWidget {
 
 /////////////////////////////////////////////////////////////////////////
 
-Widget listTile(int i) {
+Widget listTile(int i, void Function() operateIndex) {
   return GestureDetector(
       child: Padding(
           padding: const EdgeInsets.all(8),
@@ -74,7 +77,5 @@ Widget listTile(int i) {
             const SizedBox(width: 8),
             Text(hubListName[i], style: const TextStyle(fontSize: 16)),
           ])),
-      onTap: () {
-        print("hello");
-      });
+      onTap: () => operateIndex());
 }
