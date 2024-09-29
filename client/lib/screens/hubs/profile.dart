@@ -6,7 +6,7 @@ class ProfileUI extends StatelessWidget {
   @override
   Widget build(context) {
     return const Center(
-        child: Text("pfofile")
+      child: Text("pfofile")
     );
   }
 }

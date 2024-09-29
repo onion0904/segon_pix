@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 
-class PostUI extends StatelessWidget {
-  const PostUI({super.key});
+class Post extends StatelessWidget {
+  const Post({super.key});
 
   @override
   Widget build(context) {
     return const Center(
-    child: Text("post")
+      child: Text("post")
     );
   }
 }

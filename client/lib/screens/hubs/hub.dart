@@ -5,19 +5,22 @@ import 'package:client/screens/hubs/home.dart';
 import 'package:client/screens/hubs/profile.dart';
 import 'package:client/screens/hubs/search.dart';
 import 'package:client/screens/hubs/notification.dart';
+import 'post.dart';
 
-const hubList = [
+const hubUIList = [
   HubUI(),
   SearchUI(),
+  Post(),
   NotificationUI(),
   ProfileUI(),
 ];
 
-const hubListName = ["home", "search", "notify", "profile"];
+const hubNameList = ["home", "search", "post", "notify", "profile"];
 
-const hubListIcon = [
+const hubIconList = [
   Icons.home,
   Icons.search,
+  Icons.image,
   Icons.notifications,
   Icons.person
 ];
@@ -41,21 +44,19 @@ class Hub extends HookWidget {
       drawer: Drawer(
         child: ListView(children: [
           const DrawerHeader(child: Center(child: Text("Menu"))),
-          for (int i = 0; i < hubList.length; i++)
+          for (int i = 0; i < hubUIList.length; i++)
             listTile(i, () {
               index.value = i;
             }),
         ]),
       ),
-      body: hubList[index.value],
+      body: hubUIList[index.value],
       bottomNavigationBar: ConvexAppBar(
-        style: TabStyle.react,
+        style: TabStyle.fixed,
         backgroundColor: Colors.orange,
         items: [
-          TabItem(icon: Icons.home, title: hubListName[0]),
-          TabItem(icon: Icons.search, title: hubListName[1]),
-          TabItem(icon: Icons.notifications, title: hubListName[2]),
-          TabItem(icon: Icons.person, title: hubListName[3])
+          for (int i = 0; i < hubUIList.length; i++)
+            TabItem(icon: hubIconList[i], title: hubNameList[i])
         ],
         initialActiveIndex: index.value,
         onTap: (int i) {
@@ -73,9 +74,9 @@ Widget listTile(int i, void Function() operateIndex) {
       child: Padding(
           padding: const EdgeInsets.all(8),
           child: Row(children: [
-            Icon(hubListIcon[i], size: 32),
+            Icon(hubIconList[i], size: 32),
             const SizedBox(width: 8),
-            Text(hubListName[i], style: const TextStyle(fontSize: 16)),
+            Text(hubNameList[i], style: const TextStyle(fontSize: 16)),
           ])),
       onTap: () => operateIndex());
 }
