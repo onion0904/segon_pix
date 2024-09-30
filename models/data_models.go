@@ -7,13 +7,13 @@ import (
 type User struct {
     gorm.Model
     Name         string        `gorm:"not null;index"` // ユーザー名
-    Profile      string        // プロフィールメッセージ
-    Icon         string        // プロフィール画像のURL
-    HeaderImage  string        // ヘッダー画像のURL
+    Profile      *string        // プロフィールメッセージ
+    Icon         *string        // プロフィール画像のURL
+    HeaderImage  *string        // ヘッダー画像のURL
     Email        *string       `gorm:"type:varchar(100);unique"` // メールアドレス（任意、一意のメール形式）
-    Age          *uint8        // 年齢（任意）
-    PostedImages []PostedImage // ユーザーが投稿した画像
-    LikedImages  []PostedImage // ユーザーがいいねした画像
+    Birthday     *int           // 年齢（任意）
+    PostedImages []*PostedImage // ユーザーが投稿した画像
+    LikedImages  []*PostedImage // ユーザーがいいねした画像
     Follows      []*User       `gorm:"many2many:user_follows;joinForeignKey:FollowerID;JoinReferences:FollowingID"` // フォローしているユーザー
     Followers    []*User       `gorm:"many2many:user_follows;joinForeignKey:FollowingID;JoinReferences:FollowerID"` // フォローされているユーザー
 }
