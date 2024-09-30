@@ -1,7 +1,7 @@
 class User {
   final String id;
   String name;
-  int age;
+  int birthday;
   String iconURL;
   String headerURL;
   String profileMessage;
@@ -13,14 +13,14 @@ class User {
     //必須
     required this.id,
     required this.name,
-    required this.age,
-    required this.iconURL,
-    required this.headerURL,
-    required this.profileMessage,
-    //任意
-    this.postImageURLs = const <String>[],
-    this.likeImageURLs = const <String>[],
-    this.followingList = const <String>[],
+    required this.birthday,
+    //任意(デフォルト等で対応)
+    this.iconURL        = "",
+    this.headerURL      = "",
+    this.profileMessage = "",
+    this.postImageURLs  = const <String>[],
+    this.likeImageURLs  = const <String>[],
+    this.followingList  = const <String>[],
   });
 }
 
