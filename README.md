@@ -26,4 +26,8 @@
 
 ## APIの機能
 
-- 
+### User
+
+| MethodName| input       |output            |Explanation                   |
+|-----------|-------------|------------------|------------------------------| 
+|UserInfo   | userid(uint)|*models.User,error|与えられたidのユーザー情報を返す|
