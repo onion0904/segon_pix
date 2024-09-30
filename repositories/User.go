@@ -21,7 +21,7 @@ func (repo *Repository) UserInfo(id uint) (*models.User, error) {
 
 
 // 与えられたハッシュタグの部分一致の画像のスライスを返す
-func (repo *Repository) ImageList(Qhashtag string) ([]models.PostedImage, error) {
+func (repo *Repository) SearchImage(Qhashtag string) ([]models.PostedImage, error) {
     var images []models.PostedImage
     err := repo.db.
         Preload("PostUser").
