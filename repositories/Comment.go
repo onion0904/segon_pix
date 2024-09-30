@@ -6,7 +6,7 @@ import (
 
 
 // AddComment 新しいコメントをPostedImageに追加する
-func (repo Repository) AddComment (model *models.Comment,imageID uint) error {
+func (repo *Repository) AddComment (model *models.Comment,imageID uint) error {
  	// トランザクションを開始
     tx := repo.db.Begin()
     defer func() {
@@ -83,7 +83,7 @@ func (repo *Repository) UpdateComment(commentID uint, newContent string, imageID
 
 
 
-func (repo Repository) DeleteComment (commentID int, imageID uint) error {
+func (repo *Repository) DeleteComment (commentID int, imageID uint) error {
 	// トランザクションを開始
     tx := repo.db.Begin()
     defer func() {
