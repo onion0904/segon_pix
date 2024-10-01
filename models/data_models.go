@@ -20,10 +20,10 @@ type User struct {
 
 type PostedImage struct {
     gorm.Model
-    URL         string    `gorm:"not null"`                    // 画像のURL
-    UserID      uint      `gorm:"not null"`                    // 投稿者のユーザーID
-    PostUser    User      `gorm:"not null"`                    //投稿したユーザーの情報
-    Likes       []User    // いいねしたユーザー
+    URL         string    `gorm:"not null"`        // 画像のURL
+    UserID      uint      `gorm:"not null"`        // 投稿者のユーザーID (外部キー)
+    PostUser    User      `gorm:"foreignKey:UserID"`  // 外部キーを明示的に指定
+    Likes       []User    `gorm:"many2many:posted_image_likes;"` // いいねしたユーザー（多対多リレーション）
     Comments    []Comment // コメント
     Hashtags    []Hashtag `gorm:"many2many:posted_image_hashtags;"` // ハッシュタグ
 }
@@ -31,10 +31,11 @@ type PostedImage struct {
 type Comment struct {
     gorm.Model
     PostedImageID uint   `gorm:"not null"` // コメント元のPostedImageのID
-    UserID        uint   `gorm:"not null"` // コメントしたユーザーのID
-    PostUser      User   `gorm:"not null"` // コメントしたユーザーの情報
+    UserID        uint   `gorm:"not null"` // コメントしたユーザーのID (外部キー)
+    PostUser      User   `gorm:"foreignKey:UserID"` // 外部キーを明示的に指定
     Message       string // コメント内容
 }
+
 
 type Hashtag struct {
     gorm.Model
