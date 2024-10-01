@@ -83,7 +83,7 @@ func (repo *Repository) UpdateComment(commentID uint, newContent string, imageID
 
 
 
-func (repo *Repository) DeleteComment (commentID int, imageID uint) error {
+func (repo *Repository) DeleteComment (commentID uint, imageID uint) error {
 	// トランザクションを開始
     tx := repo.db.Begin()
     defer func() {

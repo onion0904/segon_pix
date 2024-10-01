@@ -48,15 +48,22 @@ func main() {
 	e.Use(middleware.Recover())
 
 	// コントローラーの作成
-	con := controllers.NewTodoController(db)
+	con := controllers.NewController(db)
 
 	// ルーティングの設定
-	method := e.Group("/Todo")
+	method := e.Group("/segon_pix")
 	{
-		method.POST("/add", con.Add)
-		method.GET("/list", con.List)
-		method.PUT("/update", con.Update)
-		method.DELETE("/delete", con.Delete)
+		method.POST("/add/user", con.AddUser)
+		method.POST("/add/image", con.AddPostedImage)
+		method.POST("/add/like", con.AddLike)
+		method.POST("/add/comment", con.AddComment)
+		method.GET("/list/user", con.UserInfo)
+		method.GET("/list/image", con.SearchImage)
+		method.PUT("/update/comment", con.UpdateComment)
+		method.DELETE("/delete/user", con.DeleteUser)
+		method.DELETE("/delete/image", con.DeletePostedImage)
+		method.DELETE("/delete/like", con.RemoveLike)
+		method.DELETE("/delete/comment", con.DeleteComment)
 	}
 
 	// サーバーの開始
