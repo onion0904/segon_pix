@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../commons/sign_form.dart';
 
 class SignUp extends StatelessWidget {
   final void Function(int) changeIndex;
@@ -6,11 +7,14 @@ class SignUp extends StatelessWidget {
 
   @override
   Widget build(context) {
-    return Center(
-      child: TextButton(
-        child: const Text("go to splash"),
-        onPressed: () => changeIndex(0)
-      )
+    return Column(
+      children: [
+        SignForm(),
+        TextButton(
+          child: const Text("go to splash"),
+          onPressed: () => changeIndex(0)
+          )
+      ]
     );
   }
 }

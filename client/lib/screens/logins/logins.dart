@@ -22,6 +22,7 @@ class Logins extends HookWidget {
     ];
 
     return Scaffold(
+      resizeToAvoidBottomInset: false,
       appBar: AppBar(
         title: const Text("Login"),
         backgroundColor: Colors.orange,

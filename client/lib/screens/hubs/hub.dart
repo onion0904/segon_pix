@@ -36,6 +36,7 @@ class Hub extends HookWidget {
     final index = useState(0);
 
     return Scaffold(
+    resizeToAvoidBottomInset: false,
       appBar: AppBar(
         title: const Center(
           child: Text("\$eg0n", style: TextStyle(color: Colors.white)),
