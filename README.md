@@ -22,7 +22,7 @@
     - 使用例
 
     ```
-    curl -X POST https://localhost:8080/add/user \
+    curl -X POST http://localhost:8080/add/user \
     -H "Content-Type: application/json" \
     -d '{
         "name": "John Doe",
@@ -42,7 +42,7 @@
     - 使用例
 
     ```
-    curl -X POST "https://localhost:8080/add/image/images?ID=1234" \
+    curl -X POST "http://localhost:8080/add/image/images?ID=1234" \
   -F "File=@/path/to/your/image.jpg" \
   -F "Hashtags=tag1" \
   -F "Hashtags=tag2" \
@@ -60,7 +60,7 @@
     - 使用例
 
     ```
-    curl -X POST "https://localhost:8080/add/like?userID=1234&imageID=5678"
+    curl -X POST "http://localhost:8080/add/like?userID=1234&imageID=5678"
     ```
 - /add/comment
 
@@ -76,7 +76,7 @@
     - 使用例
 
     ```
-    curl -X GET "https://localhost:8080/list/user/info?ID=1234"
+    curl -X GET "http://localhost:8080/list/user/info?ID=1234"
     ```
 - /list/image
     - 入力できる値
@@ -88,7 +88,7 @@
     - 使用例
 
     ```
-    curl -X GET "https://localhost:8080/list/image/search?Hashtag=旅行"
+    curl -X GET "http://localhost:8080/list/image/search?Hashtag=旅行"
     ```
 
 ### PUT
@@ -106,7 +106,7 @@
     - 使用例
 
     ```
-   curl -X PUT "https://localhost:8080/update/comment?commentID=5678&imageID=1234&newContent=更新されたコメント内容"
+   curl -X PUT "http://localhost:8080/update/comment?commentID=5678&imageID=1234&newContent=更新されたコメント内容"
     ```
 
 ### DELETE
@@ -121,7 +121,7 @@
     - 使用例
 
     ```
-    curl -X DELETE "https://localhost:8080/delete/user?ID=1234"
+    curl -X DELETE "http://localhost:8080/delete/user?ID=1234"
     ```
 - /delete/image
     - 入力できる値
@@ -133,7 +133,7 @@
     - 使用例
 
     ```
-    curl -X DELETE "https://localhost:8080/delete/image/?ID=1234"
+    curl -X DELETE "http://localhost:8080/delete/image/?ID=1234"
     ```
 - /delete/like
     - 入力できる値
@@ -146,7 +146,7 @@
     - 使用例
 
     ```
-    curl -X DELETE "https://localhost:8080/delete/like?userID=1234&imageID=5678"
+    curl -X DELETE "http://localhost:8080/delete/like?userID=1234&imageID=5678"
     ```
 - /delete/comment
     - 入力できる値
@@ -158,7 +158,7 @@
     - 使用例
 
     ```
-    curl -X DELETE "https://localhost:8080/delete/comment?commentID=5678&imageID=1234"
+    curl -X DELETE "http://localhost:8080/delete/comment?commentID=5678&imageID=1234"
     ```
 
 
