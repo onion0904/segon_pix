@@ -12,3 +12,4 @@ type Controller struct {
 func NewController(db *gorm.DB) *Controller {
 	return &Controller{db: db}
 }
+
