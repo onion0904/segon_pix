@@ -9,6 +9,7 @@ import (
 )
 
 
+
 func (con *Controller) AddComment(c echo.Context) error {
 	comment := models.Comment{}
 	if err := c.Bind(&comment); err != nil {
