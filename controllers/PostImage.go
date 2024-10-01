@@ -9,20 +9,13 @@ import (
 	"strings"
 )
 
-// 使用例
-// curl -X POST https://yourapi.com/upload \
-//   -F "file=@path/to/image.jpg" \
-//   -F "ID=12345" \
-//   -F "Hashtags=tag1" \
-//   -F "Hashtags=tag2" \
-//   -F "Hashtags=tag3"
 
 func (con *Controller) AddPostedImage(c echo.Context) error {
     // リクエストのコンテキストを取得
     ctx := c.Request().Context()
 
     // フォームデータからファイルを取得
-    fileHeader, err := c.FormFile("file")
+    fileHeader, err := c.FormFile("File")
     if err != nil {
         return c.NoContent(http.StatusBadRequest) // 400エラー
     }
@@ -87,12 +80,6 @@ func (con *Controller) AddPostedImage(c echo.Context) error {
 func (con *Controller) DeletePostedImage(c echo.Context) error {
     // リクエストのコンテキストを取得
     ctx := c.Request().Context()
-
-    // パスパラメータから imageID を取得
-    imageIDParam := c.Param("id")
-    if imageIDParam == "" {
-        return c.JSON(http.StatusBadRequest, map[string]string{"error": "Image ID is required"})
-    }
 
     // imageID を uint に変換
     imageID := c.QueryParam("ID")

@@ -24,18 +24,169 @@
 - ログイン
 
 
-## APIの機能
+## リクエストの仕方
 
-| MethodName  | Input                   | Output                        | Explanation                                         |
-|-------------|-------------------------|-------------------------------|-----------------------------------------------------|
-| UserInfo    | userid(uint)            | *models.User, error           | 与えられたidのユーザー情報を返す                      |
-| SearchImage | Qhashtag(string)        | []models.PostedImage, error   | 与えられたハッシュタグの部分一致の画像のスライスを返す |
-| AddUser     | model(*models.User)     | error                         | ユーザーを追加する                                    |
-| DeleteUser  | userID(uint)            | error                         | ユーザーとその投稿画像を削除する                       |
-| AddPostedImage     | ctx(context.Context), file(io.Reader), filename(string), userID(uint), hashtags([]models.Hashtag)| error | GCSへのアップロードを伴う投稿画像の追加を処理します             |
-| DeletePostedImage  | ctx(context.Context), imageID(uint)                                                              | error | GCSの投稿画像と対応するファイルの削除を処理します                |
-| AddLike    | userID(uint), imageID(uint)                                                                              | error | ユーザーが画像にいいねをする処理     |
-| RemoveLike | userID(uint), imageID(uint)                                                                              | error | ユーザーが画像のいいねを取り消す処理 |
-| AddComment     | model(*models.Comment), imageID(uint)              | error  | 新しいコメントをPostedImageに追加する                |
-| UpdateComment  | commentID(uint), newContent(string), imageID(uint) | error  | 指定されたコメントの内容を更新する                   |
-| DeleteComment  | commentID(int), imageID(uint)                      | error  | コメントを削除し、PostedImageからもコメントを削除する |
+### POST
+
+- /add/user
+
+    - 入力できる値(JSONでの受け取り)
+
+    | 変数      |     説明     | 
+    |-----------|-----------|
+    |Name       |  ユーザー名   |       
+    |Profile(任意)    |  プロフィール欄に書くメッセージ  |      
+    |Email(任意)      |  メールアドレス  |      
+    |Birthday   |  誕生日      |
+
+    - 使用例
+
+    ```
+    curl -X POST https://localhost:8080/add/user \
+    -H "Content-Type: application/json" \
+    -d '{
+        "name": "John Doe",
+        "email": "john@example.com",
+      }'
+    ```
+- /add/image
+    - 入力できる値
+
+    | 変数      | 説明|
+    |-----------|-----|
+    |ID       |   ユーザーID   |
+    |File    |   画像ファイル   |
+    |Hashtags     | ハッシュタグ（複数可） | 
+
+
+    - 使用例
+
+    ```
+    curl -X POST "https://localhost:8080/add/image/images?ID=1234" \
+  -F "File=@/path/to/your/image.jpg" \
+  -F "Hashtags=tag1" \
+  -F "Hashtags=tag2" \
+  -F "Hashtags=tag3"
+
+    ```
+- /add/like
+    - 入力できる値
+
+    | 変数      |     説明     | 
+    |-----------|-----------|
+    |userID     |  ユーザーID  |       
+    |imageID    |  画像ID  |      
+
+    - 使用例
+
+    ```
+    curl -X POST "https://localhost:8080/add/like?userID=1234&imageID=5678"
+    ```
+- /add/comment
+
+### GET
+
+- /list/user
+    - 入力できる値
+
+    | 変数      |     型     | 
+    |-----------|-----------|
+    |ID       |  ユーザーID   |       
+
+    - 使用例
+
+    ```
+    curl -X GET "https://localhost:8080/list/user/info?ID=1234"
+    ```
+- /list/image
+    - 入力できる値
+
+    | 変数      |     説明     | 
+    |-----------|-----------|
+    |Hashtag       |  検索したいワード   |       
+
+    - 使用例
+
+    ```
+    curl -X GET "https://localhost:8080/list/image/search?Hashtag=旅行"
+    ```
+
+### PUT
+
+- /update/comment
+    - 入力できる値
+
+    | 変数      |     説明     | 
+    |-----------|-----------|
+    |commentID       |  コメントのID  |       
+    |imageID    |  画像のID  |      
+    |newContent       |  更新後のコメントの内容  |      
+
+
+    - 使用例
+
+    ```
+   curl -X PUT "https://localhost:8080/update/comment?commentID=5678&imageID=1234&newContent=更新されたコメント内容"
+    ```
+
+### DELETE
+
+- /delete/user
+    - 入力できる値
+
+    | 変数      |     型     | 
+    |-----------|-----------|
+    |ID       |  ユーザーID   |       
+
+    - 使用例
+
+    ```
+    curl -X DELETE "https://localhost:8080/delete/user?ID=1234"
+    ```
+- /delete/image
+    - 入力できる値
+
+    | 変数      |     説明     | 
+    |-----------|-----------|
+    |ID       |   画像ID  |       
+
+    - 使用例
+
+    ```
+    curl -X DELETE "https://localhost:8080/delete/image/?ID=1234"
+    ```
+- /delete/like
+    - 入力できる値
+
+    | 変数      |     説明     | 
+    |-----------|-----------|
+    |userID     |  ユーザーID  |       
+    |imageID    |  画像ID  |       
+
+    - 使用例
+
+    ```
+    curl -X DELETE "https://localhost:8080/delete/like?userID=1234&imageID=5678"
+    ```
+- /delete/comment
+    - 入力できる値
+
+    | 変数      |     説明     | 
+    |-----------|-----------|
+    |commentID       |  コメントのID  |       
+    |imageID    |  画像のID  |      
+    - 使用例
+
+    ```
+    curl -X DELETE "https://localhost:8080/delete/comment?commentID=5678&imageID=1234"
+    ```
+
+
+
+## TODO
+
+- IconとHeaderを登録する機能の実装
+- AddCommentにmodelsのmessage以外も追加できるようにする
+- followする機能の実装
+- Update Userの実装
+- ログイン機能の実装
