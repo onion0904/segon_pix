@@ -28,7 +28,7 @@ func main() {
 	dbDatabase := os.Getenv("DATABASE")
 
 	// データベース接続の設定
-	dsn := fmt.Sprintf("%s:%s@tcp(127.0.0.1:3308)/%s?parseTime=true", dbUser, dbPassword, dbDatabase)
+	dsn := fmt.Sprintf("%s:%s@tcp(db:3306)/%s?parseTime=true", dbUser, dbPassword, dbDatabase)
 	db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{})
 	if err != nil {
 		log.Fatalf("failed to connect database: %v", err)
