@@ -26,7 +26,7 @@
     -H "Content-Type: application/json" \
     -d '{
         "name": "John Doe",
-        "email": "john@example.com",
+        "email": "john@example.com"
       }'
     ```
 - /add/image
@@ -42,7 +42,7 @@
     - 使用例
 
     ```
-    curl -X POST "http://localhost:8080/segon_pix/add/image/images?ID=1234" \
+    curl -X POST "http://localhost:8080/segon_pix/add/image?ID=1234" \
   -F "File=@/path/to/your/image.jpg" \
   -F "Hashtags=tag1" \
   -F "Hashtags=tag2" \
@@ -76,7 +76,7 @@
     - 使用例
 
     ```
-    curl -X GET "http://localhost:8080/segon_pix/list/user/info?ID=1234"
+    curl -X GET "http://localhost:8080/segon_pix/list/user?ID=1234"
     ```
 - /list/image
     - 入力できる値
@@ -88,7 +88,7 @@
     - 使用例
 
     ```
-    curl -X GET "http://localhost:8080/segon_pix/list/image/search?Hashtag=旅行"
+    curl -X GET "http://localhost:8080/segon_pix/list/image?Hashtag=旅行"
     ```
 
 ### PUT
