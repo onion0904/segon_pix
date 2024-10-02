@@ -16,6 +16,22 @@ services:
       - db_data:/var/lib/mysql
     restart: always
 
+  api:
+    build: .
+    depends_on:
+      - db
+    environment:
+      DB_HOST: db
+      DB_PORT: 3306
+      DB_USER: ${USERNAME}
+      DB_PASSWORD: ${USERPASS}
+      DB_NAME: ${DATABASE}
+    ports:
+      - "8080:8080"
+    working_dir: /app
+    tty: true
+    restart: always
+
 volumes:
   db_data:
     driver: local
