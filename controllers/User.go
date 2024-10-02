@@ -13,14 +13,14 @@ import (
 func (con *Controller) AddUser(c echo.Context) error {
 	user := models.User{}
 	if err := c.Bind(&user); err != nil {
-		return c.NoContent(http.StatusServiceUnavailable) // 503エラー
+		return c.NoContent(500) // 503エラー
 	}
 	repo ,err := repositories.NewRepository(con.db)
 	if err != nil {
-        return c.NoContent(http.StatusServiceUnavailable) // 503エラー
+        return c.NoContent(501) // 503エラー
     }
 	if err := repo.AddUser(&user); err != nil {
-		return c.NoContent(http.StatusServiceUnavailable) // 503エラー
+		return c.NoContent(502) // 503エラー
 	}
 	return c.NoContent(http.StatusNoContent) // 204エラー
 }
