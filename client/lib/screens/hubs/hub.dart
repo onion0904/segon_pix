@@ -16,6 +16,14 @@ const hubUIList = [
   ProfileUI(),
 ];
 
+final floatingActionButtonList = [
+  null,
+  searchFloatingActionButton(),
+  null,
+  null,
+  null,
+];
+
 const hubNameList = ["home", "search", "post", "notify", "profile"];
 
 const hubIconList = [
@@ -36,14 +44,8 @@ class Hub extends HookWidget {
     final index = useState(0);
 
     return Scaffold(
-    resizeToAvoidBottomInset: false,
-      appBar: AppBar(
-        title: const Center(
-          child: Text("\$eg0n", style: TextStyle(color: Colors.white)),
-        ),
-        elevation: 4,
-        backgroundColor: Colors.orange,
-      ),
+      resizeToAvoidBottomInset: false,
+      appBar: appBar(),
       drawer: Drawer(
         child: ListView(children: [
           const DrawerHeader(child: Center(child: Text("Menu"))),
@@ -55,40 +57,68 @@ class Hub extends HookWidget {
         ]),
       ),
       body: hubUIList[index.value],
-      bottomNavigationBar: ConvexAppBar(
-        style: TabStyle.fixed,
-        height: 64,
-        curveSize: 128,
-        elevation: 4,
-        backgroundColor: Colors.orange,
-        items: [
-          for (int i = 0; i < hubUIList.length; i++)
-            TabItem(icon: hubIconList[i], title: hubNameList[i])
-        ],
-        onTap: (int i) {
-          index.value = i;
-        },
-      ),
+      bottomNavigationBar: navigationBar((int i) => index.value = i),
+      floatingActionButton: floatingActionButton(index.value)
     );
   }
 }
 
-/////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////
 
-Widget listTile(BuildContext context, i, void Function(int) operateIndex) {
-  return GestureDetector(
-      child: Padding(
-          padding: const EdgeInsets.all(16),
-          child: Row(children: [
-            const SizedBox(width: 8),
-            Icon(hubIconList[i], size: 32),
-            const SizedBox(width: 8),
-            Text(hubNameList[i], style: const TextStyle(fontSize: 16)),
-          ])),
-      onTap: () {
-        operateIndex(i);
-      });
+Widget floatingActionButton(
+  int index
+){
+  return Container(
+    margin: const EdgeInsets.all(16),
+    child: floatingActionButtonList[index]
+  );
 }
 
-///ConvexAppBarだと、listTileでindexを変更しても反映されないから
-///、他のボトムバーをあとで用いる
+/////////////////////////////////////////////////////////
+
+PreferredSizeWidget? appBar(){
+  return AppBar(
+    title: const Center(
+      child: Text("\$eg0n", style: TextStyle(color: Colors.white)),
+    ),
+    elevation: 4,
+    backgroundColor: Colors.orange,
+  );
+}
+
+/////////////////////////////////////////////////////////
+
+Widget navigationBar(void Function(int) changeIndex) {
+  //TODO navigationBarを変える
+  return ConvexAppBar(
+    style: TabStyle.fixed,
+    height: 64,
+    curveSize: 128,
+    elevation: 4,
+    backgroundColor: Colors.orange,
+    items: [
+      for (int i = 0; i < hubUIList.length; i++)
+        TabItem(icon: hubIconList[i], title: hubNameList[i])
+    ],
+    onTap: changeIndex
+    );
+}
+
+/////////////////////////////////////////////////////////////////////////
+
+Widget listTile(
+  BuildContext context, i, void Function(int) changeIndex
+) {
+  return GestureDetector(
+    child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Row(children: [
+          const SizedBox(width: 8),
+          Icon(hubIconList[i], size: 32),
+          const SizedBox(width: 8),
+          Text(hubNameList[i], style: const TextStyle(fontSize: 16)),
+        ])),
+    onTap: () {
+      changeIndex(i);
+    });
+}

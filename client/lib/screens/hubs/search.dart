@@ -5,8 +5,17 @@ class SearchUI extends StatelessWidget {
 
   @override
   Widget build(context) {
-    return const Center(
-    child: Text("search")
-    );
+    return const Center(child: Text("search"));
   }
+}
+
+////////////////////////////////////////////////////////
+
+Widget searchFloatingActionButton() {
+  return FloatingActionButton(
+    onPressed: (){
+
+    },
+    child: const Icon(Icons.search)
+  );
 }
