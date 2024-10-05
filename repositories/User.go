@@ -5,6 +5,7 @@ import (
 	"errors"
 	"gorm.io/gorm"
 	"context"
+    "strings"
 )
 
 // 与えられたidのユーザー情報を返す
@@ -35,8 +36,16 @@ func (repo *Repository) SearchImage(Qhashtag string) ([]models.PostedImage, erro
     if err != nil {
         return nil, err
     }
+
+    // URLから "/download/" を取り除く
+    for i, image := range images {
+        images[i].URL = strings.Replace(image.URL, "/download/", "/", 1)
+    }
+
     return images, nil
 }
+
+
 
 
 func (repo *Repository) AddUser(model *models.User) error {
