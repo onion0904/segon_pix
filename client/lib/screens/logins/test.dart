@@ -36,7 +36,7 @@ class TestUser {
 
 Future<http.Response> createAlbum(TestUser user) {
   return http.post(
-    Uri.parse('https://jsonplaceholder.typicode.com/albums'),
+    Uri.parse('http://localhost:8080/segon_pix/add/user'),
     headers: <String, String>{
       'Content-Type': 'application/json; charset=UTF-8',
     },
