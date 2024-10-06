@@ -25,7 +25,7 @@ class Test extends StatelessWidget {
 class TestUser {
   final String name = "hoge";
   final String profile = "fuga";
-  final String email = "unko";
+  final String email = "unkofhc";
   final int age = 1;
 
   const TestUser();
