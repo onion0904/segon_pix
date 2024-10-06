@@ -80,7 +80,7 @@
     - 使用例
 
     ```
-    curl -X GET "http://localhost:8080/segon_pix/list/user?ID=1234"
+    curl -X GET "http://localhost:8080/segon_pix/get/user?ID=1234"
     ```
 - /get/list/image
     - 入力できる値
@@ -93,7 +93,7 @@
     - 使用例
 
     ```
-    curl -X GET "http://localhost:8080/segon_pix/list/image?Hashtag=旅行"
+    curl -X GET "http://localhost:8080/segon_pix/get/list/image/image?Hashtag=旅行"
     ```
 
 ### PUT
