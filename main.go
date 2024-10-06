@@ -21,12 +21,12 @@ func main() {
 	}
 
 	// 環境変数の取得
-	dbUser := os.Getenv("USERNAME")
-	dbPassword := os.Getenv("USERPASS")
-	dbDatabase := os.Getenv("DATABASE")
+	dbUser := os.Getenv("DB_USER")
+	dbPassword := os.Getenv("DB_PASSWORD")
+	dbDatabase := os.Getenv("DB_NAME")
 
 	// データベース接続の設定
-	dsn := fmt.Sprintf("%s:%s@tcp(db:3306)/%s?parseTime=true", dbUser, dbPassword, dbDatabase)
+	dsn := fmt.Sprintf("%s:%s@tcp(db:%s)/%s?parseTime=true", dbUser, dbPassword, os.Getenv("DB_PORT"),dbDatabase)
 	db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{})
 	if err != nil {
 		log.Fatalf("failed to connect database: %v", err)

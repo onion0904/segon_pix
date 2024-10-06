@@ -11,19 +11,27 @@ import (
 
 
 func (con *Controller) AddUser(c echo.Context) error {
-	user := models.User{}
-	if err := c.Bind(&user); err != nil {
-		return c.NoContent(500) // 503エラー
-	}
-	repo ,err := repositories.NewRepository(con.db)
-	if err != nil {
-        return c.NoContent(501) // 503エラー
+    user := models.User{}
+    
+    // リクエストボディのバインド
+    if err := c.Bind(&user); err != nil {
+        return c.JSON(http.StatusBadRequest, "Invalid request data")
     }
-	if err := repo.AddUser(&user); err != nil {
-		return c.NoContent(502) // 503エラー
-	}
-	return c.NoContent(http.StatusNoContent) // 204エラー
+
+    // リポジトリの作成
+    repo, err := repositories.NewRepository(con.db)
+    if err != nil {
+        return c.JSON(http.StatusInternalServerError, "Failed to create repository")
+    }
+
+    // リポジトリを使ってユーザーを追加
+    if err := repo.AddUser(&user); err != nil {
+        return c.JSON(http.StatusInternalServerError, "Failed to add user")
+    }
+
+    return c.JSON(http.StatusNoContent, nil) // 正常終了
 }
+
 
 func (con *Controller) SearchImage(c echo.Context) error {
 	Qhashtag := c.QueryParam("Hashtag")

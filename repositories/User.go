@@ -5,7 +5,8 @@ import (
 	"errors"
 	"gorm.io/gorm"
 	"context"
-    "strings"
+    "fmt"
+    "os"
 )
 
 // 与えられたidのユーザー情報を返す
@@ -31,15 +32,21 @@ func (repo *Repository) SearchImage(Qhashtag string) ([]models.PostedImage, erro
         Preload("Hashtags").
         Joins("JOIN posted_image_hashtags ON posted_image_hashtags.posted_image_id = posted_images.id").
         Joins("JOIN hashtags ON posted_image_hashtags.hashtag_id = hashtags.id").
-        Where("hashtags.name LIKE ?", "%"+Qhashtag+"%").
+        Where("hashtags.Name LIKE ?", "%"+Qhashtag+"%").
         Find(&images).Error
     if err != nil {
         return nil, err
     }
 
-    // URLから "/download/" を取り除く
+    bucketName := os.Getenv("GCS_BUCKET_NAME")
+    if bucketName == "" {
+        return nil, fmt.Errorf("GCS_BUCKET_NAME is not set in environment variables")
+    }
+    baseURL := "https://storage.googleapis.com/"
+
     for i, image := range images {
-        images[i].URL = strings.Replace(image.URL, "/download/", "/", 1)
+        // URLを手動で構築
+        images[i].URL = fmt.Sprintf("%s%s/%s", baseURL, bucketName, image.ObjectName)
     }
 
     return images, nil
@@ -49,7 +56,10 @@ func (repo *Repository) SearchImage(Qhashtag string) ([]models.PostedImage, erro
 
 
 func (repo *Repository) AddUser(model *models.User) error {
-    return repo.db.Create(model).Error
+    if err := repo.db.Create(model).Error; err != nil {
+        return fmt.Errorf("failed to add user to the database: %w", err)
+    }
+    return nil
 }
 
 

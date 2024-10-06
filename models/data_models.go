@@ -23,6 +23,7 @@ type PostedImage struct {
     URL         string    `gorm:"not null"`        // 画像のURL
     UserID      uint      `gorm:"not null"`        // 投稿者のユーザーID (外部キー)
     PostUser    User      `gorm:"foreignKey:UserID"`  // 外部キーを明示的に指定
+    ObjectName  string    `gorm:"not null;index"`  // GCSオブジェクト名
     Likes       []User    `gorm:"many2many:posted_image_likes;"` // いいねしたユーザー（多対多リレーション）
     Comments    []Comment // コメント
     Hashtags    []Hashtag `gorm:"many2many:posted_image_hashtags;"` // ハッシュタグ
