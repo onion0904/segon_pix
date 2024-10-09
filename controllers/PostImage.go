@@ -40,7 +40,7 @@ func (con *Controller) AddPostedImage(c echo.Context) error {
     userID := c.QueryParam("ID")
     uintID64, err := strconv.ParseUint(userID, 10, 64)
     if err != nil {
-        return c.NoContent(http.StatusBadRequest) // 400エラー
+        return c.NoContent(500) // 400エラー
     }
     uintID := uint(uintID64)
 

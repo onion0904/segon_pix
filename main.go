@@ -21,12 +21,13 @@ func main() {
 	}
 
 	// 環境変数の取得
-	dbUser := os.Getenv("USERNAME")
-	dbPassword := os.Getenv("USERPASS")
-	dbDatabase := os.Getenv("DATABASE")
+	dbUser := os.Getenv("DB_USER")
+	dbPassword := os.Getenv("DB_PASSWORD")
+	dbDatabase := os.Getenv("DB_NAME")
 
 	// データベース接続の設定
-	dsn := fmt.Sprintf("%s:%s@tcp(db:3308)/%s?parseTime=true", dbUser, dbPassword, dbDatabase)
+
+	dsn := fmt.Sprintf("%s:%s@tcp(db:%s)/%s?parseTime=true", dbUser, dbPassword, os.Getenv("DB_PORT"),dbDatabase)
 	db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{})
 	if err != nil {
 		log.Fatalf("failed to connect database: %v", err)
@@ -55,8 +56,8 @@ func main() {
 		method.POST("/add/image", con.AddPostedImage)
 		method.POST("/add/like", con.AddLike)
 		method.POST("/add/comment", con.AddComment)
-		method.GET("/list/user", con.UserInfo)
-		method.GET("/list/image", con.SearchImage)
+		method.GET("/get/user", con.UserInfo)
+		method.GET("/get/list/image", con.SearchImage)
 		method.PUT("/update/comment", con.UpdateComment)
 		method.DELETE("/delete/user", con.DeleteUser)
 		method.DELETE("/delete/image", con.DeletePostedImage)

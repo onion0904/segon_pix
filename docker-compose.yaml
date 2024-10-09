@@ -1,37 +1,57 @@
 services:
   db:
+    container_name: DB
     image: mysql:5.7
     command:
       - --character-set-server=utf8mb4
+      - --explicit_defaults_for_timestamp
       - --collation-server=utf8mb4_unicode_ci
       - --sql-mode=ONLY_FULL_GROUP_BY,NO_AUTO_CREATE_USER,NO_ENGINE_SUBSTITUTION
     environment:
       MYSQL_ROOT_PASSWORD: ${ROOTPASS}
-      MYSQL_DATABASE: ${DATABASE}
-      MYSQL_USER: ${USERNAME}
-      MYSQL_PASSWORD: ${USERPASS}
+      MYSQL_DATABASE: ${DB_NAME}
+      MYSQL_USER: ${DB_USER}
+      MYSQL_PASSWORD: ${DB_PASSWORD}
     ports:
-      - "3308:3306"
+      - "3306:3306"
+    networks:
+      - app-network
     volumes:
       - db_data:/var/lib/mysql
     restart: always
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-uroot", "-ppass"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+
 
   api:
     build: .
     depends_on:
-      - db
+      db :
+        condition: service_healthy
     environment:
       DB_HOST: db
-      DB_PORT: 3306
-      DB_USER: ${USERNAME}
-      DB_PASSWORD: ${USERPASS}
-      DB_NAME: ${DATABASE}
+      DB_PORT: "3306"
+      DB_USER: ${DB_USER}
+      DB_PASSWORD: ${DB_PASSWORD}
+      DB_NAME: ${DB_NAME}
     ports:
       - "8080:8080"
+    volumes:
+      - ./myapp-437007-bdde37cabb9b.json:/app/myapp-437007-bdde37cabb9b.json
     working_dir: /app
     tty: true
     restart: always
+    networks:
+      - app-network
 
 volumes:
   db_data:
     driver: local
+
+networks:
+  app-network:
+    driver: bridge
