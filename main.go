@@ -26,6 +26,7 @@ func main() {
 	dbDatabase := os.Getenv("DB_NAME")
 
 	// データベース接続の設定
+
 	dsn := fmt.Sprintf("%s:%s@tcp(db:%s)/%s?parseTime=true", dbUser, dbPassword, os.Getenv("DB_PORT"),dbDatabase)
 	db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{})
 	if err != nil {

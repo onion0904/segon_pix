@@ -1,18 +1,15 @@
-# syntax=docker/dockerfile:1
+# 1. Goのビルド環境を設定
+FROM golang AS builder
 
-FROM golang
-
-# Set destination for COPY
 WORKDIR /app
 
-# Copy go.mod and go.sum first to leverage Docker cache
-COPY go.mod go.sum ./
-RUN go mod download
+# # 2. Goモジュールの依存関係を追加
+# COPY go.mod ./
+# COPY go.sum ./
+# RUN go mod download
 
+# 3. アプリケーションのソースコードを追加
 COPY . .
+RUN go mod download && go mod tidy
 
-# Build the Go application
-RUN go build -o app
-
-# Command to wait for DB and then run the application
-CMD ["./app"]
+CMD ["go", "run", "main.go"]

@@ -15,19 +15,34 @@ class SignForm extends HookWidget {
   Widget build(context) {
     //TODO パスワードのハッシュ化
     return Form(
-        child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
-      Padding(
+        child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+      Container(
+          constraints: const BoxConstraints(
+            maxWidth: 1000
+          ),
           padding: const EdgeInsets.fromLTRB(n, p, n, p),
           child: TextFormField(
             controller: emailController,
             validator: emailValiator,
-          )),
-      Padding(
+            decoration: const InputDecoration(
+                              border: OutlineInputBorder(), labelText: "Email"),
+                        ),
+          ),
+      Container(
+      constraints: const BoxConstraints(
+        maxWidth: 1000
+      ),
           padding: const EdgeInsets.fromLTRB(n, p, n, p),
           child: TextFormField(
             controller: passwordController,
             validator: passwordValiator,
-          )),
+            decoration: const InputDecoration(
+                              border: OutlineInputBorder(), labelText: "Email"),
+                        ),
+          ),
       Padding(
           padding: const EdgeInsets.all(p),
           child: ElevatedButton(
