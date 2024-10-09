@@ -10,9 +10,8 @@ import (
 	"log"
 	"github.com/joho/godotenv"
 	"gorm.io/gorm"
-	"strings"
-	"net/url"
     "errors"
+    "cloud.google.com/go/storage"
 )
 
 
@@ -50,10 +49,11 @@ func (repo *Repository) UploadImageToGCS(ctx context.Context, file io.Reader, fi
 // ensureHashtag は指定された名前のハッシュタグを取得、または存在しない場合は作成します。
 func (repo *Repository) ensureHashtag(tx *gorm.DB, name string) (models.Hashtag, error) {
     var hashtag models.Hashtag
-    err := tx.Where("name = ?", name).First(&hashtag).Error
+    err := tx.Where("Name = ?", name).First(&hashtag).Error
     if err != nil {
         if errors.Is(err, gorm.ErrRecordNotFound) {
             // ハッシュタグが存在しない場合は作成
+            //この時、エラーが出るが気にしなくてよい
             hashtag = models.Hashtag{Name: name}
             if err := tx.Create(&hashtag).Error; err != nil {
                 return models.Hashtag{}, fmt.Errorf("failed to create hashtag: %v", err)
@@ -66,42 +66,30 @@ func (repo *Repository) ensureHashtag(tx *gorm.DB, name string) (models.Hashtag,
 }
 
 
-
-// DeleteImageFromGCS は、Google Cloud Storage から画像を削除します。
-func (repo *Repository) DeleteImageFromGCS(ctx context.Context, imageURL string) error {
-    // .envファイルの読み込み
-	err := godotenv.Load()
-	if err != nil {
-		log.Fatalf("Error loading .env file")
-	}
-	bucketName := os.Getenv("GCS_BUCKET_NAME")
+func (repo *Repository) DeleteImageFromGCS(w io.Writer,ctx context.Context, objectName string) error {
+    bucketName := os.Getenv("GCS_BUCKET_NAME")
     if bucketName == "" {
+        log.Printf("GCS bucket name is not set in environment variables")
         return fmt.Errorf("GCS bucket name is not set")
     }
 
-    objectName, err := extractObjectNameFromURL(imageURL, bucketName)
+    log.Printf("Attempting to delete object: %s from bucket: %s", objectName, bucketName)
+    
+    o := repo.gcsClient.Bucket(bucketName).Object(objectName)
+
+    attrs, err := o.Attrs(ctx)
     if err != nil {
-        return err
+        return fmt.Errorf("object.Attrs: %w", err)
     }
-
-    return repo.gcsClient.Bucket(bucketName).Object(objectName).Delete(ctx)
-}
-
-// URLからオブジェクト名を抽出する関数
-func extractObjectNameFromURL(imageURL, bucketName string) (string, error) {
-    parsedURL, err := url.Parse(imageURL)
-    if err != nil {
-        return "", fmt.Errorf("invalid image URL: %v", err)
+    o = o.If(storage.Conditions{GenerationMatch: attrs.Generation})
+    
+    if err := o.Delete(ctx); err != nil {
+        return fmt.Errorf("Object(%q).Delete: %w", objectName, err)
     }
+    
 
-    // パスからオブジェクト名を抽出
-    parts := strings.SplitN(parsedURL.Path, "/", 3)
-    if len(parts) < 3 || parts[1] != bucketName {
-        return "", fmt.Errorf("invalid image URL path")
-    }
-
-    objectName := parts[2]
-    return objectName, nil
+    fmt.Fprintf(w, "Blob %v deleted.\n", objectName)
+    return nil
 }
 
 
@@ -151,24 +139,29 @@ func (repo *Repository) AddPostedImage(ctx context.Context, file io.Reader, file
 }
 
 
-// DeletePostedImageは、GCSの投稿画像と対応するファイルの削除を処理します。
 func (repo *Repository) DeletePostedImage(ctx context.Context, imageID uint) error {
+    log.Printf("Starting deletion process for image ID: %d", imageID)
+    
     return repo.db.Transaction(func(tx *gorm.DB) error {
         var image models.PostedImage
         if err := tx.First(&image, imageID).Error; err != nil {
-            return err
+            log.Printf("Failed to find image with ID %d: %v", imageID, err)
+            return fmt.Errorf("failed to find image: %w", err)
+        }
+        log.Printf("Found image with ObjectName: %s", image.ObjectName)
+
+        // URLではなくObjectNameを使用してGCSから削除
+        if err := repo.DeleteImageFromGCS(os.Stdout,ctx, image.ObjectName); err != nil {
+            log.Printf("Failed to delete image from GCS: %v", err)
+            return fmt.Errorf("failed to delete image from GCS: %w", err)
         }
 
-        // GCSから画像を削除
-        if err := repo.DeleteImageFromGCS(ctx, image.URL); err != nil {
-            return err
-        }
-
-        // 画像を削除（関連付けも自動的に処理される）
         if err := tx.Delete(&image).Error; err != nil {
-            return err
+            log.Printf("Failed to delete image from DB: %v", err)
+            return fmt.Errorf("failed to delete image from DB: %w", err)
         }
 
+        log.Printf("Successfully deleted image with ID: %d", imageID)
         return nil
     })
 }

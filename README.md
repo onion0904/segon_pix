@@ -93,7 +93,7 @@
     - 使用例
 
     ```
-    curl -X GET "http://localhost:8080/segon_pix/get/list/image/image?Hashtag=旅行"
+    curl -X GET "http://localhost:8080/segon_pix/get/list/image?Hashtag=旅行"
     ```
 
 ### PUT
@@ -141,7 +141,7 @@
     - 使用例
 
     ```
-    curl -X DELETE "http://localhost:8080/segon_pix/delete/image/?ID=1234"
+    curl -X DELETE "http://localhost:8080/segon_pix/delete/image?ID=1234"
     ```
 - /delete/like
     - 入力できる値
