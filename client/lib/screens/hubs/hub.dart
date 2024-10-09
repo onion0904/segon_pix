@@ -9,6 +9,10 @@ import 'package:go_router/go_router.dart';
 
 /////////////////////////////////////////////////////////////////////////
 
+const drawerImage =
+    "https://onion0904.dev/ocGvg5tH5gfqsDS1715839141_1715839204.png";
+const double imageSize = 100;
+
 class Hub extends HookWidget {
   const Hub({super.key});
 
@@ -21,7 +25,13 @@ class Hub extends HookWidget {
         appBar: appBar(),
         drawer: Drawer(
           child: ListView(children: [
-            const DrawerHeader(child: Center(child: Text("Menu"))),
+            DrawerHeader(
+                decoration: const BoxDecoration(color: Colors.orange),
+                child: Center(
+                    child: SizedBox(
+                        width: imageSize,
+                        height: imageSize,
+                        child: Image.network(drawerImage)))),
             for (int i = 0; i < HubList.ui.length; i++)
               listTile(context, i, (int a) {
                 index.value = a;
@@ -30,7 +40,8 @@ class Hub extends HookWidget {
           ]),
         ),
         body: HubList.ui[index.value],
-        bottomNavigationBar: SegonNavigationBar(index: index.value, changeIndex: (int i) => index.value = i),
+        bottomNavigationBar: SegonNavigationBar(
+            index: index.value, changeIndex: (int i) => index.value = i),
         floatingActionButton: floatingActionButton(index.value));
   }
 }
@@ -39,7 +50,8 @@ class Hub extends HookWidget {
 
 Widget floatingActionButton(int index) {
   return Container(
-      margin: const EdgeInsets.all(16), child: HubList.floatingActionButton[index]);
+      margin: const EdgeInsets.all(16),
+      child: HubList.floatingActionButton[index]);
 }
 
 /////////////////////////////////////////////////////////
@@ -56,46 +68,45 @@ PreferredSizeWidget? appBar() {
 
 /////////////////////////////////////////////////////////
 
-class SegonNavigationBar extends StatelessWidget{
+class SegonNavigationBar extends StatelessWidget {
   const SegonNavigationBar({
-  super.key,
-  required this.index,
-  required this.changeIndex,
+    super.key,
+    required this.index,
+    required this.changeIndex,
   });
 
   final int index;
   final void Function(int) changeIndex;
 
   @override
-  Widget build(context){
+  Widget build(context) {
     return NavigationBar(
-      backgroundColor: Colors.orange,
-      onDestinationSelected: changeIndex,
-      selectedIndex: index,
-      destinations: [
-        for(int i=0; i<HubList.ui.length; i++)
-          NavigationDestination(
-            icon: Icon(HubList.icon[i]),
-            label: HubList.label[i],
-          )
-      ]
-    );
+        backgroundColor: Colors.orange,
+        onDestinationSelected: changeIndex,
+        selectedIndex: index,
+        destinations: [
+          for (int i = 0; i < HubList.ui.length; i++)
+            NavigationDestination(
+              icon: Icon(HubList.icon[i]),
+              label: HubList.label[i],
+            )
+        ]);
   }
 }
 
 // Widget navigationBar(void Function(int) changeIndex) {
-  //TODO navigationBarを変える
-  // return ConvexAppBar(
-  //     style: TabStyle.fixed,
-  //     height: 64,
-  //     curveSize: 128,
-  //     elevation: 4,
-  //     backgroundColor: Colors.orange,
-  //     items: [
-  //       for (int i = 0; i < HubList.ui.length; i++)
-  //         TabItem(icon: HubList.icon[i], title: HubList.label[i])
-  //     ],
-  //     onTap: changeIndex);
+//TODO navigationBarを変える
+// return ConvexAppBar(
+//     style: TabStyle.fixed,
+//     height: 64,
+//     curveSize: 128,
+//     elevation: 4,
+//     backgroundColor: Colors.orange,
+//     items: [
+//       for (int i = 0; i < HubList.ui.length; i++)
+//         TabItem(icon: HubList.icon[i], title: HubList.label[i])
+//     ],
+//     onTap: changeIndex);
 // }
 
 /////////////////////////////////////////////////////////////////////////
@@ -116,7 +127,6 @@ Widget listTile(BuildContext context, i, void Function(int) changeIndex) {
 }
 
 class HubList {
-
   static const ui = [
     HubUI(),
     SearchUI(),
