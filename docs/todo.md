@@ -18,3 +18,5 @@
 - ログイン機能の実装
 - controllerのエラーハンドリング
 - コメントを分かりやすくする
+- UserのPostedImagesとLikedImagesがnullになっている
+- PostedImagesのURLとIDを返すGETメソッドを作る
