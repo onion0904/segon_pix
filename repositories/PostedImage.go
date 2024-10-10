@@ -15,6 +15,13 @@ import (
 )
 
 
+type Image struct{
+    ID       uint
+    URL      string
+}
+
+
+
 // UploadImageToGCS は画像を Google Cloud Storage にアップロードし、その URL を返します。
 func (repo *Repository) UploadImageToGCS(ctx context.Context, file io.Reader, filename string) (string,string, error) {
     // .envファイルの読み込み
@@ -37,12 +44,10 @@ func (repo *Repository) UploadImageToGCS(ctx context.Context, file io.Reader, fi
     if err := wc.Close(); err != nil {
         return "","", err
     }
-    // オブジェクトの属性を取得してメディアリンクを取得(GCS のオブジェクトから直接 URL を取得します。)
-    attrs, err := object.Attrs(ctx)
-    if err != nil {
-        return "","", err
-    }
-    return attrs.MediaLink, objectName, nil
+
+    baseURL := "https://storage.googleapis.com/"
+    url := fmt.Sprintf("%s%s/%s", baseURL, bucketName, objectName)
+    return url, objectName, nil
 }
 
 
@@ -112,9 +117,6 @@ func (repo *Repository) AddPostedImage(ctx context.Context, file io.Reader, file
     if err = tx.First(&user, userID).Error; err != nil {
         return err
     }
-    bucketName := os.Getenv("GCS_BUCKET_NAME")
-    baseURL := "https://storage.googleapis.com/"
-    url = fmt.Sprintf("%s%s/%s", baseURL, bucketName, objectName)
 
     image := models.PostedImage{
         URL:        url,
@@ -167,4 +169,54 @@ func (repo *Repository) DeletePostedImage(ctx context.Context, imageID uint) err
         log.Printf("Successfully deleted image with ID: %d", imageID)
         return nil
     })
+}
+
+
+
+
+// 与えられたハッシュタグの部分一致の画像のスライスを返す
+func (repo *Repository) SearchImage(Qhashtag string) ([]Image, error) {
+    var images []models.PostedImage
+    query := repo.db.
+        Preload("PostUser").
+        Preload("Likes").
+        Preload("Comments").
+        Preload("Hashtags").
+        Joins("JOIN posted_image_hashtags ON posted_image_hashtags.posted_image_id = posted_images.id").
+        Joins("JOIN hashtags ON posted_image_hashtags.hashtag_id = hashtags.id")
+
+    if Qhashtag != "" {
+        query = query.Where("hashtags.name LIKE ?", "%"+Qhashtag+"%")
+    }
+
+    err := query.
+        Group("posted_images.id").
+        Find(&images).Error
+
+    if err != nil {
+        return nil, err
+    }
+
+    var image []Image
+    for _, img := range images {
+        image = append(image, Image{
+            ID:  img.ID,
+            URL: img.URL,
+        })
+    }
+
+    return image, nil
+}
+
+
+
+func (repo *Repository) ImageInfo(id uint) (*models.PostedImage, error) {
+    var image models.PostedImage
+    if err := repo.db.First(&image, id).Error; err != nil {
+        if errors.Is(err, gorm.ErrRecordNotFound) {
+            return nil, nil // またはカスタムエラーを返す
+        }
+        return nil, err
+    }
+    return &image, nil
 }

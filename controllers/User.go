@@ -33,20 +33,6 @@ func (con *Controller) AddUser(c echo.Context) error {
 }
 
 
-func (con *Controller) SearchImage(c echo.Context) error {
-	Qhashtag := c.QueryParam("Hashtag")
-	repo ,err := repositories.NewRepository(con.db)
-	if err != nil {
-        return c.NoContent(http.StatusServiceUnavailable) // 503エラー
-    }
-	PostedImage, err := repo.SearchImage(Qhashtag)
-	if err != nil {
-		return c.NoContent(http.StatusServiceUnavailable) // 503エラー
-	}
-	return c.JSON(http.StatusOK, PostedImage)
-}
-
-
 func (con *Controller) UserInfo(c echo.Context) error {
 	userID := c.QueryParam("ID")
 	uintID64, err := strconv.ParseUint(userID, 10, 64)
