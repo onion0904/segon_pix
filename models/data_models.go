@@ -12,28 +12,29 @@ type User struct {
     HeaderImage  *string        // ヘッダー画像のURL
     Email        *string       `gorm:"type:varchar(100);unique"` // メールアドレス（任意、一意のメール形式）
     Birthday     int           // 誕生日
-    PostedImages []*PostedImage // ユーザーが投稿した画像
-    LikedImages  []*PostedImage // ユーザーがいいねした画像
-    Follows      []*User       `gorm:"many2many:user_follows;joinForeignKey:FollowerID;JoinReferences:FollowingID"` // フォローしているユーザー
-    Followers    []*User       `gorm:"many2many:user_follows;joinForeignKey:FollowingID;JoinReferences:FollowerID"` // フォローされているユーザー
+    PostedImages []PostedImage // ユーザーが投稿した画像
+    LikedImages  []PostedImage `gorm:"many2many:posted_image_likes;constraint:OnDelete:CASCADE"`
+    Follows      []User       `gorm:"many2many:user_follows;joinForeignKey:FollowerID;JoinReferences:FollowingID"` // フォローしているユーザー
+    Followers    []User       `gorm:"many2many:user_follows;joinForeignKey:FollowingID;JoinReferences:FollowerID"` // フォローされているユーザー
 }
 
 type PostedImage struct {
     gorm.Model
-    URL         string    `gorm:"not null"`        // 画像のURL
-    UserID      uint      `gorm:"not null"`        // 投稿者のユーザーID (外部キー)
-    PostUser    User      `gorm:"foreignKey:UserID"`  // 外部キーを明示的に指定
-    ObjectName  string    `gorm:"not null;index"`  // GCSオブジェクト名
-    Likes       []User    `gorm:"many2many:posted_image_likes;"` // いいねしたユーザー（多対多リレーション）
-    Comments    []Comment // コメント
-    Hashtags    []Hashtag `gorm:"many2many:posted_image_hashtags;"` // ハッシュタグ
+    URL         string    `gorm:"not null"`        
+    UserID      uint      `gorm:"not null"`        
+    PostUser    User      `gorm:"foreignKey:UserID;constraint:OnDelete:CASCADE"`  // 投稿者が削除されたら関連する画像も削除
+    ObjectName  string    `gorm:"not null;index"`  
+    Likes       []User    `gorm:"many2many:posted_image_likes;constraint:OnDelete:CASCADE"` // いいねしたユーザー
+    Comments    []Comment 
+    Hashtags    []Hashtag `gorm:"many2many:posted_image_hashtags;"` 
 }
+
 
 type Comment struct {
     gorm.Model
     PostedImageID uint   `gorm:"not null"` // コメント元のPostedImageのID
     UserID        uint   `gorm:"not null"` // コメントしたユーザーのID (外部キー)
-    PostUser      User   `gorm:"foreignKey:UserID"` // 外部キーを明示的に指定
+    PostUser      User   `gorm:"foreignKey:UserID;constraint:OnDelete:CASCADE"` // 外部キーを明示的に指定
     Message       string // コメント内容
 }
 
