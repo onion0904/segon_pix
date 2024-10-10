@@ -40,7 +40,7 @@ class SignForm extends HookWidget {
             controller: passwordController,
             validator: passwordValiator,
             decoration: const InputDecoration(
-                              border: OutlineInputBorder(), labelText: "Email"),
+                              border: OutlineInputBorder(), labelText: "Password"),
                         ),
           ),
       Padding(
