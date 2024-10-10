@@ -1,25 +1,17 @@
-class User {
-  final String id;
-  String name;
-  int birthday;
-  String iconURL;
-  String headerURL;
-  String profileMessage;
-  List<String> postImageURLs;
-  List<String> likeImageURLs;
-  List<String> followingList;
+import 'package:freezed_annotation/freezed_annotation.dart';
 
-  User({
-    //必須
-    required this.id,
-    required this.name,
-    required this.birthday,
-    //任意(デフォルト等で対応)
-    this.iconURL        = "",
-    this.headerURL      = "",
-    this.profileMessage = "",
-    this.postImageURLs  = const <String>[],
-    this.likeImageURLs  = const <String>[],
-    this.followingList  = const <String>[],
-  });
+part 'user.freezed.dart';
+part 'user.g.dart'; // JSONシリアライズ用
+
+@freezed
+class User with _$User {
+  const factory User({
+    required int id,
+    required String name,
+    String? profile,
+    String? email,
+  }) = _User;
+
+  // JSONのシリアライズ/デシリアライズ用
+  factory User.fromJson(Map<String, dynamic> json) => _$UserFromJson(json);
 }
