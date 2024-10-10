@@ -174,3 +174,49 @@ func (con *Controller) UpdateUserHeader(c echo.Context) error {
 
     return c.NoContent(http.StatusOK)
 }
+
+
+
+func (con *Controller) UpdateUserInfo(c echo.Context) error {
+    // クエリパラメータからユーザーIDを取得
+    idStr := c.QueryParam("userID")
+    if idStr == "" {
+        return c.String(http.StatusBadRequest, "IDクエリパラメータが必要です")
+    }
+
+    // 文字列のIDをuintに変換
+    idUint64, err := strconv.ParseUint(idStr, 10, 64)
+    if err != nil {
+        return c.String(http.StatusBadRequest, "無効なIDの形式です")
+    }
+    userID := uint(idUint64)
+
+	name := c.QueryParam("name")
+    if name == "" {
+        return c.String(http.StatusBadRequest,"nothing name")
+    }
+
+	description := c.QueryParam("description")
+    if description == "" {
+        return c.String(http.StatusBadRequest, "nothing description")
+    }
+
+	email := c.QueryParam("email")
+    if email == "" {
+        return c.String(http.StatusBadRequest, "nothing email")
+    }
+
+    // リポジトリを取得
+    repo, err := repositories.NewRepository(con.db)
+    if err != nil {
+        return c.NoContent(http.StatusServiceUnavailable) // 503エラー
+    }
+
+    // ユーザーのIconフィールドを更新
+    err = repo.UpdateUserInfo(userID, name,description,email)
+    if err != nil {
+        return c.String(http.StatusInternalServerError, "ユーザーのアイコン更新に失敗しました")
+    }
+
+    return c.NoContent(http.StatusOK)
+}

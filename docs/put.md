@@ -52,3 +52,20 @@
     curl -X POST "http://localhost:8080/segon_pix/add/user/icon?ID=1234" \
   -F "File=@/path/to/your/image.jpg"
     ```
+
+- /update/user
+    - 入力できる値(queryでの受け取り)
+    - コメントの内容を更新する。
+
+    | 変数      |     説明     |
+    |-----------|-----------|
+    |userID       |  userのID  |
+    |name       |  userのname  |
+    |description       |   プロフィールメッセージ |
+    |email      |   email |
+
+
+    - 使用例
+
+    ```
+   curl -X PUT "http://localhost:8080/segon_pix/update/user?userID=1234&name=onion&description=更新された内容&email=更新された内容"

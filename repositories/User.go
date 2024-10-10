@@ -84,3 +84,21 @@ func (repo *Repository) UpdateUserHeader(userID uint, iconURL string) error {
 
     return nil
 }
+
+
+func (repo *Repository) UpdateUserInfo(userID uint, name string, description string, email string) error {
+    var user models.User
+    if err := repo.db.First(&user, userID).Error; err != nil {
+        return err
+    }
+
+    user.Name = name
+    user.Description = description
+    user.Email = email
+
+    if err := repo.db.Save(&user).Error; err != nil {
+        return err
+    }
+
+    return nil
+}
