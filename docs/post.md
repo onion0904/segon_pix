@@ -22,6 +22,27 @@
         "email": "john@example.com"
       }'
     ```
+
+- /add/user/header
+    - 入力できる値
+    - headerを追加する
+
+    | 変数      |     説明     |
+    |-----------|-----------|
+    |Name       |  ユーザー名   |
+    |Profile(任意)    |  プロフィール欄に書くメッセージ  |
+    |Email(任意)      |  メールアドレス  |
+    |Birthday   |  誕生日      |
+
+    - 使用例
+
+    ```
+    curl -X POST http://localhost:8080/segon_pix/add/user \
+    ```
+
+- /add/user/icon
+
+
 - /add/image
     - 入力できる値
     - 画像を追加する。ユーザーのPostedImageにも追加する。ハッシュタグは検索するときに使う。

@@ -28,7 +28,7 @@ func (con *Controller) AddLike(c echo.Context) error {
 	if err := repo.AddLike(uintUserID,uintImageID); err != nil {
 		return c.NoContent(http.StatusServiceUnavailable) // 503エラー
 	}
-	return c.NoContent(http.StatusNoContent) // 204エラー
+	return c.NoContent(http.StatusOK)
 }
 
 
@@ -52,5 +52,5 @@ func (con *Controller) RemoveLike(c echo.Context) error {
 	if err := repo.RemoveLike(uintUserID,uintImageID); err != nil {
 		return c.NoContent(http.StatusServiceUnavailable) // 503エラー
 	}
-	return c.NoContent(http.StatusNoContent) // 204エラー
+	return c.NoContent(http.StatusOK)
 }

@@ -29,7 +29,7 @@ func (con *Controller) AddUser(c echo.Context) error {
         return c.JSON(http.StatusInternalServerError, "Failed to add user")
     }
 
-    return c.JSON(http.StatusNoContent, nil) // 正常終了
+    return c.JSON(http.StatusOK, nil) // 正常終了
 }
 
 
@@ -74,5 +74,5 @@ func (con *Controller) DeleteUser(c echo.Context) error {
 	if err := repo.DeleteUser(uintID); err != nil {
 		return c.NoContent(http.StatusServiceUnavailable) // 503エラー
 	}
-	return c.NoContent(http.StatusNoContent) // 204エラー
+	return c.NoContent(http.StatusOK)
 }
