@@ -7,10 +7,10 @@ import (
 type User struct {
     gorm.Model
     Name         string        `gorm:"not null;index"` // ユーザー名
-    description  *string        // プロフィールメッセージ
-    Icon         *string        // プロフィール画像のURL
-    HeaderImage  *string        // ヘッダー画像のURL
-    Email        *string       `gorm:"type:varchar(100);unique"` // メールアドレス（任意、一意のメール形式）
+    description  string        // プロフィールメッセージ
+    Icon         string        // プロフィール画像のURL
+    HeaderImage  string        // ヘッダー画像のURL
+    Email        string       `gorm:"type:varchar(100);unique"` // メールアドレス（任意、一意のメール形式）
     Birthday     int           // 誕生日
     PostedImages []PostedImage `gorm:"foreignKey:UserID"`// ユーザーが投稿した画像
     LikedImages  []PostedImage `gorm:"many2many:posted_image_likes;constraint:OnDelete:CASCADE"`
