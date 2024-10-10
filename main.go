@@ -59,6 +59,7 @@ func main() {
 		method.GET("/get/user", con.UserInfo)
 		method.GET("/get/list/image", con.SearchImage)
 		method.GET("/get/image", con.ImageInfo)
+		method.PUT("/update/user", con.UpdateUserInfo)
 		method.PUT("/update/user/icon", con.UpdateUserIcon)
 		method.PUT("/update/user/header", con.UpdateUserHeader)
 		method.PUT("/update/comment", con.UpdateComment)
