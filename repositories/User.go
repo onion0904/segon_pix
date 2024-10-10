@@ -55,3 +55,32 @@ func (repo *Repository) DeleteUser(userID uint) error {
     })
 }
 
+func (repo *Repository) UpdateUserIcon(userID uint, iconURL string) error {
+    var user models.User
+    if err := repo.db.First(&user, userID).Error; err != nil {
+        return err
+    }
+
+    user.Icon = iconURL
+
+    if err := repo.db.Save(&user).Error; err != nil {
+        return err
+    }
+
+    return nil
+}
+
+func (repo *Repository) UpdateUserHeader(userID uint, iconURL string) error {
+    var user models.User
+    if err := repo.db.First(&user, userID).Error; err != nil {
+        return err
+    }
+
+    user.HeaderImage = iconURL
+
+    if err := repo.db.Save(&user).Error; err != nil {
+        return err
+    }
+
+    return nil
+}

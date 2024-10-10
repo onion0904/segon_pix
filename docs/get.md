@@ -1,7 +1,7 @@
 # GET
 
 - /get/user
-    - 入力できる値
+    - 入力できる値(queryでの受け取り)
     - 与えられたユーザーの情報を返す。
 
     | 変数      |     説明     |
@@ -14,7 +14,7 @@
     curl -X GET "http://localhost:8080/segon_pix/get/user?ID=1234"
     ```
 - /get/list/image
-    - 入力できる値
+    - 入力できる値(queryでの受け取り)
     - 指定されたハッシュタグの部分一致を返す。
     - URLとimageIDのlistを返す。
 
@@ -29,7 +29,7 @@
     ```
 
 - /get/image
-    - 入力できる値
+    - 入力できる値(queryでの受け取り)
     - 指定されたimageIDの画像の情報を返す。
     - PostedImageの全部を返す。
 
