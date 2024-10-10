@@ -6,13 +6,12 @@ import (
 	"gorm.io/gorm"
 	"context"
     "fmt"
-    "os"
 )
 
 // 与えられたidのユーザー情報を返す
 func (repo *Repository) UserInfo(id uint) (*models.User, error) {
     var user models.User
-    if err := repo.db.First(&user, id).Error; err != nil {
+    if err := repo.db.Preload("PostedImages").Preload("LikedImages").First(&user, id).Error; err != nil {
         if errors.Is(err, gorm.ErrRecordNotFound) {
             return nil, nil // またはカスタムエラーを返す
         }
@@ -20,38 +19,6 @@ func (repo *Repository) UserInfo(id uint) (*models.User, error) {
     }
     return &user, nil
 }
-
-
-// 与えられたハッシュタグの部分一致の画像のスライスを返す
-func (repo *Repository) SearchImage(Qhashtag string) ([]models.PostedImage, error) {
-    var images []models.PostedImage
-    err := repo.db.
-        Preload("PostUser").
-        Preload("Likes").
-        Preload("Comments").
-        Preload("Hashtags").
-        Joins("JOIN posted_image_hashtags ON posted_image_hashtags.posted_image_id = posted_images.id").
-        Joins("JOIN hashtags ON posted_image_hashtags.hashtag_id = hashtags.id").
-        Where("hashtags.Name LIKE ?", "%"+Qhashtag+"%").
-        Find(&images).Error
-    if err != nil {
-        return nil, err
-    }
-
-    bucketName := os.Getenv("GCS_BUCKET_NAME")
-    if bucketName == "" {
-        return nil, fmt.Errorf("GCS_BUCKET_NAME is not set in environment variables")
-    }
-    baseURL := "https://storage.googleapis.com/"
-
-    for i, image := range images {
-        // URLを手動で構築
-        images[i].URL = fmt.Sprintf("%s%s/%s", baseURL, bucketName, image.ObjectName)
-    }
-
-    return images, nil
-}
-
 
 
 
@@ -88,3 +55,50 @@ func (repo *Repository) DeleteUser(userID uint) error {
     })
 }
 
+func (repo *Repository) UpdateUserIcon(userID uint, iconURL string) error {
+    var user models.User
+    if err := repo.db.First(&user, userID).Error; err != nil {
+        return err
+    }
+
+    user.Icon = iconURL
+
+    if err := repo.db.Save(&user).Error; err != nil {
+        return err
+    }
+
+    return nil
+}
+
+func (repo *Repository) UpdateUserHeader(userID uint, iconURL string) error {
+    var user models.User
+    if err := repo.db.First(&user, userID).Error; err != nil {
+        return err
+    }
+
+    user.HeaderImage = iconURL
+
+    if err := repo.db.Save(&user).Error; err != nil {
+        return err
+    }
+
+    return nil
+}
+
+
+func (repo *Repository) UpdateUserInfo(userID uint, name string, description string, email string) error {
+    var user models.User
+    if err := repo.db.First(&user, userID).Error; err != nil {
+        return err
+    }
+
+    user.Name = name
+    user.Description = description
+    user.Email = email
+
+    if err := repo.db.Save(&user).Error; err != nil {
+        return err
+    }
+
+    return nil
+}

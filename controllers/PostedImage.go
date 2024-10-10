@@ -74,7 +74,7 @@ func (con *Controller) AddPostedImage(c echo.Context) error {
         return c.NoContent(http.StatusInternalServerError) // 500エラー
     }
 
-    return c.NoContent(http.StatusNoContent) // 204エラー
+    return c.NoContent(http.StatusOK)
 }
 
 
@@ -118,5 +118,37 @@ func (con *Controller) DeletePostedImage(c echo.Context) error {
     }
 
     log.Printf("Successfully completed delete operation for image ID: %d", uintID)
-    return c.NoContent(http.StatusNoContent)
+    return c.NoContent(http.StatusOK)
+}
+
+func (con *Controller) SearchImage(c echo.Context) error {
+	Qhashtag := c.QueryParam("Hashtag")
+	repo ,err := repositories.NewRepository(con.db)
+	if err != nil {
+        return c.NoContent(http.StatusServiceUnavailable) // 503エラー
+    }
+	PostedImage, err := repo.SearchImage(Qhashtag)
+	if err != nil {
+		return c.NoContent(http.StatusServiceUnavailable) // 503エラー
+	}
+	return c.JSON(http.StatusOK, PostedImage)
+}
+
+func (con *Controller) ImageInfo(c echo.Context) error {
+	id := c.QueryParam("imageID")
+	repo ,err := repositories.NewRepository(con.db)
+	if err != nil {
+        return c.NoContent(http.StatusServiceUnavailable) // 503エラー
+    }
+    uintID64, err := strconv.ParseUint(id, 10, 64)
+    if err != nil {
+        log.Printf("Invalid image ID format: %v", err)
+        return c.NoContent(http.StatusBadRequest)
+    }
+    uintID := uint(uintID64)
+	PostedImage, err := repo.ImageInfo(uintID)
+	if err != nil {
+		return c.NoContent(http.StatusServiceUnavailable) // 503エラー
+	}
+	return c.JSON(http.StatusOK, PostedImage)
 }

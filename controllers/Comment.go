@@ -28,7 +28,7 @@ func (con *Controller) AddComment(c echo.Context) error {
 	if err := repo.AddComment(&comment,uintImageID); err != nil {
 		return c.NoContent(http.StatusServiceUnavailable) // 503エラー
 	}
-	return c.NoContent(http.StatusNoContent) // 204エラー
+	return c.NoContent(http.StatusOK)
 }
 
 
@@ -53,7 +53,7 @@ func (con *Controller) UpdateComment(c echo.Context) error {
 	if err := repo.UpdateComment(uintCommentID,newContent,uintImageID); err != nil {
 		return c.NoContent(http.StatusServiceUnavailable) // 503エラー
 	}
-	return c.NoContent(http.StatusNoContent) // 204エラー
+	return c.NoContent(http.StatusOK)
 }
 
 
@@ -77,5 +77,5 @@ func (con *Controller) DeleteComment(c echo.Context) error {
 	if err := repo.DeleteComment(uintCommentID,uintImageID); err != nil {
 		return c.NoContent(http.StatusServiceUnavailable) // 503エラー
 	}
-	return c.NoContent(http.StatusNoContent) // 204エラー
+	return c.NoContent(http.StatusOK)
 }
