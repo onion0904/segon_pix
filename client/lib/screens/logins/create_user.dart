@@ -12,8 +12,8 @@ class CreateUser extends HookWidget {
   Widget build(BuildContext context) {
     final birthday = useState(0);
     final formKey = GlobalKey<FormState>();
-    final nameController = TextEditingController();
-    final descriptionController = TextEditingController();
+    final nameController = useState(TextEditingController());
+    final descriptionController = useState(TextEditingController());
 
     return Column(children: [
       Form(
@@ -23,13 +23,13 @@ class CreateUser extends HookWidget {
                 padding: const EdgeInsets.all(p),
                 child: TextFormField(
                     //name
-                    controller: nameController,
+                    controller: nameController.value,
                     validator: nameValidator)),
             Padding(
                 padding: const EdgeInsets.all(p),
                 child: TextFormField(
                     //description
-                    controller: descriptionController,
+                    controller: descriptionController.value,
                     validator: descriptionValidator)),
             Text("${birthday.value}testtooo"),
             Padding(
@@ -41,7 +41,7 @@ class CreateUser extends HookWidget {
                           initialDate: DateTime.now(),
                           lastDate: DateTime.now(),
                           firstDate: DateTime(1900, 1, 1));
-                      if(date != null){
+                      if (date != null) {
                         birthday.value =
                             date.year * 10000 + date.month * 100 + date.day;
                       }
@@ -53,8 +53,8 @@ class CreateUser extends HookWidget {
                     onPressed: () async {
                       if (formKey.currentState!.validate()) {
                         final response = await createUser(
-                            name: nameController.text,
-                            description: descriptionController.text,
+                            name: nameController.value.text,
+                            description: descriptionController.value.text,
                             birthday: birthday.value);
                         if (response.statusCode == 200 && context.mounted) {
                           context.go("/hub");
