@@ -23,7 +23,7 @@ type PostedImage struct {
     URL         string    `gorm:"not null"`        
     UserID      uint      `gorm:"not null"` //画像を投稿した人のID       
     PostUser    User      `gorm:"foreignKey:UserID;constraint:OnDelete:CASCADE"`  // 投稿者が削除されたら関連する画像も削除
-    ObjectName  string    `gorm:"not null;index"`  
+    ObjectName  string    `gorm:"not null;index"`  // バックエンドの処理で使用
     Likes       []User    `gorm:"many2many:posted_image_likes;constraint:OnDelete:CASCADE"` // いいねしたユーザー
     Comments    []Comment 
     Hashtags    []Hashtag `gorm:"many2many:posted_image_hashtags;"` 

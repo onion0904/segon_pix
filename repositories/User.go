@@ -6,7 +6,6 @@ import (
 	"gorm.io/gorm"
 	"context"
     "fmt"
-    "os"
 )
 
 // 与えられたidのユーザー情報を返す
@@ -20,32 +19,6 @@ func (repo *Repository) UserInfo(id uint) (*models.User, error) {
     }
     return &user, nil
 }
-
-
-// 与えられたハッシュタグの部分一致の画像のスライスを返す
-func (repo *Repository) SearchImage(Qhashtag string) ([]models.PostedImage, error) {
-    var images []models.PostedImage
-    err := repo.db.
-        Preload("PostUser").
-        Preload("Likes").
-        Preload("Comments").
-        Preload("Hashtags").
-        Joins("JOIN posted_image_hashtags ON posted_image_hashtags.posted_image_id = posted_images.id").
-        Joins("JOIN hashtags ON posted_image_hashtags.hashtag_id = hashtags.id").
-        Where("hashtags.Name LIKE ?", "%"+Qhashtag+"%").
-        Find(&images).Error
-    if err != nil {
-        return nil, err
-    }
-
-    bucketName := os.Getenv("GCS_BUCKET_NAME")
-    if bucketName == "" {
-        return nil, fmt.Errorf("GCS_BUCKET_NAME is not set in environment variables")
-    }
-
-    return images, nil
-}
-
 
 
 

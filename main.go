@@ -58,6 +58,7 @@ func main() {
 		method.POST("/add/comment", con.AddComment)
 		method.GET("/get/user", con.UserInfo)
 		method.GET("/get/list/image", con.SearchImage)
+		method.GET("/get/image", con.ImageInfo)
 		method.PUT("/update/comment", con.UpdateComment)
 		method.DELETE("/delete/user", con.DeleteUser)
 		method.DELETE("/delete/image", con.DeletePostedImage)
