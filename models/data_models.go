@@ -7,21 +7,21 @@ import (
 type User struct {
     gorm.Model
     Name         string        `gorm:"not null;index"` // ユーザー名
-    Profile      *string        // プロフィールメッセージ
+    description  *string        // プロフィールメッセージ
     Icon         *string        // プロフィール画像のURL
     HeaderImage  *string        // ヘッダー画像のURL
     Email        *string       `gorm:"type:varchar(100);unique"` // メールアドレス（任意、一意のメール形式）
     Birthday     int           // 誕生日
-    PostedImages []PostedImage // ユーザーが投稿した画像
+    PostedImages []PostedImage `gorm:"foreignKey:UserID"`// ユーザーが投稿した画像
     LikedImages  []PostedImage `gorm:"many2many:posted_image_likes;constraint:OnDelete:CASCADE"`
-    Follows      []User       `gorm:"many2many:user_follows;joinForeignKey:FollowerID;JoinReferences:FollowingID"` // フォローしているユーザー
-    Followers    []User       `gorm:"many2many:user_follows;joinForeignKey:FollowingID;JoinReferences:FollowerID"` // フォローされているユーザー
+    Follows      []User        `gorm:"many2many:user_follows;joinForeignKey:FollowerID;JoinReferences:FollowingID"` // フォローしているユーザー
+    Followers    []User        `gorm:"many2many:user_follows;joinForeignKey:FollowingID;JoinReferences:FollowerID"` // フォローされているユーザー
 }
 
 type PostedImage struct {
     gorm.Model
     URL         string    `gorm:"not null"`        
-    UserID      uint      `gorm:"not null"`        
+    UserID      uint      `gorm:"not null"` //画像を投稿した人のID       
     PostUser    User      `gorm:"foreignKey:UserID;constraint:OnDelete:CASCADE"`  // 投稿者が削除されたら関連する画像も削除
     ObjectName  string    `gorm:"not null;index"`  
     Likes       []User    `gorm:"many2many:posted_image_likes;constraint:OnDelete:CASCADE"` // いいねしたユーザー
