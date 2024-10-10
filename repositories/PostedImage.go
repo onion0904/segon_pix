@@ -112,6 +112,9 @@ func (repo *Repository) AddPostedImage(ctx context.Context, file io.Reader, file
     if err = tx.First(&user, userID).Error; err != nil {
         return err
     }
+    bucketName := os.Getenv("GCS_BUCKET_NAME")
+    baseURL := "https://storage.googleapis.com/"
+    url = fmt.Sprintf("%s%s/%s", baseURL, bucketName, objectName)
 
     image := models.PostedImage{
         URL:        url,

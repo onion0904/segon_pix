@@ -12,7 +12,7 @@ import (
 // 与えられたidのユーザー情報を返す
 func (repo *Repository) UserInfo(id uint) (*models.User, error) {
     var user models.User
-    if err := repo.db.First(&user, id).Error; err != nil {
+    if err := repo.db.Preload("PostedImages").Preload("LikedImages").First(&user, id).Error; err != nil {
         if errors.Is(err, gorm.ErrRecordNotFound) {
             return nil, nil // またはカスタムエラーを返す
         }
@@ -41,12 +41,6 @@ func (repo *Repository) SearchImage(Qhashtag string) ([]models.PostedImage, erro
     bucketName := os.Getenv("GCS_BUCKET_NAME")
     if bucketName == "" {
         return nil, fmt.Errorf("GCS_BUCKET_NAME is not set in environment variables")
-    }
-    baseURL := "https://storage.googleapis.com/"
-
-    for i, image := range images {
-        // URLを手動で構築
-        images[i].URL = fmt.Sprintf("%s%s/%s", baseURL, bucketName, image.ObjectName)
     }
 
     return images, nil
