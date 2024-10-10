@@ -3,7 +3,6 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'splash.dart';
 import 'sign_in.dart';
 import 'sign_up.dart';
-import 'test.dart';
 
 class Logins extends HookWidget {
   const Logins({super.key});
@@ -13,9 +12,6 @@ class Logins extends HookWidget {
     final index = useState(0);
 
     final loginUIList = [
-      Test(changeIndex: (int a) {
-        index.value = a;
-      }),
       const Splash(),
       SignIn(changeIndex: (int a) {
         index.value = a;

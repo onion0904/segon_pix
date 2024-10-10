@@ -12,9 +12,9 @@ class SignIn extends HookWidget {
     return Column(
       children: [
         SignForm(),
-        TextButton(
-        onPressed: () => changeIndex(0),
-        child: const Text("Go to Sign Up"),
+          TextButton(
+          onPressed: () => changeIndex(0),
+          child: const Text("Go to Sign Up"),
         ),
       ]
     );

@@ -2,7 +2,6 @@
 
 ## client
 
-- logout実装
 - model定義
 - CURD実装
 - home実装

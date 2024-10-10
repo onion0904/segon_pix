@@ -8,7 +8,9 @@ import 'post.dart';
 import 'package:go_router/go_router.dart';
 
 /////////////////////////////////////////////////////////////////////////
-
+const double n = 1;
+const double p = 8*1.5;
+const double sWidth = 32;
 const drawerImage =
     "https://onion0904.dev/ocGvg5tH5gfqsDS1715839141_1715839204.png";
 const double imageSize = 100;
@@ -39,7 +41,7 @@ class Hub extends HookWidget {
               }),
           ]),
         ),
-        body: HubList.ui[index.value],
+        body: Center(child: HubList.ui[index.value]),
         bottomNavigationBar: SegonNavigationBar(
             index: index.value, changeIndex: (int i) => index.value = i),
         floatingActionButton: floatingActionButton(index.value));
@@ -94,34 +96,28 @@ class SegonNavigationBar extends StatelessWidget {
   }
 }
 
-// Widget navigationBar(void Function(int) changeIndex) {
-//TODO navigationBarを変える
-// return ConvexAppBar(
-//     style: TabStyle.fixed,
-//     height: 64,
-//     curveSize: 128,
-//     elevation: 4,
-//     backgroundColor: Colors.orange,
-//     items: [
-//       for (int i = 0; i < HubList.ui.length; i++)
-//         TabItem(icon: HubList.icon[i], title: HubList.label[i])
-//     ],
-//     onTap: changeIndex);
-// }
-
 /////////////////////////////////////////////////////////////////////////
 
 Widget listTile(BuildContext context, i, void Function(int) changeIndex) {
-  return GestureDetector(
-      child: Padding(
-          padding: const EdgeInsets.all(16),
-          child: Row(children: [
-            const SizedBox(width: 8),
-            Icon(HubList.icon[i], size: 32),
-            const SizedBox(width: 8),
-            Text(HubList.label[i], style: const TextStyle(fontSize: 16)),
-          ])),
-      onTap: () {
+  return OutlinedButton(
+      style: OutlinedButton.styleFrom(
+        side: const BorderSide(color: Colors.transparent),
+        shape: const RoundedRectangleBorder(borderRadius: BorderRadius.zero),
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.start,
+        children: [
+        Padding(
+          padding: const EdgeInsets.fromLTRB(0,p,p,p),
+          child: Icon(HubList.icon[i], size: 32 * n, color: Colors.black),
+        ),
+        Padding(
+          padding: const EdgeInsets.all(p),
+          child: Text(HubList.label[i],
+              style: const TextStyle(fontSize: 16 * n, color: Colors.black)),
+        )
+      ]),
+      onPressed: () {
         changeIndex(i);
       });
 }
