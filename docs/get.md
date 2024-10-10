@@ -40,4 +40,4 @@
     - 使用例
 
     ```
-    curl -X GET "http://localhost:8080/segon_pix/get/list/image?imageID=1234"
+    curl -X GET "http://localhost:8080/segon_pix/get/image?imageID=1234"
