@@ -74,7 +74,7 @@ func (con *Controller) AddPostedImage(c echo.Context) error {
         return c.NoContent(http.StatusInternalServerError) // 500エラー
     }
 
-    return c.NoContent(http.StatusNoContent) // 204エラー
+    return c.NoContent(http.StatusOK)
 }
 
 
@@ -118,7 +118,7 @@ func (con *Controller) DeletePostedImage(c echo.Context) error {
     }
 
     log.Printf("Successfully completed delete operation for image ID: %d", uintID)
-    return c.NoContent(http.StatusNoContent)
+    return c.NoContent(http.StatusOK)
 }
 
 func (con *Controller) SearchImage(c echo.Context) error {

@@ -11,7 +11,6 @@
 
 ## server
 
-- PostedImagesのURLとIDを返すGETメソッドを作る
 - IconとHeaderを登録する機能の実装
 - ログイン機能の実装
 - AddCommentにmodelsのmessage以外も追加できるようにする
