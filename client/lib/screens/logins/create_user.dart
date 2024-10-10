@@ -31,6 +31,7 @@ class CreateUser extends HookWidget {
                     //description
                     controller: descriptionController,
                     validator: descriptionValidator)),
+            Text("${birthday.value}"),
             Padding(
                 padding: const EdgeInsets.all(p),
                 child: OutlinedButton(
