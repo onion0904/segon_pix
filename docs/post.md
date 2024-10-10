@@ -25,23 +25,37 @@
 
 - /add/user/header
     - 入力できる値
-    - headerを追加する
+    - ユーザー情報にheader画像を追加する
 
-    | 変数      |     説明     |
-    |-----------|-----------|
-    |Name       |  ユーザー名   |
-    |Profile(任意)    |  プロフィール欄に書くメッセージ  |
-    |Email(任意)      |  メールアドレス  |
-    |Birthday   |  誕生日      |
+    | 変数      | 説明|
+    |-----------|-----|
+    |ID       |   ユーザーID   |
+    |File    |   画像ファイル   |
+
 
     - 使用例
 
     ```
-    curl -X POST http://localhost:8080/segon_pix/add/user \
+    curl -X POST "http://localhost:8080/segon_pix/add/user/header?ID=1234" \
+  -F "File=@/path/to/your/image.jpg"
     ```
 
 - /add/user/icon
+    - 入力できる値
+    - ユーザー情報にicon画像を追加する
 
+    | 変数      | 説明|
+    |-----------|-----|
+    |ID       |   ユーザーID   |
+    |File    |   画像ファイル   |
+
+
+    - 使用例
+
+    ```
+    curl -X POST "http://localhost:8080/segon_pix/add/user/icon?ID=1234" \
+  -F "File=@/path/to/your/image.jpg"
+    ```
 
 - /add/image
     - 入力できる値
@@ -65,7 +79,7 @@
 
     ```
 - /add/like
-    - 入力できる値
+    - 入力できる値(queryでの受け取り)
     -指定された画像にユーザー情報を入れる。ユーザー情報にいいねした画像を追加する。
 
     | 変数      |     説明     |

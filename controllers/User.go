@@ -76,3 +76,101 @@ func (con *Controller) DeleteUser(c echo.Context) error {
 	}
 	return c.NoContent(http.StatusOK)
 }
+
+
+func (con *Controller) UpdateUserIcon(c echo.Context) error {
+    // クエリパラメータからユーザーIDを取得
+    idStr := c.QueryParam("ID")
+    if idStr == "" {
+        return c.String(http.StatusBadRequest, "IDクエリパラメータが必要です")
+    }
+
+    // 文字列のIDをuintに変換
+    idUint64, err := strconv.ParseUint(idStr, 10, 64)
+    if err != nil {
+        return c.String(http.StatusBadRequest, "無効なIDの形式です")
+    }
+    userID := uint(idUint64)
+
+    // アップロードされたファイルを取得
+    file, err := c.FormFile("File")
+    if err != nil {
+        return c.String(http.StatusBadRequest, "ファイルが必要です")
+    }
+
+    // ファイルを開く
+    src, err := file.Open()
+    if err != nil {
+        return c.String(http.StatusInternalServerError, "ファイルを開けませんでした")
+    }
+    defer src.Close()
+
+    // リポジトリを取得
+    repo, err := repositories.NewRepository(con.db)
+    if err != nil {
+        return c.NoContent(http.StatusServiceUnavailable) // 503エラー
+    }
+
+    // アイコン画像をアップロードし、URLを取得
+    url, _, err := repo.UploadImageToGCS(c.Request().Context(), src, file.Filename)
+    if err != nil {
+        return c.String(http.StatusInternalServerError, "画像のアップロードに失敗しました")
+    }
+
+    // ユーザーのIconフィールドを更新
+    err = repo.UpdateUserIcon(userID, url)
+    if err != nil {
+        return c.String(http.StatusInternalServerError, "ユーザーのアイコン更新に失敗しました")
+    }
+
+    return c.NoContent(http.StatusOK)
+}
+
+
+func (con *Controller) UpdateUserHeader(c echo.Context) error {
+    // クエリパラメータからユーザーIDを取得
+    idStr := c.QueryParam("ID")
+    if idStr == "" {
+        return c.String(http.StatusBadRequest, "IDクエリパラメータが必要です")
+    }
+
+    // 文字列のIDをuintに変換
+    idUint64, err := strconv.ParseUint(idStr, 10, 64)
+    if err != nil {
+        return c.String(http.StatusBadRequest, "無効なIDの形式です")
+    }
+    userID := uint(idUint64)
+
+    // アップロードされたファイルを取得
+    file, err := c.FormFile("File")
+    if err != nil {
+        return c.String(http.StatusBadRequest, "ファイルが必要です")
+    }
+
+    // ファイルを開く
+    src, err := file.Open()
+    if err != nil {
+        return c.String(http.StatusInternalServerError, "ファイルを開けませんでした")
+    }
+    defer src.Close()
+
+    // リポジトリを取得
+    repo, err := repositories.NewRepository(con.db)
+    if err != nil {
+        return c.NoContent(http.StatusServiceUnavailable) // 503エラー
+    }
+
+    // アイコン画像をアップロードし、URLを取得
+    url, _, err := repo.UploadImageToGCS(c.Request().Context(), src, file.Filename)
+    if err != nil {
+        return c.String(http.StatusInternalServerError, "画像のアップロードに失敗しました")
+    }
+
+    // ユーザーのIconフィールドを更新
+    err = repo.UpdateUserHeader(userID, url)
+    if err != nil {
+        return c.String(http.StatusInternalServerError, "ユーザーのアイコン更新に失敗しました")
+    }
+
+    return c.NoContent(http.StatusOK)
+}
