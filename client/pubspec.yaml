@@ -17,6 +17,7 @@ dependencies:
   go_router: ^14.2.8
   hooks_riverpod: ^2.5.2
   http: ^1.2.2
+  syncfusion_flutter_datepicker: ^27.1.52
 
 dev_dependencies:
   flutter_test:

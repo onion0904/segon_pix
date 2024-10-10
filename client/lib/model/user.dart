@@ -2,38 +2,42 @@ class User {
   final int id;
   String name;
   String icon;
+  String profile;
   String headerImage;
   String email;
+  String password;
   String birthday;
 
   User({
     required this.id,
     required this.name,
     required this.icon,
+    required this.profile,
     required this.headerImage,
     required this.email,
+    this.password = "nothing",
     required this.birthday,
   });
 
-  factory User.fromJson(Map<String, dynamic> json) {
-    return switch (json) {
-      {
-        "id": int id,
-        "name": String name,
-        "icon": String icon,
-        "headerImage": String headerImage,
-        "email": String email,
-        "birthday": String birthday
-      } =>
-        User(
-            id: id,
-            name: name,
-            icon: icon,
-            headerImage: headerImage,
-            email: email,
-            birthday: birthday),
-      _ => throw const FormatException("Failed get uesr")
+  Map<String, dynamic> toJson() {
+    return {
+      "name": name,
+      "profile": profile,
+      "email": email,
+      "birthday": birthday
     };
+  }
+
+  factory User.fromJson(Map<String, dynamic> json) {
+    return User(
+      id: json["id"],
+      name: json["name"],
+      icon: json["icon"],
+      profile: json["profile"],
+      headerImage: json["headerImage"],
+      email: json["email"],
+      birthday: json["birthday"],
+    );
   }
 }
 
