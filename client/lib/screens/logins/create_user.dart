@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import "../../logic/http/post.dart";
 import 'package:go_router/go_router.dart';
+import '../commons/input_form.dart';
 
 const double p = 2;
 
@@ -11,36 +12,33 @@ class CreateUser extends HookWidget {
   @override
   Widget build(BuildContext context) {
     final birthday = useState(0);
+    final initialDate = useState(DateTime.now());
     final formKey = GlobalKey<FormState>();
-    final nameController = useState(TextEditingController());
-    final descriptionController = useState(TextEditingController());
+    final controllers = useState([
+      TextEditingController(),
+      TextEditingController(),
+    ]);
 
     return Column(children: [
       Form(
           key: formKey,
           child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
-            // Padding(
-            //     padding: const EdgeInsets.all(p),
-            //     child: TextFormField(
-            //         //name
-            //         controller: nameController.value,
-            //         validator: nameValidator)),
-            // Padding(
-            //     padding: const EdgeInsets.all(p),
-            //     child: TextFormField(
-            //         //description
-            //         controller: descriptionController.value,
-            //         validator: descriptionValidator)),
+            InputForm(
+                validators: validators,
+                controllers: controllers.value,
+                labels: labels),
+            Text("${initialDate.value}"),
             Padding(
                 padding: const EdgeInsets.all(p),
                 child: OutlinedButton(
                     onPressed: () async {
                       final date = await showDatePicker(
                           context: context,
-                          initialDate: DateTime.now(),
+                          initialDate: initialDate.value,
                           lastDate: DateTime.now(),
                           firstDate: DateTime(1900, 1, 1));
                       if (date != null) {
+                        initialDate.value = date;
                         birthday.value =
                             date.year * 10000 + date.month * 100 + date.day;
                       }
@@ -52,21 +50,25 @@ class CreateUser extends HookWidget {
                     onPressed: () async {
                       if (formKey.currentState!.validate()) {
                         final response = await createUser(
-                            name: nameController.value.text,
-                            description: descriptionController.value.text,
+                            name: controllers.value[0].value.text,
+                            description: controllers.value[1].value.text,
                             birthday: birthday.value);
                         if (response.statusCode == 200 && context.mounted) {
                           context.go("/hub");
                         }
                       }
                     },
-                    child: const Text("Deside"))),
+                    child: const Text("Decide"))),
           ]))
     ]);
   }
 }
 
 /////////////////////////////////////////////////////////////////////////
+
+const validators = [nameValidator, descriptionValidator];
+
+const labels = ["Name", "Description"];
 
 String? nameValidator(String? value) {
   if (value == null || value.isEmpty) {
@@ -77,13 +79,5 @@ String? nameValidator(String? value) {
 }
 
 String? descriptionValidator(String? value) {
-  return null;
-}
-
-String? birthdayValidator(String? value) {
-  if (value == null || value.isEmpty) {
-    return "誕生日を入力してください";
-  }
-
   return null;
 }

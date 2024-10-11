@@ -19,7 +19,6 @@ class SignUp extends StatelessWidget {
   }
 }
 
-
 //////////////////////////////////////////////////////
 
 final validators = [emailValiator, passwordValiator];

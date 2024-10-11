@@ -4,13 +4,14 @@ import 'splash.dart';
 import 'sign_in.dart';
 import 'sign_up.dart';
 import 'create_user.dart';
+import 'package:go_router/go_router.dart';
 
 class Logins extends HookWidget {
   const Logins({super.key});
 
   @override
   Widget build(context) {
-    final index = useState(0);
+    final index = useState(3);
 
     final loginUIList = [
       const Splash(),
@@ -29,8 +30,21 @@ class Logins extends HookWidget {
         title: const Text("Login"),
         backgroundColor: Colors.orange,
       ),
-      body: Center(
-        child: loginUIList[index.value],
+      body: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          loginUIList[index.value],
+          Padding(
+              padding: const EdgeInsets.all(p),
+              child: ElevatedButton(
+                  onPressed: () {
+                    //TODO サーバに送信
+
+                    context.go("/hub");
+                  },
+                  child: const Text("決定")))
+        ],
       )
     );
   }

@@ -32,15 +32,6 @@ class InputForm extends HookWidget {
                 border: const OutlineInputBorder(), labelText: labels[i]),
           ),
         ),
-        Padding(
-            padding: const EdgeInsets.all(p),
-            child: ElevatedButton(
-                onPressed: () {
-                  //TODO サーバに送信
-
-                  context.go("/hub");
-                },
-                child: const Text("決定")))
     ]));
   }
 }
