@@ -10,7 +10,7 @@ class Logins extends HookWidget {
 
   @override
   Widget build(context) {
-    final index = useState(3);
+    final index = useState(0);
 
     final loginUIList = [
       const Splash(),

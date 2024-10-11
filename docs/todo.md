@@ -2,7 +2,7 @@
 
 ## client
 
-- model定義
+- SignFormを改良して、任意数の入力フォームを実装
 - CURD実装
 - home実装
 - post実装
