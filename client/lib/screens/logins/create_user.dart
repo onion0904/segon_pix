@@ -19,19 +19,18 @@ class CreateUser extends HookWidget {
       Form(
           key: formKey,
           child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
-            Padding(
-                padding: const EdgeInsets.all(p),
-                child: TextFormField(
-                    //name
-                    controller: nameController.value,
-                    validator: nameValidator)),
-            Padding(
-                padding: const EdgeInsets.all(p),
-                child: TextFormField(
-                    //description
-                    controller: descriptionController.value,
-                    validator: descriptionValidator)),
-            Text("${birthday.value}testtooo"),
+            // Padding(
+            //     padding: const EdgeInsets.all(p),
+            //     child: TextFormField(
+            //         //name
+            //         controller: nameController.value,
+            //         validator: nameValidator)),
+            // Padding(
+            //     padding: const EdgeInsets.all(p),
+            //     child: TextFormField(
+            //         //description
+            //         controller: descriptionController.value,
+            //         validator: descriptionValidator)),
             Padding(
                 padding: const EdgeInsets.all(p),
                 child: OutlinedButton(
