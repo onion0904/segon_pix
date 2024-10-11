@@ -10,8 +10,9 @@ type User struct {
     Description  string        // プロフィールメッセージ
     Icon         string        // プロフィール画像のURL
     HeaderImage  string        // ヘッダー画像のURL
-    Email        string        `gorm:"type:varchar(100);unique"` // メールアドレス（任意、一意のメール形式）
-    Birthday     int           // 誕生日
+    Email        string        `gorm:"type:varchar(100);unique"` // メールアドレス（一意のメール形式）
+    Password     string        `gorm:"type:varchar(100);unique"`// パスワード
+    Birthday     int           // 誕生日(20241009=2024年10月9日)
     PostedImages []PostedImage `gorm:"foreignKey:UserID"`// ユーザーが投稿した画像
     LikedImages  []PostedImage `gorm:"many2many:posted_image_likes;constraint:OnDelete:CASCADE"`
     Follows      []User        `gorm:"many2many:user_follows;joinForeignKey:FollowerID;JoinReferences:FollowingID"` // フォローしているユーザー

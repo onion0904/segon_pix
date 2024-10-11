@@ -11,6 +11,8 @@ import (
 	"github.com/joho/godotenv"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
+	echojwt "github.com/labstack/echo-jwt/v4"
+	"github.com/golang-jwt/jwt/v5"
 )
 
 func main() {
@@ -50,8 +52,12 @@ func main() {
 	con := controllers.NewController(db)
 
 	// ルーティングの設定
+
+	e.POST("/login", con.Login)
+    e.POST("/verify", con.Verify)
+
 	method := e.Group("/segon_pix")
-	{
+	{	
 		method.POST("/add/user", con.AddUser)
 		method.POST("/add/image", con.AddPostedImage)
 		method.POST("/add/like", con.AddLike)
@@ -68,6 +74,22 @@ func main() {
 		method.DELETE("/delete/like", con.RemoveLike)
 		method.DELETE("/delete/comment", con.DeleteComment)
 	}
+
+    // 認証が必要なルートグループを作成
+    r := e.Group("/restricted")
+    {
+		secret := os.Getenv("JWT_SECRET_KEY")
+		jwtSecret := []byte(secret)
+        // JWTミドルウェアの設定
+        config := echojwt.Config{
+			NewClaimsFunc: func(c echo.Context) jwt.Claims {
+				return new(jwt.RegisteredClaims)
+			},
+			SigningKey: jwtSecret,
+		}
+		r.Use(echojwt.WithConfig(config))
+        r.GET("", con.Restricted)
+    }
 
 	// サーバーの開始
 	e.Logger.Fatal(e.Start(":8080"))
