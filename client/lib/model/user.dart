@@ -1,3 +1,7 @@
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+
+final userProvider = StateProvider<User?>((ref) => null);
+
 class User {
   final int id;
   String name;
@@ -59,13 +63,9 @@ class PostedImage {
   });
 
   Map<String, dynamic> toJson() {
-    return {
-
-    };
+    return {};
   }
 }
-
-
 
 class Comment {
   final int id;

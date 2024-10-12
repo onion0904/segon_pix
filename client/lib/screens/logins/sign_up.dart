@@ -12,7 +12,7 @@ class SignUp extends StatelessWidget {
         InputForm( controllers: controllers, validators: validators, labels: labels),
         TextButton(
           child: const Text("go to splash"),
-          onPressed: () => changeIndex(0)
+          onPressed: () => changeIndex(1)
           )
       ]
     );

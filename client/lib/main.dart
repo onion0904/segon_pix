@@ -3,7 +3,8 @@ import 'package:go_router/go_router.dart';
 import 'package:client/screens/hubs/hub.dart';
 import 'screens/logins/logins.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
   runApp(const MainApp());
 }
 

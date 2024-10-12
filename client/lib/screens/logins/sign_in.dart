@@ -13,7 +13,7 @@ class SignIn extends HookWidget {
       children: [
         InputForm( controllers: controllers, validators: validators, labels: labels),
           TextButton(
-          onPressed: () => changeIndex(0),
+          onPressed: () => changeIndex(2),
           child: const Text("Go to Sign Up"),
         ),
       ]
