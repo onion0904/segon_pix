@@ -77,20 +77,20 @@ func main() {
 
     // 認証が必要なルートグループを作成
     r := e.Group("/restricted")
-    {
-		secret := os.Getenv("JWT_SECRET_KEY")
-		jwtSecret := []byte(secret)
-        // JWTミドルウェアの設定
-        config := echojwt.Config{
-			NewClaimsFunc: func(c echo.Context) jwt.Claims {
-				return new(jwt.RegisteredClaims)
-			},
-			SigningKey: jwtSecret,
-		}
-		r.Use(echojwt.WithConfig(config))
-        r.GET("", con.Restricted)
-    }
+	secret := os.Getenv("JWT_SECRET_KEY")
+	jwtSecret := []byte(secret)
+	config := echojwt.Config{
+		NewClaimsFunc: func(c echo.Context) jwt.Claims {
+			return new(controllers.MyCustomClaims)
+		},
+		SigningKey: jwtSecret,
+	}
+	r.Use(echojwt.WithConfig(config))
 
+	// 認証が必要なルート
+	{
+		r.GET("", con.Restricted)
+	}
 	// サーバーの開始
 	e.Logger.Fatal(e.Start(":8080"))
 }
