@@ -6,21 +6,19 @@ import(
     "encoding/base64"
     "fmt"
     "net/http"
-    "sync"
     "time"
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/labstack/echo/v4"
 	"os"
 )
 
-
-// 認証コードを保存するためのマップ（メールアドレスとコードの対応）
-var verificationCodes = make(map[string]string)
-var codeMutex sync.Mutex
+type MyCustomClaims struct {
+	Email string `json:"email"`
+	jwt.RegisteredClaims
+}
 
 
 func (con *Controller) Login(c echo.Context) error {
-
     email := c.FormValue("email")
     password := c.FormValue("password")
 
@@ -42,9 +40,9 @@ func (con *Controller) Login(c echo.Context) error {
     }
 
     // 認証コードを保存
-    codeMutex.Lock()
-    verificationCodes[email] = code
-    codeMutex.Unlock()
+    con. auth.CodeMutex.Lock()
+	con.auth.VerificationCodes[email] = code
+	con.auth.CodeMutex.Unlock()
 
     // 認証コードをメールで送信（デモではコンソールに出力）
     fmt.Printf("認証コードを %s に送信しました: %s\n", email, code)
@@ -66,25 +64,33 @@ func (con *Controller) Verify(c echo.Context) error {
     email := c.FormValue("email")
     code := c.FormValue("code")
 
+	fmt.Printf("Email is %s \n", email)
+
     // 認証コードの検証
-    codeMutex.Lock()
-    expectedCode, ok := verificationCodes[email]
-    codeMutex.Unlock()
+    con.auth.CodeMutex.Lock()
+    expectedCode, ok := con.auth.VerificationCodes[email]
+    con.auth.CodeMutex.Unlock()
 
     if !ok || expectedCode != code {
         return c.JSON(http.StatusUnauthorized, map[string]string{"message": "認証コードが正しくありません"})
     }
 
     // 認証コードを削除（再利用を防ぐため）
-    codeMutex.Lock()
-    delete(verificationCodes, email)
-    codeMutex.Unlock()
+    con.auth.CodeMutex.Lock()
+    delete(con.auth.VerificationCodes, email)
+    con.auth.CodeMutex.Unlock()
 
+
+	claims := &MyCustomClaims{
+		Email: email,
+		RegisteredClaims: jwt.RegisteredClaims{
+			Subject:   email,  // メールアドレスやIDを設定
+			ExpiresAt: jwt.NewNumericDate(time.Now().Add(time.Hour * 24)),  // 有効期限
+		},
+	}
     // JWTトークンの作成
-    token := jwt.New(jwt.SigningMethodHS256)
-    claims := token.Claims.(jwt.MapClaims)
-    claims["email"] = email
-    claims["exp"] = time.Now().Add(time.Hour * 24).Unix() // 24時間有効
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+	fmt.Printf("Generated token claims: %+v\n", token.Claims)
 
     tokenString, err := token.SignedString(jwtSecret)
     if err != nil {
@@ -108,8 +114,8 @@ func generateVerificationCode() (string, error) {
 
 func (con *Controller) Restricted(c echo.Context) error {
     user := c.Get("user").(*jwt.Token)
-	claims := user.Claims.(*jwt.RegisteredClaims)
-    email := claims.Subject
-
-    return c.String(http.StatusOK, "ようこそ "+email+" さん！")
+	claims := user.Claims.(*MyCustomClaims)
+	email := claims.Email
+	return c.String(http.StatusOK, "Welcome "+email+"!")
 }
+
