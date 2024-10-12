@@ -12,5 +12,3 @@ Future<User> getUser(int userId) async {
     throw Exception("Failed getUser method");
   }
 }
-
-Future<>
