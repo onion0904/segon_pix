@@ -123,12 +123,12 @@ Widget listTile(BuildContext context, i, void Function(int) changeIndex) {
 }
 
 class HubList {
-  static const ui = [
-    HubUI(),
-    SearchUI(),
-    Post(),
-    NotificationUI(),
-    ProfileUI(),
+  static final ui = [
+    const HubUI(),
+    const SearchUI(),
+    const Post(),
+    const NotificationUI(),
+    const ProfileUI(),
   ];
 
   static final floatingActionButton = [
