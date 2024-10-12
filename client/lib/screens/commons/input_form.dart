@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
-import 'package:go_router/go_router.dart';
 
 const p = 32.0;
 const double n = p;
@@ -19,11 +18,10 @@ class InputForm extends HookWidget {
 
   @override
   Widget build(context) {
-    return Form(
-        child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
+    return Column(mainAxisAlignment: MainAxisAlignment.center, children: [
       for (int i = 0; i < controllers.length; i++)
         Container(
-          constraints: const BoxConstraints(maxWidth: 1000),
+          constraints: const BoxConstraints(maxWidth: 1024),
           padding: const EdgeInsets.fromLTRB(n, p, n, p),
           child: TextFormField(
             controller: controllers[i],
@@ -32,6 +30,6 @@ class InputForm extends HookWidget {
                 border: const OutlineInputBorder(), labelText: labels[i]),
           ),
         ),
-    ]));
+    ]);
   }
 }

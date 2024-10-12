@@ -30,21 +30,23 @@ class Logins extends HookWidget {
         title: const Text("Login"),
         backgroundColor: Colors.orange,
       ),
-      body: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          loginUIList[index.value],
-          Padding(
-              padding: const EdgeInsets.all(p),
-              child: ElevatedButton(
-                  onPressed: () {
-                    //TODO サーバに送信
+      body: Center(
+        child:  Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          // crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            loginUIList[index.value],
+            Padding(
+                padding: const EdgeInsets.all(p),
+                child: ElevatedButton(
+                    onPressed: () {
+                      //TODO サーバに送信
 
-                    context.go("/hub");
-                  },
-                  child: const Text("決定")))
-        ],
+                      context.go("/hub");
+                    },
+                    child: const Text("決定")))
+          ],
+        )
       )
     );
   }

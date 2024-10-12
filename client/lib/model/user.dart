@@ -57,7 +57,15 @@ class PostedImage {
     required this.likes,
     required this.comments,
   });
+
+  Map<String, dynamic> toJson() {
+    return {
+
+    };
+  }
 }
+
+
 
 class Comment {
   final int id;
