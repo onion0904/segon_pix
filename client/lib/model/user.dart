@@ -6,27 +6,35 @@ class User {
   final int id;
   String name;
   String icon;
-  String profile;
+  String description;
   String headerImage;
   String email;
   String password;
   String birthday;
+  List<PostedImage> postedImages;
+  List<PostedImage> likedImages;
+  List<User> follows;
+  List<User> followers;
 
   User({
     required this.id,
     required this.name,
     required this.icon,
-    required this.profile,
+    required this.description,
     required this.headerImage,
     required this.email,
     this.password = "nothing",
     required this.birthday,
+    this.postedImages = const [],
+    this.likedImages = const [],
+    this.follows = const [],
+    this.followers = const [],
   });
 
   Map<String, dynamic> toJson() {
     return {
       "name": name,
-      "profile": profile,
+      "description": description,
       "email": email,
       "birthday": birthday
     };
@@ -37,10 +45,14 @@ class User {
       id: json["id"],
       name: json["name"],
       icon: json["icon"],
-      profile: json["profile"],
+      description: json["description"],
       headerImage: json["headerImage"],
       email: json["email"],
       birthday: json["birthday"],
+      postedImages: json["postedImages"],
+      likedImages: json["likedImages"],
+      follows: json["follows"],
+      followers: json["followers"]
     );
   }
 }
