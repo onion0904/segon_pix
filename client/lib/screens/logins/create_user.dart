@@ -3,14 +3,17 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import "../../logic/http/post.dart";
 import 'package:go_router/go_router.dart';
 import '../commons/input_form.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
+import '../../model/user.dart';
+import 'dart:convert';
 
 const double p = 2;
 
-class CreateUser extends HookWidget {
+class CreateUser extends HookConsumerWidget {
   const CreateUser({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(context, ref) {
     final birthday = useState(0);
     final initialDate = useState(DateTime.now());
     final formKey = GlobalKey<FormState>();
@@ -54,6 +57,8 @@ class CreateUser extends HookWidget {
                             description: controllers.value[1].value.text,
                             birthday: birthday.value);
                         if (response.statusCode == 200 && context.mounted) {
+                          //ここのjsonがどんなかんじになっているか確認
+                          ref.read(userProvider.notifier).state = User.fromJson(jsonDecode(response.body));
                           context.go("/hub");
                         }
                       }
