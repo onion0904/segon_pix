@@ -11,7 +11,7 @@
     - 使用例
 
     ```
-    curl -X DELETE "http://localhost:8080/segon_pix/delete/user?ID=1234"
+    curl -X DELETE "http://localhost:8080/segon_pix_auth/delete/user?ID=1234"
     ```
 - /delete/image
     - 入力できる値(queryでの受け取り)
@@ -24,7 +24,7 @@
     - 使用例
 
     ```
-    curl -X DELETE "http://localhost:8080/segon_pix/delete/image?ID=1234"
+    curl -X DELETE "http://localhost:8080/segon_pix_auth/delete/image?ID=1234"
     ```
 - /delete/like
     - 入力できる値(queryでの受け取り)
@@ -38,7 +38,7 @@
     - 使用例
 
     ```
-    curl -X DELETE "http://localhost:8080/segon_pix/delete/like?userID=1234&imageID=5678"
+    curl -X DELETE "http://localhost:8080/segon_pix_auth/delete/like?userID=1234&imageID=5678"
     ```
 - /delete/comment
     - 入力できる値(queryでの受け取り)
@@ -51,5 +51,5 @@
     - 使用例
 
     ```
-    curl -X DELETE "http://localhost:8080/segon_pix/delete/comment?commentID=5678&imageID=1234"
+    curl -X DELETE "http://localhost:8080/segon_pix_auth/delete/comment?commentID=5678&imageID=1234"
     ```

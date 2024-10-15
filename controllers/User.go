@@ -51,6 +51,25 @@ func (con *Controller) UserInfo(c echo.Context) error {
 	return c.JSON(http.StatusOK, User)
 }
 
+
+func (con *Controller) UserInfoAuth(c echo.Context) error {
+    email := c.QueryParam("email")
+    password := c.QueryParam("password")
+
+    repo, err := repositories.NewRepository(con.db)
+    if err != nil {
+        return c.NoContent(http.StatusServiceUnavailable) // 503エラー
+    }
+
+    user ,err := repo.UserInfoAuth(email,password)
+	if err!= nil {
+        return c.JSON(http.StatusUnauthorized, map[string]string{"message": "メールアドレスまたはパスワードが間違っています"})
+    }
+
+    return c.JSON(http.StatusOK, user)
+}
+
+
 func (con *Controller) DeleteUser(c echo.Context) error {
 	userID := c.QueryParam("ID")
 	uintID64, err := strconv.ParseUint(userID, 10, 64)

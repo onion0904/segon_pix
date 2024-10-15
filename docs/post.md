@@ -15,7 +15,7 @@
     - 使用例
 
     ```
-    curl -X POST http://localhost:8080/segon_pix/add/user \
+    curl -X POST http://localhost:8080/segon_pix_auth/add/user \
     -H "Content-Type: application/json" \
     -d '{
         "name": "John Doe",
@@ -37,7 +37,7 @@
     - 使用例
 
     ```
-    curl -X POST "http://localhost:8080/segon_pix/add/image?ID=1234" \
+    curl -X POST "http://localhost:8080/segon_pix_auth/add/image?ID=1234" \
   -F "File=@/path/to/your/image.jpg" \
   -F "Hashtags=tag1" \
   -F "Hashtags=tag2" \
@@ -56,6 +56,6 @@
     - 使用例
 
     ```
-    curl -X POST "http://localhost:8080/segon_pix/add/like?userID=1234&imageID=5678"
+    curl -X POST "http://localhost:8080/segon_pix_auth/add/like?userID=1234&imageID=5678"
     ```
 - /add/comment

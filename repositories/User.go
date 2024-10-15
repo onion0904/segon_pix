@@ -6,6 +6,7 @@ import (
 	"gorm.io/gorm"
 	"context"
     "fmt"
+    "golang.org/x/crypto/bcrypt"
 )
 
 // 与えられたidのユーザー情報を返す
@@ -17,13 +18,45 @@ func (repo *Repository) UserInfo(id uint) (*models.User, error) {
         }
         return nil, err
     }
+
+    user.Email = ""
+    user.Password = ""
+
     return &user, nil
 }
 
 
+// 認証付きでユーザー情報を返す
+func (repo *Repository) UserInfoAuth(email, password string) (*models.User, error) {
+    var user models.User
+    // Emailでユーザーを検索
+    if err := repo.db.Preload("PostedImages").Preload("LikedImages").
+        Where("email = ?", email).First(&user).Error; err != nil {
+        if errors.Is(err, gorm.ErrRecordNotFound) {
+            return nil, nil
+        }
+        return nil, err
+    }
 
-func (repo *Repository) AddUser(model *models.User) error {
-    if err := repo.db.Create(model).Error; err != nil {
+    // パスワードの照合
+    if err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(password)); err != nil {
+        return nil, errors.New("invalid password")
+    }
+
+    return &user, nil
+}
+
+
+func (repo *Repository) AddUser(user *models.User) error {
+    // パスワードをハッシュ化する
+    hashedPassword, err := bcrypt.GenerateFromPassword([]byte(user.Password), bcrypt.DefaultCost)
+    if err != nil {
+        return fmt.Errorf("failed to hash password: %w", err)
+    }
+    user.Password = string(hashedPassword)
+
+    // ユーザーをデータベースに追加
+    if err := repo.db.Create(user).Error; err != nil {
         return fmt.Errorf("failed to add user to the database: %w", err)
     }
     return nil
