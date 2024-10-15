@@ -29,20 +29,30 @@ func (repo *Repository) UserInfo(id uint) (*models.User, error) {
 // 認証付きでユーザー情報を返す
 func (repo *Repository) UserInfoAuth(email, password string) (*models.User, error) {
     var user models.User
+
+    // デバッグ用ログ
+    fmt.Println("Searching for user with email:", email)
+
     // Emailでユーザーを検索
     if err := repo.db.Preload("PostedImages").Preload("LikedImages").
         Where("email = ?", email).First(&user).Error; err != nil {
+
+        // エラーの詳細を出力
         if errors.Is(err, gorm.ErrRecordNotFound) {
+            fmt.Println("User not found with email:", email)
             return nil, nil
         }
+        fmt.Println("Error during query execution:", err)
         return nil, err
     }
 
     // パスワードの照合
     if err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(password)); err != nil {
+        fmt.Println("Invalid password for user:", email)
         return nil, errors.New("invalid password")
     }
 
+    fmt.Println("User found and password is valid:", email)
     return &user, nil
 }
 

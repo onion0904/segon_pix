@@ -17,12 +17,15 @@
     - 使用例
 
     ```
-    curl -X POST -H "Authorization: Bearer <JWTトークン>" \http://localhost:8080/segon_pix_auth/add/user \
-    -H "Content-Type: application/json" \
-    -d '{
-        "name": "John Doe",
-        "email": "john@example.com"
-      }'
+    curl -X POST -H "Authorization: Bearer <JWTトークン>" \
+-H "Content-Type: application/json" \
+-d '{
+    "name": "John Doe",
+    "email": "john@example.com",
+    "password": "password",
+    "birthday": 20241015
+}' \
+http://localhost:8080/segon_pix_auth/add/user
     ```
 
 - /add/image(token必要)

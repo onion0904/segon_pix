@@ -30,7 +30,7 @@
 
     ```
     curl -X GET -H "Authorization: Bearer <JWTトークン>" \
-"http://localhost:8080/segon_pix_auth/get/user?email=onion@example.com&password=your_password"
+http://localhost:8080/segon_pix_auth/get/user?email=onion@example.com&password=your_password
     ```
 
 - /get/list/image
