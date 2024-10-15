@@ -1,4 +1,4 @@
-# auth（作り途中）
+# auth
 
 - /signup
 
