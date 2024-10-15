@@ -2,13 +2,27 @@ package repositories
 
 import (
     "PixApp/models"
+    "errors"
+    "gorm.io/gorm"
+    "golang.org/x/crypto/bcrypt"
 )
 
 
-func (repo *Repository) ExistUser(email string, password string) error {
+func (repo *Repository) ExistUser(email string, password string) (bool,error) {
     var user models.User
-    if err := repo.db.Where("email = ? AND password = ?", email, password).First(&user).Error; err != nil {
-        return err 
+    // Emailでユーザーを検索
+    if err := repo.db.Preload("PostedImages").Preload("LikedImages").
+        Where("email = ?", email).First(&user).Error; err != nil {
+        if errors.Is(err, gorm.ErrRecordNotFound) {
+            return false,nil
+        }
+        return false,err
     }
-    return nil
+
+    // パスワードの照合
+    if err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(password)); err != nil {
+        return false,errors.New("invalid password")
+    }
+
+    return true,nil
 }

@@ -1,19 +1,18 @@
 # auth（作り途中）
 
-- /login->signupに変更
+- /signup
 
     - 入力できる値
-    - メアドとパスワードを入力して認証コードをメアド先に送信する
+    - メアドを入力して認証コードをメアド先に送信するに変更
 
     | 変数      |     説明     |
     |-----------|-----------|
     |Email     |  メールアドレス  |
-    |password|パスワード|
 
     - 使用例
 
     ```
-    curl -X POST -F "email=user@example.com" -F "password=password123" http://localhost:8080/signup
+    curl -X POST -F "email=user@example.com" http://localhost:8080/signup
     ```
 
 - /verify
@@ -49,11 +48,11 @@
     curl -X POST -F "email=user@example.com" -F "password=password123" http://localhost:8080/login
     ```
 
-- /restricted
+- /restricted(token必要)
     - 入力できる値(JSONでの受け取り)
     - このエンドポイント以下はJWTトークンが必要になる
     - /restrictedこれを叩くと"ようこそ user@example.com さん！
-"と返ってくる->Userを返すように変更する。emailとpasswordからUserを判断する
+"と返ってくる
 
     | 変数      |     説明     |
     |-----------|-----------|
@@ -64,3 +63,5 @@
     ```
     curl -H "Authorization: Bearer <JWTトークン>" http://localhost:8080/restricted
     ```
+
+

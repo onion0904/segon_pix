@@ -53,30 +53,19 @@ func main() {
 
 	// ルーティングの設定
 
-	e.POST("/login", con.Login)
+	e.POST("/signup", con.Signup)
     e.POST("/verify", con.Verify)
+	e.POST("/login", con.Login)
 
 	method := e.Group("/segon_pix")
 	{	
-		method.POST("/add/user", con.AddUser)
-		method.POST("/add/image", con.AddPostedImage)
-		method.POST("/add/like", con.AddLike)
-		method.POST("/add/comment", con.AddComment)
 		method.GET("/get/user", con.UserInfo)
 		method.GET("/get/list/image", con.SearchImage)
 		method.GET("/get/image", con.ImageInfo)
-		method.PUT("/update/user", con.UpdateUserInfo)
-		method.PUT("/update/user/icon", con.UpdateUserIcon)
-		method.PUT("/update/user/header", con.UpdateUserHeader)
-		method.PUT("/update/comment", con.UpdateComment)
-		method.DELETE("/delete/user", con.DeleteUser)
-		method.DELETE("/delete/image", con.DeletePostedImage)
-		method.DELETE("/delete/like", con.RemoveLike)
-		method.DELETE("/delete/comment", con.DeleteComment)
 	}
 
     // 認証が必要なルートグループを作成
-    r := e.Group("/restricted")
+    r := e.Group("/segon_pix_auth")
 	secret := os.Getenv("JWT_SECRET_KEY")
 	jwtSecret := []byte(secret)
 	config := echojwt.Config{
@@ -89,7 +78,20 @@ func main() {
 
 	// 認証が必要なルート
 	{
+		r.POST("/add/user", con.AddUser)
+		r.POST("/add/image", con.AddPostedImage)
+		r.POST("/add/like", con.AddLike)
+		r.POST("/add/comment", con.AddComment)
 		r.GET("", con.Restricted)
+		r.GET("get/user",con.UserInfoAuth)
+		r.PUT("/update/user", con.UpdateUserInfo)
+		r.PUT("/update/user/icon", con.UpdateUserIcon)
+		r.PUT("/update/user/header", con.UpdateUserHeader)
+		r.PUT("/update/comment", con.UpdateComment)
+		r.DELETE("/delete/user", con.DeleteUser)
+		r.DELETE("/delete/image", con.DeletePostedImage)
+		r.DELETE("/delete/like", con.RemoveLike)
+		r.DELETE("/delete/comment", con.DeleteComment)
 	}
 	// サーバーの開始
 	e.Logger.Fatal(e.Start(":8080"))

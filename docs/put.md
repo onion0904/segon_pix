@@ -14,7 +14,7 @@
     - 使用例
 
     ```
-   curl -X PUT "http://localhost:8080/segon_pix/update/comment?commentID=5678&imageID=1234&newContent=更新されたコメント内容"
+   curl -X PUT "http://localhost:8080/segon_pix_auth/update/comment?commentID=5678&imageID=1234&newContent=更新されたコメント内容"
     ```
 
 - /update/user/header
@@ -31,7 +31,7 @@
     - 使用例
 
     ```
-    curl -X POST "http://localhost:8080/segon_pix/add/user/header?ID=1234" \
+    curl -X POST "http://localhost:8080/segon_pix_auth/update/user/header?ID=1234" \
   -F "File=@/path/to/your/image.jpg"
     ```
 
@@ -49,7 +49,7 @@
     - 使用例
 
     ```
-    curl -X POST "http://localhost:8080/segon_pix/add/user/icon?ID=1234" \
+    curl -X POST "http://localhost:8080/segon_pix_auth/update/user/icon?ID=1234" \
   -F "File=@/path/to/your/image.jpg"
     ```
 
