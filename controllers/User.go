@@ -216,9 +216,13 @@ func (con *Controller) UpdateUserInfo(c echo.Context) error {
     }
 
 	description := c.QueryParam("description")
-    if description == "" {
-        return c.String(http.StatusBadRequest, "nothing description")
+
+    birthdayStr := c.QueryParam("birthday")
+    birthday, err := strconv.Atoi(birthdayStr)
+    if err != nil {
+        return c.JSON(http.StatusBadRequest, map[string]string{"message": "誕生日は数値で指定してください"})
     }
+
 
 	email := c.QueryParam("email")
     if email == "" {
@@ -232,7 +236,7 @@ func (con *Controller) UpdateUserInfo(c echo.Context) error {
     }
 
     // ユーザーのIconフィールドを更新
-    err = repo.UpdateUserInfo(userID, name,description,email)
+    err = repo.UpdateUserInfo(userID, name,description,email,birthday)
     if err != nil {
         return c.String(http.StatusInternalServerError, "ユーザーのアイコン更新に失敗しました")
     }
