@@ -3,25 +3,34 @@ import '../commons/input_form.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:image_picker/image_picker.dart';
 import 'dart:io';
+import '../../logic/http/post.dart';
+import '../../model/user.dart' as user;
 
 class Post extends HookWidget {
   const Post({super.key});
 
   @override
   Widget build(context) {
-      final image = useState<XFile?>(null);
+    final image = useState<XFile?>(null);
 
     return Center(
-      child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
-        if (image.value != null) Container(constraints: const BoxConstraints(maxWidth: 1000, maxHeight:1000), child: Image.file(File(image.value!.path))),
-        InputForm(
+        child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
+      if (image.value != null)
+        Container(
+            constraints: const BoxConstraints(maxWidth: 1000, maxHeight: 1000),
+            child: Image.file(File(image.value!.path))),
+      InputForm(
           controllers: controllers, validators: validators, labels: labels),
-        OutlinedButton(
+      OutlinedButton(
           child: const Text("image"),
           onPressed: () async {
             final ImagePicker picker = ImagePicker();
             image.value = await picker.pickImage(source: ImageSource.gallery);
-          })
+          }),
+      OutlinedButton(
+          onPressed: () async {
+          },
+          child: const Text("Post"))
     ]));
   }
 }
