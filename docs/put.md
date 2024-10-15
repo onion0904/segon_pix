@@ -1,6 +1,6 @@
 # PUT
 
-- /update/comment
+- /update/comment(token必要)
     - 入力できる値(queryでの受け取り)
     - コメントの内容を更新する。
 
@@ -14,10 +14,10 @@
     - 使用例
 
     ```
-   curl -X PUT "http://localhost:8080/segon_pix_auth/update/comment?commentID=5678&imageID=1234&newContent=更新されたコメント内容"
+   curl -X PUT -H "Authorization: Bearer <JWTトークン>" \"http://localhost:8080/segon_pix_auth/update/comment?commentID=5678&imageID=1234&newContent=更新されたコメント内容"
     ```
 
-- /update/user/header
+- /update/user/header(token必要)
     - 入力できる値
     - ユーザー情報にheader画像を追加する
     - もともとユーザーがあるときに使える
@@ -31,11 +31,11 @@
     - 使用例
 
     ```
-    curl -X POST "http://localhost:8080/segon_pix_auth/update/user/header?ID=1234" \
+    curl -X POST -H "Authorization: Bearer <JWTトークン>" \"http://localhost:8080/segon_pix_auth/update/user/header?ID=1234" \
   -F "File=@/path/to/your/image.jpg"
     ```
 
-- /update/user/icon
+- /update/user/icon(token必要)
     - 入力できる値
     - ユーザー情報にicon画像を追加する
     - もともとユーザーがあるときに使える
@@ -49,11 +49,11 @@
     - 使用例
 
     ```
-    curl -X POST "http://localhost:8080/segon_pix_auth/update/user/icon?ID=1234" \
+    curl -X POST -H "Authorization: Bearer <JWTトークン>" \"http://localhost:8080/segon_pix_auth/update/user/icon?ID=1234" \
   -F "File=@/path/to/your/image.jpg"
     ```
 
-- /update/user
+- /update/user(token必要)
     - 入力できる値(queryでの受け取り)
     - コメントの内容を更新する。
 
@@ -62,10 +62,11 @@
     |userID       |  userのID  |
     |name       |  userのname  |
     |description       |   プロフィールメッセージ |
+    |birthday      |   誕生日 |
     |email      |   email |
 
 
     - 使用例
 
     ```
-   curl -X PUT "http://localhost:8080/segon_pix/update/user?userID=1234&name=onion&description=更新された内容&email=更新された内容"
+   curl -X PUT -H "Authorization: Bearer <JWTトークン>" \"http://localhost:8080/segon_pix/update/user?userID=1234&name=onion&description=更新された内容&email=更新された内容"

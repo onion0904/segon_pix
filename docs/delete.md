@@ -1,6 +1,6 @@
 # DELETE
 
-- /delete/user
+- /delete/user(token必要)
     - 入力できる値(queryでの受け取り)
     - ユーザー情報を削除する。
 
@@ -11,9 +11,10 @@
     - 使用例
 
     ```
-    curl -X DELETE "http://localhost:8080/segon_pix_auth/delete/user?ID=1234"
+    curl -X DELETE -H "Authorization: Bearer <JWTトークン>" \
+"http://localhost:8080/segon_pix_auth/delete/user?ID=1234"
     ```
-- /delete/image
+- /delete/image(token必要)
     - 入力できる値(queryでの受け取り)
     - 画像をDBとGCSから削除する。
 
@@ -24,9 +25,9 @@
     - 使用例
 
     ```
-    curl -X DELETE "http://localhost:8080/segon_pix_auth/delete/image?ID=1234"
+    curl -X DELETE -H "Authorization: Bearer <JWTトークン>" \"http://localhost:8080/segon_pix_auth/delete/image?ID=1234"
     ```
-- /delete/like
+- /delete/like(token必要)
     - 入力できる値(queryでの受け取り)
     - いいねを取り消す。ユーザー情報のいいね欄からも消す。
 
@@ -38,9 +39,9 @@
     - 使用例
 
     ```
-    curl -X DELETE "http://localhost:8080/segon_pix_auth/delete/like?userID=1234&imageID=5678"
+    curl -X DELETE -H "Authorization: Bearer <JWTトークン>" \"http://localhost:8080/segon_pix_auth/delete/like?userID=1234&imageID=5678"
     ```
-- /delete/comment
+- /delete/comment(token必要)
     - 入力できる値(queryでの受け取り)
     - コメントを消す
 
@@ -51,5 +52,5 @@
     - 使用例
 
     ```
-    curl -X DELETE "http://localhost:8080/segon_pix_auth/delete/comment?commentID=5678&imageID=1234"
+    curl -X DELETE -H "Authorization: Bearer <JWTトークン>" \"http://localhost:8080/segon_pix_auth/delete/comment?commentID=5678&imageID=1234"
     ```

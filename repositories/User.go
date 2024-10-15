@@ -119,7 +119,7 @@ func (repo *Repository) UpdateUserHeader(userID uint, iconURL string) error {
 }
 
 
-func (repo *Repository) UpdateUserInfo(userID uint, name string, description string, email string) error {
+func (repo *Repository) UpdateUserInfo(userID uint, name ,description , email string, birthday int) error {
     var user models.User
     if err := repo.db.First(&user, userID).Error; err != nil {
         return err
@@ -127,6 +127,7 @@ func (repo *Repository) UpdateUserInfo(userID uint, name string, description str
 
     user.Name = name
     user.Description = description
+    user.Birthday = birthday
     user.Email = email
 
     if err := repo.db.Save(&user).Error; err != nil {
