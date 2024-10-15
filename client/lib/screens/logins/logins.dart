@@ -12,7 +12,7 @@ class Logins extends HookWidget {
 
   @override
   Widget build(context) {
-    final index = useState(0);
+    final index = useState(3);
 
     final loginUIList = [
       Splash(changeIndex: (int a) {
