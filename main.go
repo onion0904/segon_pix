@@ -83,7 +83,7 @@ func main() {
 		r.POST("/add/like", con.AddLike)
 		r.POST("/add/comment", con.AddComment)
 		r.GET("", con.Restricted)
-		r.GET("get/user",con.UserInfoAuth)
+		r.GET("/get/user",con.UserInfoAuth)
 		r.PUT("/update/user", con.UpdateUserInfo)
 		r.PUT("/update/user/icon", con.UpdateUserIcon)
 		r.PUT("/update/user/header", con.UpdateUserHeader)

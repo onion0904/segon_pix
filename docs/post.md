@@ -42,14 +42,15 @@ http://localhost:8080/segon_pix_auth/add/user
 
     - 使用例
 
-    ```
-    curl -X POST -H "Authorization: Bearer <JWTトークン>" \"http://localhost:8080/segon_pix_auth/add/image?ID=1234" \
-  -F "File=@/path/to/your/image.jpg" \
-  -F "Hashtags=tag1" \
-  -F "Hashtags=tag2" \
-  -F "Hashtags=tag3"
+```bash
+curl -X POST -H "Authorization: Bearer <JWTトークン>" \
+"http://localhost:8080/segon_pix_auth/add/image?ID=1234" \
+-F "File=@/path/to/your/image.jpg" \
+-F "Hashtags=tag1" \
+-F "Hashtags=tag2" \
+-F "Hashtags=tag3"
+```
 
-    ```
 - /add/like(token必要)
     - 入力できる値(queryでの受け取り)
     -指定された画像にユーザー情報を入れる。ユーザー情報にいいねした画像を追加する。

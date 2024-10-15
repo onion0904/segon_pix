@@ -1,11 +1,12 @@
 package controllers
 
 import (
-	"net/http"
-	"strconv"
-	"github.com/labstack/echo/v4"
 	"PixApp/models"
 	"PixApp/repositories"
+	"net/http"
+	"strconv"
+
+	"github.com/labstack/echo/v4"
 	"gorm.io/gorm"
 )
 
@@ -58,7 +59,7 @@ func (con *Controller) UserInfoAuth(c echo.Context) error {
 
     repo, err := repositories.NewRepository(con.db)
     if err != nil {
-        return c.NoContent(http.StatusServiceUnavailable) // 503エラー
+        return c.JSON(http.StatusServiceUnavailable,err) // 503エラー
     }
 
     user ,err := repo.UserInfoAuth(email,password)

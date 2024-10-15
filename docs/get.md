@@ -14,7 +14,7 @@
     curl -X GET "http://localhost:8080/segon_pix/get/user?ID=1234"
     ```
 
-- /restricted/get/user(token必要)
+- /get/user(token必要)
     - 入力できる値(queryでの受け取り)
     - このエンドポイント以下はJWTトークンが必要になる
     - Userを返す。emailとpasswordからUserを判断する
