@@ -6,13 +6,15 @@ import 'search.dart';
 import 'notification.dart';
 import 'post.dart';
 import 'package:go_router/go_router.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 /////////////////////////////////////////////////////////////////////////
 const double n = 1;
-const double p = 8*1.5;
+const double p = 8 * 1.5;
 const double sWidth = 32;
 const drawerImage =
     "https://onion0904.dev/ocGvg5tH5gfqsDS1715839141_1715839204.png";
+final url = Uri.parse("https://onion0904.dev");
 const double imageSize = 100;
 
 class Hub extends HookWidget {
@@ -25,22 +27,13 @@ class Hub extends HookWidget {
     return Scaffold(
         resizeToAvoidBottomInset: false,
         appBar: appBar(),
-        drawer: Drawer(
-          child: ListView(children: [
-            DrawerHeader(
-                decoration: const BoxDecoration(color: Colors.orange),
-                child: Center(
-                    child: SizedBox(
-                        width: imageSize,
-                        height: imageSize,
-                        child: Image.network(drawerImage)))),
-            for (int i = 0; i < HubList.ui.length; i++)
-              listTile(context, i, (int a) {
-                index.value = a;
-                context.pop(context);
-              }),
-          ]),
-        ),
+        drawer: drawer(
+            context: context,
+            index: index.value,
+            changeIndex: (int a) {
+              index.value = a;
+              context.pop(context);
+            }),
         body: Center(child: HubList.ui[index.value]),
         bottomNavigationBar: SegonNavigationBar(
             index: index.value, changeIndex: (int i) => index.value = i),
@@ -54,6 +47,31 @@ Widget floatingActionButton(int index) {
   return Container(
       margin: const EdgeInsets.all(16),
       child: HubList.floatingActionButton[index]);
+}
+
+////////////////////////////////////////////////////////
+Widget drawer({
+  required BuildContext context,
+  required int index,
+  required void Function(int a) changeIndex,
+}) {
+  return Drawer(
+    child: ListView(children: [
+      DrawerHeader(
+          decoration: const BoxDecoration(color: Colors.orange),
+          child: Center(
+              child: SizedBox(
+                  width: imageSize,
+                  height: imageSize,
+                  child: GestureDetector(
+                      onTap: () {
+                        launchUrl(url);
+                      },
+                      child: Image.network(drawerImage))))),
+      for (int i = 0; i < HubList.ui.length; i++)
+        listTile(context, i, changeIndex),
+    ]),
+  );
 }
 
 /////////////////////////////////////////////////////////
@@ -104,11 +122,9 @@ Widget listTile(BuildContext context, i, void Function(int) changeIndex) {
         side: const BorderSide(color: Colors.transparent),
         shape: const RoundedRectangleBorder(borderRadius: BorderRadius.zero),
       ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.start,
-        children: [
+      child: Row(mainAxisAlignment: MainAxisAlignment.start, children: [
         Padding(
-          padding: const EdgeInsets.fromLTRB(0,p,p,p),
+          padding: const EdgeInsets.fromLTRB(0, p, p, p),
           child: Icon(HubList.icon[i], size: 32 * n, color: Colors.black),
         ),
         Padding(

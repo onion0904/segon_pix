@@ -5,6 +5,7 @@ import 'sign_in.dart';
 import 'sign_up.dart';
 import 'create_user.dart';
 import 'package:go_router/go_router.dart';
+import '../commons/button.dart';
 
 class Logins extends HookWidget {
   const Logins({super.key});
@@ -27,29 +28,32 @@ class Logins extends HookWidget {
     ];
 
     return Scaffold(
-      resizeToAvoidBottomInset: false,
-      appBar: AppBar(
-        title: const Text("Login"),
-        backgroundColor: Colors.orange,
-      ),
-      body: Center(
-        child:  Column(
+        resizeToAvoidBottomInset: false,
+        appBar: AppBar(
+          title: const Text("Login"),
+          backgroundColor: Colors.orange,
+        ),
+        body: Center(
+            child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
-          // crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             loginUIList[index.value],
             Padding(
                 padding: const EdgeInsets.all(p),
-                child: ElevatedButton(
-                    onPressed: () {
-                      //TODO サーバに送信
-
-                      context.go("/hub");
-                    },
-                    child: const Text("決定")))
+                child: SegonButton(
+                  handler: handler(context: context),
+                  label: "go"
+                )
+            )
           ],
-        )
-      )
-    );
+        )));
   }
+}
+
+void Function()? handler({
+  required BuildContext context,
+}) {
+  return ()async{
+    context.go("/hub");
+  };
 }

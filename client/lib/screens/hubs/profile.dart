@@ -11,11 +11,10 @@ class ProfileUI extends StatelessWidget {
 
   @override
   Widget build(context) {
-    return const Column(
-        children: [
-          ShowUserInfo(),
-          Padding(padding: EdgeInsets.all(p), child: LogOut())
-        ]);
+    return const Column(children: [
+      // ShowUserInfo(),
+      Padding(padding: EdgeInsets.all(p), child: LogOut())
+    ]);
   }
 }
 
@@ -26,24 +25,18 @@ class ShowUserInfo extends ConsumerWidget {
   Widget build(context, ref) {
     final user = ref.watch(userProvider);
     return Center(
-      child: Container(
-        padding: const EdgeInsets.all(32),
-        //TODO decoration
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Image.network(user!.icon),
-            Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Text("Name: ${user.name}"),
-                Text("Email: ${user.email}")
-              ]
-            )
-          ]
-        )
-      )
-    );
+        child: Container(
+            padding: const EdgeInsets.all(32),
+            //TODO decoration
+            child: Row(mainAxisAlignment: MainAxisAlignment.center, children: [
+              if (user != null)
+                Image.network(user.icon),
+              if(user != null)
+                Column(mainAxisAlignment: MainAxisAlignment.center, children: [
+                  Text("Name: ${user.name}"),
+                  Text("Email: ${user.email}")
+                ])
+            ])));
   }
 }
 
@@ -55,8 +48,8 @@ class LogOut extends HookConsumerWidget {
     return ElevatedButton(
         onPressed: () async {
           await UserIdManager.removeUserId();
+          ref.read(userProvider.notifier).state = null;
           WidgetsBinding.instance.addPostFrameCallback((_) {
-            ref.read(userProvider.notifier).state = null;
             context.go("/");
           });
         },
