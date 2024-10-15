@@ -16,8 +16,8 @@
 
     - 使用例
 
-    ```
-    curl -X POST -H "Authorization: Bearer <JWTトークン>" \
+```bash
+curl -X POST -H "Authorization: Bearer <JWTトークン>" \
 -H "Content-Type: application/json" \
 -d '{
     "name": "John Doe",
@@ -26,7 +26,8 @@
     "birthday": 20241015
 }' \
 http://localhost:8080/segon_pix_auth/add/user
-    ```
+```
+
 
 - /add/image(token必要)
     - 入力できる値

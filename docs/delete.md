@@ -10,10 +10,11 @@
 
     - 使用例
 
-    ```
-    curl -X DELETE -H "Authorization: Bearer <JWTトークン>" \
+```bash
+curl -X DELETE -H "Authorization: Bearer <JWTトークン>" \
 "http://localhost:8080/segon_pix_auth/delete/user?ID=1234"
-    ```
+```
+
 - /delete/image(token必要)
     - 入力できる値(queryでの受け取り)
     - 画像をDBとGCSから削除する。
