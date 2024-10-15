@@ -28,11 +28,11 @@
 
     - 使用例
 
-    ```
-    curl -X GET -H "Authorization: Bearer <JWTトークン>" \
+```bash
+curl -X GET -H "Authorization: Bearer <JWTトークン>" \
 "http://localhost:8080/segon_pix_auth/get/user?email=john@example.com&password=password"
+```
 
-    ```
 
 - /get/list/image
     - 入力できる値(queryでの受け取り)
