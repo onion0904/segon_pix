@@ -15,15 +15,9 @@ class Logins extends HookWidget {
     final index = useState(3);
 
     final loginUIList = [
-      Splash(changeIndex: (int a) {
-        index.value = a;
-      }),
-      SignIn(changeIndex: (int a) {
-        index.value = a;
-      }),
-      SignUp(changeIndex: (int a) {
-        index.value = a;
-      }),
+      Splash(changeIndex: (int a) {index.value = a;}),
+      SignIn(changeIndex: (int a) {index.value = a;}),
+      SignUp(changeIndex: (int a) {index.value = a;}),
       const CreateUser()
     ];
 

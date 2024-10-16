@@ -6,6 +6,7 @@ import '../commons/input_form.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import '../../model/user.dart';
 import 'dart:convert';
+import '../commons/button.dart';
 
 const double p = 2;
 
@@ -22,6 +23,8 @@ class CreateUser extends HookConsumerWidget {
       TextEditingController(),
     ]);
 
+    //気が向いたらきれいにする
+
     return Column(children: [
       Form(
           key: formKey,
@@ -30,40 +33,47 @@ class CreateUser extends HookConsumerWidget {
                 validators: validators,
                 controllers: controllers.value,
                 labels: labels),
-            Text("${initialDate.value}"),
             Padding(
                 padding: const EdgeInsets.all(p),
-                child: OutlinedButton(
-                    onPressed: () async {
-                      final date = await showDatePicker(
-                          context: context,
-                          initialDate: initialDate.value,
-                          lastDate: DateTime.now(),
-                          firstDate: DateTime(1900, 1, 1));
-                      if (date != null) {
-                        initialDate.value = date;
-                        birthday.value =
-                            date.year * 10000 + date.month * 100 + date.day;
-                      }
-                    },
-                    child: const Text("Select Birthday"))),
+                child: SegonButton(
+                handler: () async {
+                  final date = await showDatePicker(
+                      context: context,
+                      initialDate: initialDate.value,
+                      lastDate: DateTime.now(),
+                      firstDate: DateTime(1900, 1, 1));
+                  if (date != null) {
+                    initialDate.value = date;
+                    birthday.value =
+                        date.year * 10000 + date.month * 100 + date.day;
+                  }
+                },
+                label: "Select birthday"
+                )),
             Padding(
                 padding: const EdgeInsets.all(p),
-                child: OutlinedButton(
-                    onPressed: () async {
-                      if (formKey.currentState!.validate()) {
-                        final response = await createUser(
-                            name: controllers.value[0].value.text,
-                            description: controllers.value[1].value.text,
-                            birthday: birthday.value);
-                        if (response.statusCode == 200 && context.mounted) {
-                          //ここのjsonがどんなかんじになっているか確認
-                          ref.read(userProvider.notifier).state = User.fromJson(jsonDecode(response.body));
-                          context.go("/hub");
-                        }
+                child: SegonButton(
+                  handler: () async {
+                    if (formKey.currentState!.validate()) {
+                      final response = await createUser(
+                          name: controllers.value[0].value.text,
+                          description: controllers.value[1].value.text,
+                          email: "tmpEmail",
+                          password: "tmpassword",
+                          birthday: birthday.value,
+                          token: "tmpToken"
+                      );
+
+                      if (response.statusCode == 200 && context.mounted) {
+                        //ここのjsonがどんなかんじになっているか確認
+                        ref.read(userProvider.notifier).state = User.fromJson(jsonDecode(response.body));
+                        context.go("/hub");
                       }
-                    },
-                    child: const Text("Decide"))),
+                    }
+                  },
+                  label: "create"
+                )
+            ),
           ]))
     ]);
   }

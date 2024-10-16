@@ -1,19 +1,22 @@
 import 'package:flutter/material.dart';
 import '../commons/input_form.dart';
+import '../commons/button.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-class SignUp extends StatelessWidget {
-  final void Function(int) changeIndex;
+class SignUp extends ConsumerWidget {
   const SignUp({super.key, required this.changeIndex});
+  final void Function(int) changeIndex;
+
 
   @override
-  Widget build(context) {
+  Widget build(context, ref) {
     return Column(
       children: [
         InputForm( controllers: controllers, validators: validators, labels: labels),
-        TextButton(
-          child: const Text("go to splash"),
-          onPressed: () => changeIndex(1)
-          )
+        SegonButton(
+          handler: ()async{changeIndex(1);},
+          label: "Go to Sign in"
+        )
       ]
     );
   }
