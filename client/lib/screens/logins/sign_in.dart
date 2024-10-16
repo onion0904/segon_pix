@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import '../commons/input_form.dart';
+import '../commons/button.dart';
 
 class SignIn extends HookWidget {
   final void Function(int) changeIndex;
@@ -8,19 +9,18 @@ class SignIn extends HookWidget {
 
   @override
   Widget build(BuildContext context) {
-
-    return Column(
-      children: [
-        InputForm( controllers: controllers, validators: validators, labels: labels),
-          TextButton(
-          onPressed: () => changeIndex(2),
-          child: const Text("Go to Sign Up"),
-        ),
-      ]
-    );
+    return Column(children: [
+      InputForm(
+          controllers: controllers, validators: validators, labels: labels),
+      SegonButton(
+        handler: () {
+          changeIndex(2);
+        },
+        label: "Go to Sign up"
+      ),
+    ]);
   }
 }
-
 
 //////////////////////////////////////////////////////
 

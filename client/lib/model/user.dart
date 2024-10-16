@@ -1,7 +1,3 @@
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-
-final userProvider = StateProvider<User?>((ref) => null);
-
 class User {
   final int id;
   String name;
@@ -42,51 +38,72 @@ class User {
 
   factory User.fromJson(Map<String, dynamic> json) {
     return User(
-      id: json["id"],
-      name: json["name"],
-      icon: json["icon"],
-      description: json["description"],
-      headerImage: json["headerImage"],
-      email: json["email"],
-      birthday: json["birthday"],
-      postedImages: json["postedImages"],
-      likedImages: json["likedImages"],
-      follows: json["follows"],
-      followers: json["followers"]
-    );
+        id: json["id"],
+        name: json["name"],
+        icon: json["icon"],
+        description: json["description"],
+        headerImage: json["headerImage"],
+        email: json["email"],
+        birthday: json["birthday"],
+        postedImages: json["postedImages"],
+        likedImages: json["likedImages"],
+        follows: json["follows"],
+        followers: json["followers"]);
   }
 }
 
 class PostedImage {
   final int id;
-  final int userId;
+  final int userID;
   final String url;
   final User user;
   final List<User> likes;
   final List<Comment> comments;
+  final String hashTag;
 
   PostedImage({
     required this.id,
-    required this.userId,
+    required this.userID,
     required this.url,
     required this.user,
     required this.likes,
     required this.comments,
+    required this.hashTag,
   });
 
   Map<String, dynamic> toJson() {
-    return {};
+    return {
+      "ID": id,
+      "UserID": userID,
+      "URL": url,
+      "PostUser": user,
+      "Likes": likes,
+      "Comments": comments,
+      "Hashtags": hashTag,
+    };
+  }
+
+  factory PostedImage.fromJson(Map<String, dynamic> json) {
+    return PostedImage(
+        id: json["ID"],
+        userID: json["UserID"],
+        url: json["URL"],
+        user: json["PostUser"],
+        likes: json["Likes"],
+        comments: json["Comments"],
+        hashTag: json["Hashtags"],
+    );
   }
 }
 
 class Comment {
   final int id;
-  final int userId;
+  final int userID;
   String message;
 
   Comment({
     required this.id,
-    required this.userId,
+    required this.userID,
     required this.message,
   });
 }
@@ -97,4 +114,21 @@ class HashTag {
   final List<PostedImage> postedImages;
 
   HashTag({required this.id, required this.tag, required this.postedImages});
+}
+
+class SimpleImages {
+  final List<int> imageIDs;
+  final List<String> imageURLs;
+
+  SimpleImages({
+    required this.imageIDs,
+    required this.imageURLs,
+  });
+
+  factory SimpleImages.fromJson(Map<String, dynamic> json) {
+    return SimpleImages(
+      imageIDs: json["ID"],
+      imageURLs: json["URL"],
+    );
+  }
 }
