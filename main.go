@@ -60,8 +60,10 @@ func main() {
 	method := e.Group("/segon_pix")
 	{	
 		method.GET("/get/user", con.UserInfo)
-		method.GET("/get/list/image", con.SearchImage)
-		method.GET("/get/image", con.ImageInfo)
+		method.GET("/get/list/search", con.SearchImage)
+		method.GET("/get/list/like", con.GetLikeImages)
+		method.GET("/get/list/recent", con.GetRecentImages)
+		method.GET("/get/image_detail", con.ImageInfo)
 	}
 
     // 認証が必要なルートグループを作成
@@ -70,7 +72,7 @@ func main() {
 	jwtSecret := []byte(secret)
 	config := echojwt.Config{
 		NewClaimsFunc: func(c echo.Context) jwt.Claims {
-			return new(controllers.MyCustomClaims)
+			return new(models.MyCustomClaims)
 		},
 		SigningKey: jwtSecret,
 	}

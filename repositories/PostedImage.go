@@ -15,12 +15,6 @@ import (
 )
 
 
-type Image struct{
-    ID       uint
-    URL      string
-}
-
-
 
 // UploadImageToGCS は画像を Google Cloud Storage にアップロードし、その URL を返します。
 func (repo *Repository) UploadImageToGCS(ctx context.Context, file io.Reader, filename string) (string,string, error) {
@@ -175,7 +169,7 @@ func (repo *Repository) DeletePostedImage(ctx context.Context, imageID uint) err
 
 
 // 与えられたハッシュタグの部分一致の画像のスライスを返す
-func (repo *Repository) SearchImage(Qhashtag string) ([]Image, error) {
+func (repo *Repository) SearchImage(Qhashtag string) ([]models.Image, error) {
     var images []models.PostedImage
     query := repo.db.
         Preload("PostUser").
@@ -197,9 +191,9 @@ func (repo *Repository) SearchImage(Qhashtag string) ([]Image, error) {
         return nil, err
     }
 
-    var image []Image
+    var image []models.Image
     for _, img := range images {
-        image = append(image, Image{
+        image = append(image, models.Image{
             ID:  img.ID,
             URL: img.URL,
         })
@@ -220,3 +214,61 @@ func (repo *Repository) ImageInfo(id uint) (*models.PostedImage, error) {
     }
     return &image, nil
 }
+
+
+
+
+// GetRecentImages retrieves the most recently posted images.
+func (repo *Repository) GetRecentImages() ([]models.Image, error) {
+    var postedImages []models.PostedImage
+    err := repo.db.
+        Preload("PostUser").
+        Preload("Likes").
+        Preload("Comments").
+        Preload("Hashtags").
+        Order("posted_images.created_at DESC"). // 作成日時の降順で並び替え
+        Find(&postedImages).Error
+
+    if err != nil {
+        return nil, err
+    }
+
+    var images []models.Image
+    for _, img := range postedImages {
+        images = append(images, models.Image{
+            ID:  img.ID,
+            URL: img.URL,
+        })
+    }
+
+    return images, nil
+}
+
+// GetPopularImages retrieves images ordered by the number of likes in descending order.
+func (repo *Repository) GetLikeImages() ([]models.Image, error) {
+    var postedImages []models.PostedImage
+    err := repo.db.
+        Preload("PostUser").
+        Preload("Likes").
+        Preload("Comments").
+        Preload("Hashtags").
+        Select("posted_images.*, COUNT(posted_image_likes.user_id) as likes_count").
+        Joins("LEFT JOIN posted_image_likes ON posted_image_likes.posted_image_id = posted_images.id").
+        Group("posted_images.id").
+        Order("likes_count DESC"). // いいね数の降順で並び替え
+        Find(&postedImages).Error
+
+    if err != nil {
+        return nil, err
+    }
+
+    var images []models.Image
+    for _, img := range postedImages {
+        images = append(images, models.Image{
+            ID:  img.ID,
+            URL: img.URL,
+        })
+    }
+    return images, nil
+}
+
