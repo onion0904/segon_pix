@@ -34,7 +34,7 @@ curl -X GET -H "Authorization: Bearer <JWTトークン>" \
 ```
 
 
-- /get/list/image
+- /get/list/search
     - 入力できる値(queryでの受け取り)
     - 指定されたハッシュタグの部分一致を返す。
     - URLとimageIDのlistを返す。
@@ -46,10 +46,28 @@ curl -X GET -H "Authorization: Bearer <JWTトークン>" \
     - 使用例
 
     ```
-    curl -X GET "http://localhost:8080/segon_pix/get/list/image?Hashtag=旅行"
+    curl -X GET "http://localhost:8080/segon_pix/get/list/search?Hashtag=旅行"
     ```
 
-- /get/image
+- /get/list/like
+    - いいね数が多い順にURLとimageIDのlistを返す。
+
+    - 使用例
+
+    ```
+    curl -X GET "http://localhost:8080/segon_pix/get/list/like"
+    ```
+
+- /get/list/recent
+    - 新しい順にURLとimageIDのlistを返す。
+
+    - 使用例
+
+    ```
+    curl -X GET "http://localhost:8080/segon_pix/get/list/recent"
+    ```    
+
+- /get/image_detail
     - 入力できる値(queryでの受け取り)
     - 指定されたimageIDの画像の情報を返す。
     - PostedImageの全部を返す。
@@ -61,4 +79,4 @@ curl -X GET -H "Authorization: Bearer <JWTトークン>" \
     - 使用例
 
     ```
-    curl -X GET "http://localhost:8080/segon_pix/get/image?imageID=1234"
+    curl -X GET "http://localhost:8080/segon_pix/get/image_detail?imageID=1234"

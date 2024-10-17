@@ -2,6 +2,7 @@ package controllers
 
 import(
 	"PixApp/repositories"
+    "PixApp/models"
 	"crypto/rand"
     "encoding/base64"
     "fmt"
@@ -11,11 +12,6 @@ import(
 	"github.com/labstack/echo/v4"
 	"os"
 )
-
-type MyCustomClaims struct {
-	Email string `json:"email"`
-	jwt.RegisteredClaims
-}
 
 
 func (con *Controller) Signup(c echo.Context) error {
@@ -92,7 +88,7 @@ func (con *Controller) Verify(c echo.Context) error {
     con.auth.CodeMutex.Unlock()
 
 
-	claims := &MyCustomClaims{
+	claims := &models.MyCustomClaims{
 		Email: email,
 		RegisteredClaims: jwt.RegisteredClaims{
 			Subject:   email,  // メールアドレスやIDを設定
@@ -133,7 +129,7 @@ func (con *Controller) Login(c echo.Context) error {
         return c.JSON(http.StatusConflict, map[string]string{"message": "ユーザーが登録されていません"})
     }
 
-	claims := &MyCustomClaims{
+	claims := &models.MyCustomClaims{
 		Email: email,
 		RegisteredClaims: jwt.RegisteredClaims{
 			Subject:   email,  // メールアドレスやIDを設定
@@ -155,7 +151,7 @@ func (con *Controller) Login(c echo.Context) error {
 
 func (con *Controller) Restricted(c echo.Context) error {
     user := c.Get("user").(*jwt.Token)
-	claims := user.Claims.(*MyCustomClaims)
+	claims := user.Claims.(*models.MyCustomClaims)
 	email := claims.Email
 	return c.String(http.StatusOK, "Welcome "+email+"!")
 }

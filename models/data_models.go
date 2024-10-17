@@ -2,6 +2,7 @@ package models
 
 import (
     "gorm.io/gorm"
+    "github.com/golang-jwt/jwt/v5"
 )
 
 type User struct {
@@ -44,4 +45,20 @@ type Hashtag struct {
     gorm.Model
     Name         string        `gorm:"unique;not null"` // ハッシュタグ名
     PostedImages []PostedImage `gorm:"many2many:posted_image_hashtags;"` // 同じハッシュタグを持つ画像
+}
+
+
+
+
+
+
+type MyCustomClaims struct {
+	Email string `json:"email"`
+	jwt.RegisteredClaims
+}
+
+//repositoriesのPostedImageの中で画像を返す時に使用
+type Image struct{
+    ID       uint
+    URL      string
 }

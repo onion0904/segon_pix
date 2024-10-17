@@ -152,3 +152,28 @@ func (con *Controller) ImageInfo(c echo.Context) error {
 	}
 	return c.JSON(http.StatusOK, PostedImage)
 }
+
+
+func (con *Controller) GetRecentImages(c echo.Context) error {
+	repo ,err := repositories.NewRepository(con.db)
+	if err != nil {
+        return c.NoContent(http.StatusServiceUnavailable) // 503エラー
+    }
+	PostedImage, err := repo.GetRecentImages()
+	if err != nil {
+		return c.NoContent(http.StatusServiceUnavailable) // 503エラー
+	}
+	return c.JSON(http.StatusOK, PostedImage)
+}
+
+func (con *Controller) GetLikeImages(c echo.Context) error {
+	repo ,err := repositories.NewRepository(con.db)
+	if err != nil {
+        return c.NoContent(http.StatusServiceUnavailable) // 503エラー
+    }
+	PostedImage, err := repo.GetLikeImages()
+	if err != nil {
+		return c.NoContent(http.StatusServiceUnavailable) // 503エラー
+	}
+	return c.JSON(http.StatusOK, PostedImage)
+}
