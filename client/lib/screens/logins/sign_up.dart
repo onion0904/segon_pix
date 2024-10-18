@@ -25,7 +25,6 @@ class SignUp extends HookWidget {
           validators: validators,
           labels: labels),
       SegonButton(
-        isFixed: true,
           handler: () async {
               UserManager.email = controllers.value[0].text;
               UserManager.password = controllers.value[1].text;

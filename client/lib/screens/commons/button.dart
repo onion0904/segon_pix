@@ -3,41 +3,41 @@ import 'package:flutter/material.dart';
 const double elevation = 4;
 const double padding = 8;
 const double width = 1;
+const double height = 46;
 
 class SegonButton extends StatelessWidget {
-  SegonButton({
+  const SegonButton({
     super.key,
     required this.handler,
     required this.label,
-    isFixed,
+    this.minSize = 200,
+    this.maxSize,
   });
 
   final void Function()? handler;
   final String label;
-  bool isFixed = false;
+  final double minSize;
+  final double? maxSize;
 
   @override
   Widget build(context) {
-    final double a = 200; //MediaQuery.sizeOf(context).width;
     return Container(
-        width: a,
+        width: maxSize,
         padding: EdgeInsets.all(padding),
         child: ElevatedButton(
             style: ElevatedButton.styleFrom(
-                minimumSize: isFixed ? Size(a * 0.1, 10) : null,
-                elevation: elevation,
-                backgroundColor: Colors.orange,
-                shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(4)),
+              minimumSize: Size(minSize, height),
+              maximumSize:
+                  (maxSize != null) ? Size(maxSize as double, height) : null,
+              elevation: elevation,
+              backgroundColor: Colors.orange,
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(4)),
             ),
             onPressed: handler,
-            child: Text(
-              label,
-              style: TextStyle(
-                fontWeight: FontWeight.bold,
-                color: Colors.black
-              )
-            )));
+            child: Text(label,
+                style: TextStyle(
+                    fontWeight: FontWeight.bold, color: Colors.black))));
   }
 }
 
