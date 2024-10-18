@@ -1,144 +1,85 @@
-class User {
-  final int id;
-  String name;
-  String icon;
-  String description;
-  String headerImage;
-  String email;
-  String password;// 多分これはいらない
-  int birthday;
-  List<PostedImage> postedImages;
-  List<PostedImage> likedImages;
-  // List<User>? follows;
-  // List<User>? followers;
+import 'package:flutter/material.dart';
+import 'package:flutter_hooks/flutter_hooks.dart';
+import 'dart:convert';
+import 'package:http/http.dart' as http;
 
-  User({
-    required this.id,
-    required this.name,
-    required this.icon,
-    required this.description,
-    required this.headerImage,
-    required this.email,
-    this.password = "nothing",
-    required this.birthday,
-    this.postedImages = const [],
-    this.likedImages = const [],
-    // this.follows = const [],
-    // this.followers = const [],
+class SimpleImage {
+  final int imageID;
+  final String imageURL;
+
+  SimpleImage({
+    required this.imageID,
+    required this.imageURL,
   });
 
-  Map<String, dynamic> toJson() {
-    return {
-      "name": name,
-      "description": description,
-      "email": email,
-      "birthday": birthday
-    };
-  }
-
-  factory User.fromJson(Map<String, dynamic> json) {
-    return User(
-        id: json["ID"] as int,
-        name: json["Name"],
-        icon: json["Icon"],
-        description: json["Description"],
-        headerImage: json["HeaderImage"],
-        email: json["Email"],
-        birthday: json["Birthday"],
-postedImages: (json["PostedImages"] as List<dynamic>)
-    .map((item) => PostedImage.fromJson(item))
-    .toList(),
-likedImages: (json["LikedImages"] as List<dynamic>)
-    .map((item) => PostedImage.fromJson(item))
-    .toList(),
-
-      // followers: json['Followers'] != null
-      //     ? (json['Followers'] as List).map((e) => User.fromJson(e)).toList()
-      //     : null,
-      // follows: json['Follows'] != null
-      //     ? (json['Follows'] as List).map((e) => User.fromJson(e)).toList()
-      //     : null,
-        );
-  }
-}
-
-class PostedImage {
-  final int id;
-  final int userID;
-  final String url;
-  final User user;
-  final List<User> likes;
-  final List<Comment> comments;
-  final String hashTag;
-
-  PostedImage({
-    required this.id,
-    required this.userID,
-    required this.url,
-    required this.user,
-    required this.likes,
-    required this.comments,
-    required this.hashTag,
-  });
-
-  Map<String, dynamic> toJson() {
-    return {
-      "ID": id,
-      "UserID": userID,
-      "URL": url,
-      "PostUser": user,
-      "Likes": likes,
-      "Comments": comments,
-      "Hashtags": hashTag,
-    };
-  }
-
-  factory PostedImage.fromJson(Map<String, dynamic> json) {
-    return PostedImage(
-        id: json["ID"],
-        userID: json["UserID"],
-        url: json["URL"],
-        user: json["PostUser"],
-        likes: json["Likes"],
-        comments: json["Comments"],
-        hashTag: json["Hashtags"],
+  factory SimpleImage.fromJson(Map<String, dynamic> json) {
+    return SimpleImage(
+      imageID: json["ID"],
+      imageURL: json["URL"],
     );
   }
 }
 
-class Comment {
-  final int id;
-  final int userID;
-  String message;
+Future<List<SimpleImage>> getRecentImages() async {
+  final url = Uri.http("localhost:8080", "/get/list/recent");
+  final response = await http.get(url, headers: {"Content-Type": "application/json"});
 
-  Comment({
-    required this.id,
-    required this.userID,
-    required this.message,
-  });
+  if (response.statusCode == 200) {
+    final List<dynamic> jsonList = jsonDecode(response.body) as List<dynamic>;
+    final images = jsonList.map((item) => SimpleImage.fromJson(item)).toList();
+    return images;
+  } else {
+    throw Exception('Failed to load images');
+  }
 }
 
-class HashTag {
-  final int id;
-  final String tag;
-  final List<PostedImage> postedImages;
+class HubUI extends HookWidget {
+  const HubUI({super.key});
 
-  HashTag({required this.id, required this.tag, required this.postedImages});
-}
+  @override
+  Widget build(BuildContext context) {
+    final images = useState<List<SimpleImage>>([]);
+    final isLoading = useState(true);
 
-class SimpleImages {
-  final List<int> imageIDs;
-  final List<String> imageURLs;
+    useEffect(() {
+      getRecentImages().then((fetchedImages) {
+        images.value = fetchedImages;
+        isLoading.value = false;
+      }).catchError((error) {
+        print("Error loading images: $error");
+      });
 
-  SimpleImages({
-    required this.imageIDs,
-    required this.imageURLs,
-  });
+      return null;
+    }, []);
 
-  factory SimpleImages.fromJson(Map<String, dynamic> json) {
-    return SimpleImages(
-      imageIDs: json["ID"],
-      imageURLs: json["URL"],
+    return Column(
+      children: [
+        const Padding(
+          padding: EdgeInsets.all(8),
+          child: Row(children: [
+            SizedBox(width: 16),
+            Icon(Icons.favorite, size: 32),
+            SizedBox(width: 8),
+            Text("Recent Image", style: TextStyle(fontSize: 20))
+          ]),
+        ),
+        Expanded(
+          child: isLoading.value
+              ? const Center(child: CircularProgressIndicator())
+              : GridView.count(
+                  crossAxisCount: 2,
+                  children: images.value.map((image) {
+                    return Container(
+                      padding: const EdgeInsets.all(2),
+                      child: Image.network(
+                        image.imageURL,
+                        fit: BoxFit.cover,
+                      ),
+                    );
+                  }).toList(),
+                ),
+        ),
+      ],
     );
   }
 }

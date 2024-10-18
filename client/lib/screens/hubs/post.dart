@@ -35,7 +35,6 @@ class Post extends HookWidget {
           maxSize: maxSize),
       SegonButton(
           handler: () async {
-            //POST TODO
             if(image.value != null){
             await postImage(
               hashTags: controllers[0].text,

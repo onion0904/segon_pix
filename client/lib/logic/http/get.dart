@@ -2,9 +2,7 @@ import 'package:http/http.dart' as http;
 import "../../model/user.dart";
 import 'dart:convert';
 
-Future<User> getUser({
-  required final String userID
-}) async {
+Future<User> getUser({required final String userID}) async {
   final response = await http
       .get(Uri.parse("http://localhost:8080/segon_pix/get/user?ID=$userID"));
 
@@ -15,21 +13,33 @@ Future<User> getUser({
   }
 }
 
+Future<List<SimpleImage>> getRecentImages() async {
+  final url = Uri.http(
+    "localhost:8080",
+    "/get/list/recent"
+  );
+  final response = await http.get(url, headers: {"Content-Type": "application/json"});
+
+  if (response.statusCode == 200) {
+    final List<dynamic> jsonList = jsonDecode(response.body) as List<dynamic>;
+    final images = jsonList.map((item) => SimpleImage.fromJson(item)).toList();
+    return images;
+  } else {
+    throw Exception('Failed to load images lib/logic/http/get.dart');
+  }
+}
+
 Future<User> getUserWithAuth({
   required final String token,
   required final String email,
   required final String password,
 }) async {
-  final url = Uri.http(
-    "localhost:8080",
-    "/segon_pix_auth/get/user",
+  final url = Uri.http("localhost:8080", "/segon_pix_auth/get/user",
       {"email": email, "password": password});
-  final response = await http.get(
-    url,
-    headers:{    "Authorization": "Bearer $token", // Bearerトークンをヘッダーに追加
+  final response = await http.get(url, headers: {
+    "Authorization": "Bearer $token", // Bearerトークンをヘッダーに追加
     "Content-Type": "application/json", // 必要に応じて他のヘッダーも追加
-    }
-  );
+  });
   if (response.statusCode == 200) {
     print(jsonDecode(response.body));
     return User.fromJson(jsonDecode(response.body));
