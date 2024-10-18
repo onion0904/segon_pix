@@ -2,7 +2,9 @@ import 'package:http/http.dart' as http;
 import "../../model/user.dart";
 import 'dart:convert';
 
-Future<User> getUser({required final String userID}) async {
+Future<User> getUser({
+  required final String userID
+}) async {
   final response = await http
       .get(Uri.parse("http://localhost:8080/segon_pix/get/user?ID=$userID"));
 
@@ -18,9 +20,16 @@ Future<User> getUserWithAuth({
   required final String email,
   required final String password,
 }) async {
-  final url = Uri.http("localhost:8080", "/segon_pix_auth/get/user",
-      {"token": token, "email": email, "password": password});
-  final response = await http.get(url);
+  final url = Uri.http(
+    "localhost:8080",
+    "/segon_pix_auth/get/user",
+      {"email": email, "password": password});
+  final response = await http.get(
+    url,
+    headers:{    "Authorization": "Bearer $token", // Bearerトークンをヘッダーに追加
+    "Content-Type": "application/json", // 必要に応じて他のヘッダーも追加
+    }
+  );
   if (response.statusCode == 200) {
     return User.fromJson(jsonDecode(response.body));
   } else {
