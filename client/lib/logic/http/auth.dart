@@ -11,7 +11,7 @@ Future<http.Response> signUp({required String email}) async {
   );
 }
 
-Future<http.StreamedResponse> verify({
+Future<http.Response> verify({
   required String email,
   required String password,
   required String code, // 認証コード 数値
@@ -23,7 +23,9 @@ Future<http.StreamedResponse> verify({
     ..fields["email"] = email
     ..fields["password"] = password;
 
-  final response = await request.send();
+  final streamedResponse = await request.send();
+  final response = await http.Response.fromStream(streamedResponse);
+
 
   if (response.statusCode == 200) {
     return response;
