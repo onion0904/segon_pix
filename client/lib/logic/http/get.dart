@@ -31,6 +31,7 @@ Future<User> getUserWithAuth({
     }
   );
   if (response.statusCode == 200) {
+    print(jsonDecode(response.body));
     return User.fromJson(jsonDecode(response.body));
   } else {
     throw Exception("Failed getUserWithAuth method");

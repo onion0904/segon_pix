@@ -66,8 +66,7 @@ func main() {
 		method.GET("/get/image_detail", con.ImageInfo)
 	}
 
-    // 認証が必要なルートグループを作成
-    r := e.Group("/segon_pix_auth")
+
 	secret := os.Getenv("JWT_SECRET_KEY")
 	jwtSecret := []byte(secret)
 	config := echojwt.Config{
@@ -76,6 +75,9 @@ func main() {
 		},
 		SigningKey: jwtSecret,
 	}
+
+	// 認証が必要なルートグループを作成
+	r := e.Group("/segon_pix_auth")
 	r.Use(echojwt.WithConfig(config))
 
 	// 認証が必要なルート

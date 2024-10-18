@@ -18,6 +18,12 @@ func (con *Controller) AddUser(c echo.Context) error {
     if err := c.Bind(&user); err != nil {
         return c.JSON(http.StatusBadRequest, "Invalid request data")
     }
+    if user.Followers == nil {
+        user.Followers = make([]models.User, 0)
+    }
+    if user.Follows == nil {
+        user.Follows = make([]models.User, 0)
+    }
 
     // リポジトリの作成
     repo, err := repositories.NewRepository(con.db)
