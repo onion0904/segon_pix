@@ -36,12 +36,12 @@ class CheckCode extends HookConsumerWidget {
                 controllers: controllers.value,
                 labels: labels),
             SegonButton(
-                handler:
-                  handler(
-                      code: controllers.value[0].text,
-                      context: context,
-                      changeIndex: changeIndex),
-
+                handler: ()async{
+                handler(
+                    code: controllers.value[0].text,
+                    context: context,
+                    changeIndex: changeIndex);
+                },
                 label: "Enter")
           ]))
     ]);
@@ -50,15 +50,14 @@ class CheckCode extends HookConsumerWidget {
 
 /////////////////////////////////////////////////////////////////////////
 
-void Function() handler({
+Future<void> handler({
   required final String code,
   required final BuildContext context,
   required final void Function(int) changeIndex,
-}) {
+})async{
   //userがいたら、ホームに飛ばす
-  return () async {
     try {
-
+      print("codeeeeee $code");
       final response = await verify(
         email: UserManager.email,
         password: UserManager.password,
@@ -90,7 +89,7 @@ void Function() handler({
 
     //まだuser登録していない場合
     changeIndex(3);
-  };
+    return;
 }
 
 const validators = [codeValidator];

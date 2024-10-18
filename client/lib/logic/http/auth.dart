@@ -2,7 +2,8 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 
 Future<http.Response> signUp({required String email}) async {
-  final url = Uri.http("localhost:8080", "/signup", {"email": email});
+  final url = Uri.http(
+    "localhost:8080", "/signup", {"email": email});
   return http.post(
     url,
     headers: <String, String>{
