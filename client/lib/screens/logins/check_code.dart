@@ -57,6 +57,7 @@ void Function() handler({
   //userがいたら、ホームに飛ばす
   return () async {
     try {
+
       final response = await verify(
         email: UserManager.email,
         password: UserManager.password,
