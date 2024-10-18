@@ -57,7 +57,7 @@ class CreateUser extends HookConsumerWidget {
                     handler: () async {
                       if (formKey.currentState!.validate()) {
                         try {
-                          await createUser(
+                          await createUser(//addUser
                             name: controllers.value[0].text,
                             description: controllers.value[1].text,
                             email: UserManager.email,
@@ -68,7 +68,8 @@ class CreateUser extends HookConsumerWidget {
                           UserManager.user = await getUserWithAuth(
                               token: UserManager.token,
                               email: UserManager.email,
-                              password: UserManager.password);
+                              password: UserManager.password
+                          );
 
                           //db(偽)に保存
 
@@ -77,7 +78,7 @@ class CreateUser extends HookConsumerWidget {
                             context.go("/hub");
                           }
                         } catch (e) {
-                          print("error");
+                          print(e);
                         }
                       }
                     },
