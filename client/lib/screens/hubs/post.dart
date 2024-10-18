@@ -3,8 +3,11 @@ import '../commons/input_form.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:image_picker/image_picker.dart';
 import 'dart:io';
+import '../commons/button.dart';
 // import '../../logic/http/post.dart';
 // import '../../model/user.dart' as user;
+
+const double maxSize = 500;
 
 class Post extends HookWidget {
   const Post({super.key});
@@ -23,15 +26,21 @@ class Post extends HookWidget {
             child: Image.file(File(image.value!.path))),
       InputForm(
           controllers: controllers, validators: validators, labels: labels),
-      OutlinedButton(
-          child: const Text("image"),
-          onPressed: () async {
+      SegonButton(
+          handler: () async {
             final ImagePicker picker = ImagePicker();
             image.value = await picker.pickImage(source: ImageSource.gallery);
-          }),
-      OutlinedButton(onPressed: () async {
-        //TODO post
-      }, child: const Text("Post"))
+          },
+          label: "Image",
+          maxSize: maxSize
+      ),
+      SegonButton(
+          handler: () async {
+            //POST TODO
+          },
+          label: "Post",
+          maxSize: maxSize
+      ),
     ]));
   }
 }
