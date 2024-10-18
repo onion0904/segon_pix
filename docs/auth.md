@@ -12,7 +12,7 @@
     - 使用例
 
     ```
-    curl -X POST -F "email=user@example.com" http://localhost:8080/signup
+    curl -X POST http://localhost:8080/signup?email=user@example.com
     ```
 
 - /verify
@@ -29,7 +29,7 @@
     - 使用例
 
     ```
-    curl -X POST -F "email=user@example.com" -F "password=password123" -F "code=ABCDEF" http://localhost:8080/verify
+    curl -X POST http://localhost:8080/verify?email=user@example&password=pas&code=ABCDEF
     ```
 
 - /login
@@ -45,7 +45,7 @@
     - 使用例
 
     ```
-    curl -X POST -F "email=user@example.com" -F "password=password123" http://localhost:8080/login
+    curl -X POST http://localhost:8080/login?email=user@example&password=pas
     ```
 
 - /restricted(token必要)
