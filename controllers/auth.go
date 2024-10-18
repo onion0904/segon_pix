@@ -15,7 +15,7 @@ import(
 
 
 func (con *Controller) Signup(c echo.Context) error {
-    email := c.FormValue("email")
+    email := c.QueryParam("email")
 
     // ランダムな認証コードを生成
     code, err := generateVerificationCode()
@@ -54,9 +54,9 @@ func (con *Controller) Verify(c echo.Context) error {
 	jwtSecret := []byte(secret)
 
 
-    email := c.FormValue("email")
-    password := c.FormValue("password")
-    code := c.FormValue("code")
+    email := c.QueryParam("email")
+    password := c.QueryParam("password")
+    code := c.QueryParam("code")
 
     repo, err := repositories.NewRepository(con.db)
     if err != nil {
@@ -113,8 +113,8 @@ func (con *Controller) Login(c echo.Context) error {
     secret := os.Getenv("JWT_SECRET_KEY")
 	jwtSecret := []byte(secret)
 
-    email := c.FormValue("email")
-    password := c.FormValue("password")
+    email := c.QueryParam("email")
+    password := c.QueryParam("password")
 	// リポジトリを初期化
     repo, err := repositories.NewRepository(con.db)
     if err != nil {
