@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 
-const double elevation = 10;
+const double elevation = 4;
+const double padding = 8;
+const double width = 1;
 
 class SegonButton extends StatelessWidget {
   SegonButton({
@@ -17,18 +19,25 @@ class SegonButton extends StatelessWidget {
   @override
   Widget build(context) {
     final double a = 200; //MediaQuery.sizeOf(context).width;
-    return SizedBox(
+    return Container(
         width: a,
-
-        child: OutlinedButton(
-            style: OutlinedButton.styleFrom(
+        padding: EdgeInsets.all(padding),
+        child: ElevatedButton(
+            style: ElevatedButton.styleFrom(
                 minimumSize: isFixed ? Size(a * 0.1, 10) : null,
-                backgroundColor: Colors.grey[100],
                 elevation: elevation,
+                backgroundColor: Colors.orange,
                 shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10))),
+                    borderRadius: BorderRadius.circular(4)),
+            ),
             onPressed: handler,
-            child: Text(label)));
+            child: Text(
+              label,
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+                color: Colors.black
+              )
+            )));
   }
 }
 
