@@ -5,7 +5,7 @@ import 'package:image_picker/image_picker.dart';
 import 'dart:io';
 import '../commons/button.dart';
 import '../../logic/http/post.dart';
-// import '../../model/user.dart' as user;
+import '../../logic/db/user_manager.dart' ;
 
 const double maxSize = 500;
 
@@ -36,7 +36,14 @@ class Post extends HookWidget {
       SegonButton(
           handler: () async {
             //POST TODO
-            await postImage();
+            if(image.value != null){
+            await postImage(
+              hashTags: controllers[0].text,
+              userId: UserManager.userID!,
+              imageFile: image.value!,
+              token: UserManager.token
+            );
+            }
           },
           label: "Post",
           maxSize: maxSize),
