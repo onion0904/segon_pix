@@ -2,23 +2,30 @@ import 'package:flutter/material.dart';
 import '../commons/input_form.dart';
 import '../commons/button.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../logic/http/auth.dart' as auth;
+import '../../logic/db/user_manager.dart';
 
 class SignUp extends ConsumerWidget {
   const SignUp({super.key, required this.changeIndex});
   final void Function(int) changeIndex;
 
-
   @override
   Widget build(context, ref) {
-    return Column(
-      children: [
-        InputForm( controllers: controllers, validators: validators, labels: labels),
-        SegonButton(
-          handler: ()async{changeIndex(1);},
-          label: "Go to Sign in"
-        )
-      ]
-    );
+    return Column(children: [
+      InputForm(
+          controllers: controllers, validators: validators, labels: labels),
+      SegonButton(
+          handler: () async {
+            auth.signUp(email: UserManager.email);
+            changeIndex(3);
+          },
+          label: "create"),
+      SegonButton(
+          handler: () async {
+            changeIndex(1);
+          },
+          label: "Go to Sign in")
+    ]);
   }
 }
 

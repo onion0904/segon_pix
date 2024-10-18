@@ -4,6 +4,7 @@ import '../../logic/db/user_manager.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import '../../logic/http/get.dart';
+import '../../model/provider.dart';
 
 class Splash extends HookConsumerWidget {
   const Splash({super.key, required this.changeIndex});
@@ -33,7 +34,7 @@ class Splash extends HookConsumerWidget {
 
       WidgetsBinding.instance.addPostFrameCallback((_) async {
         ref.read(userProvider.notifier).state =
-            await getUserWithAuth(await UserIdManager.getUserId() as int);
+            await getUserWithAuth(token: UserManager.token, email: UserManager.email, password: UserManager.password);
         if (context.mounted) {
           context.go("/hub");
         }

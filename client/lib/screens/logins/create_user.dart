@@ -1,16 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
-import "../../logic/http/post.dart";
-import 'package:go_router/go_router.dart';
+import '../commons/button.dart';
 import '../commons/input_form.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import '../../model/user.dart';
-import 'dart:convert';
-import '../commons/button.dart';
+import "../../logic/http/post.dart";
+import 'package:go_router/go_router.dart';
+import '../../logic/db/user_manager.dart';
+import '../../logic/http/get.dart';
 
 const double p = 2;
 
 class CreateUser extends HookConsumerWidget {
+  //TODO addUserでUserを作成する
+
   const CreateUser({super.key});
 
   @override
@@ -36,44 +38,50 @@ class CreateUser extends HookConsumerWidget {
             Padding(
                 padding: const EdgeInsets.all(p),
                 child: SegonButton(
-                handler: () async {
-                  final date = await showDatePicker(
-                      context: context,
-                      initialDate: initialDate.value,
-                      lastDate: DateTime.now(),
-                      firstDate: DateTime(1900, 1, 1));
-                  if (date != null) {
-                    initialDate.value = date;
-                    birthday.value =
-                        date.year * 10000 + date.month * 100 + date.day;
-                  }
-                },
-                label: "Select birthday"
-                )),
+                    handler: () async {
+                      final date = await showDatePicker(
+                          context: context,
+                          initialDate: initialDate.value,
+                          lastDate: DateTime.now(),
+                          firstDate: DateTime(1900, 1, 1));
+                      if (date != null) {
+                        initialDate.value = date;
+                        birthday.value =
+                            date.year * 10000 + date.month * 100 + date.day;
+                      }
+                    },
+                    label: "Select birthday")),
             Padding(
                 padding: const EdgeInsets.all(p),
                 child: SegonButton(
-                  handler: () async {
-                    if (formKey.currentState!.validate()) {
-                      final response = await createUser(
-                          name: controllers.value[0].value.text,
-                          description: controllers.value[1].value.text,
-                          email: "tmpEmail",
-                          password: "tmpassword",
-                          birthday: birthday.value,
-                          token: "tmpToken"
-                      );
+                    handler: () async {
+                      if (formKey.currentState!.validate()) {
+                        try {
+                          await createUser(
+                            name: controllers.value[0].text,
+                            description: controllers.value[1].text,
+                            email: UserManager.email,
+                            password: UserManager.password,
+                            birthday: birthday.value,
+                            token: UserManager.token,
+                          );
+                          UserManager.user = await getUserWithAuth(
+                              token: UserManager.token,
+                              email: UserManager.email,
+                              password: UserManager.password);
 
-                      if (response.statusCode == 200 && context.mounted) {
-                        //ここのjsonがどんなかんじになっているか確認
-                        ref.read(userProvider.notifier).state = User.fromJson(jsonDecode(response.body));
-                        context.go("/hub");
+                          //db(偽)に保存
+
+                          await UserManager.setMainInstance();
+                          if (context.mounted) {
+                            context.go("/hub");
+                          }
+                        } catch (e) {
+                          print("error");
+                        }
                       }
-                    }
-                  },
-                  label: "create"
-                )
-            ),
+                    },
+                    label: "create")),
           ]))
     ]);
   }
