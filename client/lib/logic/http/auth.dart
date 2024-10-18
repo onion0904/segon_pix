@@ -2,8 +2,7 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 
 Future<http.Response> signUp({required String email}) async {
-  final url = Uri.http(
-    "localhost:8080", "/signup", {"email": email});
+  final url = Uri.http("localhost:8080", "/signup", {"email": email});
   return http.post(
     url,
     headers: <String, String>{
@@ -12,17 +11,25 @@ Future<http.Response> signUp({required String email}) async {
   );
 }
 
-Future<http.Response> verify({
+Future<http.StreamedResponse> verify({
   required String email,
   required String password,
   required String code, // 認証コード 数値
-}) {
-  final url = Uri.http("localhost:8080", "/verify",
-      {"email": email, "password": password, "code": code});
+}) async {
+  final url = Uri.http("localhost:8080", "/verify");
 
-  return http.post(url, headers: <String, String>{
-    "Content-Type": "application/json; charset=UTF-8"
-  });
+  final request = http.MultipartRequest("POST", url)
+    ..fields["code"] = code
+    ..fields["email"] = email
+    ..fields["password"] = password;
+
+  final response = await request.send();
+
+  if (response.statusCode == 200) {
+    return response;
+  } else {
+    throw Exception("Failed verify lib/logic/http/auth.dart");
+  }
 }
 
 Future<http.Response> getJWT({
@@ -31,13 +38,11 @@ Future<http.Response> getJWT({
   required String password,
 }) {
   final url = Uri.http(
-    "localhost:8080",
-    "/login",
-    {"email": email, "password": password}
-  );
+      "localhost:8080", "/login", {"email": email, "password": password});
   return http.post(
-      url,
-      headers: <String, String>{
-        "Content-Type": "application/json; charset=UTF-8"
-      },);
+    url,
+    headers: <String, String>{
+      "Content-Type": "application/json; charset=UTF-8"
+    },
+  );
 }

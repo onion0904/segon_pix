@@ -4,7 +4,7 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:image_picker/image_picker.dart';
 import 'dart:io';
 import '../commons/button.dart';
-// import '../../logic/http/post.dart';
+import '../../logic/http/post.dart';
 // import '../../model/user.dart' as user;
 
 const double maxSize = 500;
@@ -32,15 +32,14 @@ class Post extends HookWidget {
             image.value = await picker.pickImage(source: ImageSource.gallery);
           },
           label: "Image",
-          maxSize: maxSize
-      ),
+          maxSize: maxSize),
       SegonButton(
           handler: () async {
             //POST TODO
+            await postImage();
           },
           label: "Post",
-          maxSize: maxSize
-      ),
+          maxSize: maxSize),
     ]));
   }
 }
