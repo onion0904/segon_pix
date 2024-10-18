@@ -1,14 +1,57 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
+import 'dart:convert';
+import 'package:http/http.dart' as http;
+
+class SimpleImage {
+  final int imageID;
+  final String imageURL;
+
+  SimpleImage({
+    required this.imageID,
+    required this.imageURL,
+  });
+
+  factory SimpleImage.fromJson(Map<String, dynamic> json) {
+    return SimpleImage(
+      imageID: json["ID"],
+      imageURL: json["URL"],
+    );
+  }
+}
+
+Future<List<SimpleImage>> getRecentImages() async {
+  final url = Uri.http("localhost:8080", "/get/list/recent");
+  final response = await http.get(url, headers: {"Content-Type": "application/json"});
+
+  if (response.statusCode == 200) {
+    final List<dynamic> jsonList = jsonDecode(response.body) as List<dynamic>;
+    final images = jsonList.map((item) => SimpleImage.fromJson(item)).toList();
+    return images;
+  } else {
+    throw Exception('Failed to load images');
+  }
+}
 
 class HubUI extends HookWidget {
   const HubUI({super.key});
 
   @override
   Widget build(BuildContext context) {
-    useEffect((){
-      final
-    });
+    final images = useState<List<SimpleImage>>([]);
+    final isLoading = useState(true);
+
+    useEffect(() {
+      getRecentImages().then((fetchedImages) {
+        images.value = fetchedImages;
+        isLoading.value = false;
+      }).catchError((error) {
+        print("Error loading images: $error");
+        isLoading.value = false;
+      });
+
+      return null;
+    }, []);
 
     return Column(
       children: [
@@ -22,18 +65,20 @@ class HubUI extends HookWidget {
           ]),
         ),
         Expanded(
-          child: GridView.count(
-            crossAxisCount: 2,
-            children: List.generate(64, (index) {
-              return Container(
-                padding: const EdgeInsets.all(2),
-                child: Image.network(
-                  "https://dthezntil550i.cloudfront.net/i9/latest/i92307171113441820023299212/1280_960/326b00ed-3038-459e-96aa-a1692a925864.png",
-                  fit: BoxFit.cover,
+          child: isLoading.value
+              ? const Center(child: CircularProgressIndicator())
+              : GridView.count(
+                  crossAxisCount: 2,
+                  children: images.value.map((image) {
+                    return Container(
+                      padding: const EdgeInsets.all(2),
+                      child: Image.network(
+                        image.imageURL,
+                        fit: BoxFit.cover,
+                      ),
+                    );
+                  }).toList(),
                 ),
-              );
-            }),
-          ),
         ),
       ],
     );
