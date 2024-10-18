@@ -1,6 +1,7 @@
 package controllers
 
 import(
+    "PixApp/mail"
 	"PixApp/repositories"
     "PixApp/models"
 	"crypto/rand"
@@ -30,6 +31,7 @@ func (con *Controller) Signup(c echo.Context) error {
 
     // 認証コードをメールで送信（デモではコンソールに出力）
     fmt.Printf("認証コードを %s に送信しました: %s\n", email, code)
+    mail.SendEmail(email, code);
     // 実際のアプリケーションでは、ここでメール送信処理を行います
 
     return c.JSON(http.StatusOK, map[string]string{"message": "認証コードをメールに送信しました"})
@@ -54,9 +56,9 @@ func (con *Controller) Verify(c echo.Context) error {
 	jwtSecret := []byte(secret)
 
 
-    email := c.QueryParam("email")
-    password := c.QueryParam("password")
-    code := c.QueryParam("code")
+    email := c.FormValue("email")
+    password := c.FormValue("password")
+    code := c.FormValue("code")
 
     repo, err := repositories.NewRepository(con.db)
     if err != nil {

@@ -72,7 +72,7 @@ class CreateUser extends HookConsumerWidget {
                           );
 
                           //db(偽)に保存
-
+                          UserManager.userID = UserManager.user!.id;
                           await UserManager.setMainInstance();
                           if (context.mounted) {
                             context.go("/hub");

@@ -6,11 +6,11 @@ class User {
   String headerImage;
   String email;
   String password;// 多分これはいらない
-  String birthday;
+  int birthday;
   List<PostedImage> postedImages;
   List<PostedImage> likedImages;
-  List<User> follows;
-  List<User> followers;
+  // List<User>? follows;
+  // List<User>? followers;
 
   User({
     required this.id,
@@ -23,8 +23,8 @@ class User {
     required this.birthday,
     this.postedImages = const [],
     this.likedImages = const [],
-    this.follows = const [],
-    this.followers = const [],
+    // this.follows = const [],
+    // this.followers = const [],
   });
 
   Map<String, dynamic> toJson() {
@@ -38,17 +38,27 @@ class User {
 
   factory User.fromJson(Map<String, dynamic> json) {
     return User(
-        id: json["id"],
-        name: json["name"],
-        icon: json["icon"],
-        description: json["description"],
-        headerImage: json["headerImage"],
-        email: json["email"],
-        birthday: json["birthday"],
-        postedImages: json["postedImages"],
-        likedImages: json["likedImages"],
-        follows: json["follows"],
-        followers: json["followers"]);
+        id: json["ID"] as int,
+        name: json["Name"],
+        icon: json["Icon"],
+        description: json["Description"],
+        headerImage: json["HeaderImage"],
+        email: json["Email"],
+        birthday: json["Birthday"],
+postedImages: (json["PostedImages"] as List<dynamic>)
+    .map((item) => PostedImage.fromJson(item))
+    .toList(),
+likedImages: (json["LikedImages"] as List<dynamic>)
+    .map((item) => PostedImage.fromJson(item))
+    .toList(),
+
+      // followers: json['Followers'] != null
+      //     ? (json['Followers'] as List).map((e) => User.fromJson(e)).toList()
+      //     : null,
+      // follows: json['Follows'] != null
+      //     ? (json['Follows'] as List).map((e) => User.fromJson(e)).toList()
+      //     : null,
+        );
   }
 }
 
