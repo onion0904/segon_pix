@@ -5,7 +5,7 @@ class User {
   String description;
   String headerImage;
   String email;
-  String password;
+  String password;// 多分これはいらない
   String birthday;
   List<PostedImage> postedImages;
   List<PostedImage> likedImages;

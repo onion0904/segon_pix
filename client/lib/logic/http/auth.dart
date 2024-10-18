@@ -1,7 +1,9 @@
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 
-Future<http.Response> singUp({required String email}) {
+Future<http.Response> signUp({
+  required String email
+})async{
   return http.post(
     Uri.parse("http://localhost:8080/signup"),
     headers: <String, String>{"Content-Type": "application/json; charset=UTF-8"},

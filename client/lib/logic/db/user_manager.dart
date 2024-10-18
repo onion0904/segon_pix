@@ -1,9 +1,12 @@
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../logic/http/auth.dart';
 import "dart:convert";
+import '../../model/user.dart';
 
 class UserManager {
-  static int userID = 0;
+  //保存すべきはemail password idの3つ
+  static User? user;
+  static int? userID;
   static String email = "";
   static String password = "";
   static String token = "";
@@ -32,22 +35,24 @@ class UserManager {
 
   static Future<void> resetUserManager() async {
     final p = await SharedPreferences.getInstance();
-    userID = 0;
+    userID = null;
     email = "";
     password = "";
     token = "";
+    user = null;
     p.remove("userID");
     p.remove("email");
     p.remove("password");
   }
 
-  static Future<void> saveEmailAndPassword(
-      {required int userID,
-      required String email,
-      required String password,
-      required String token}) async {
-    final p = await SharedPreferences.getInstance();
-    await p.setString("email", email);
-    await p.setString("password", password);
+  static Future<void> setMainInstance() async {
+    if (userID == null || email == "" || password == "") {
+      throw Exception("Failed setMainIncetance() lib/logic/db/user_manager.dart");
+    }else{
+      final p = await SharedPreferences.getInstance();
+      await p.setString("email", email);
+      await p.setString("password", password);
+      await p.setInt("userID", userID as int);
+    }
   }
 }

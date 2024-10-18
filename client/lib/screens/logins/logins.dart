@@ -3,22 +3,34 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'splash.dart';
 import 'sign_in.dart';
 import 'sign_up.dart';
+import 'check_code.dart';
 import 'create_user.dart';
 import 'package:go_router/go_router.dart';
 import '../commons/button.dart';
+
+const double p = 2;
 
 class Logins extends HookWidget {
   const Logins({super.key});
 
   @override
   Widget build(context) {
-    final index = useState(3);
+    final index = useState(0);
 
     final loginUIList = [
-      Splash(changeIndex: (int a) {index.value = a;}),
-      SignIn(changeIndex: (int a) {index.value = a;}),
-      SignUp(changeIndex: (int a) {index.value = a;}),
-      const CreateUser()
+      Splash(changeIndex: (int a) {
+        index.value = a;
+      }),
+      SignIn(changeIndex: (int a) {
+        index.value = a;
+      }),
+      SignUp(changeIndex: (int a) {
+        index.value = a;
+      }),
+      const CreateUser(),
+      CheckCode(changeIndex: (int a) {
+        index.value = a;
+      })
     ];
 
     return Scaffold(
@@ -35,10 +47,7 @@ class Logins extends HookWidget {
             Padding(
                 padding: const EdgeInsets.all(p),
                 child: SegonButton(
-                  handler: handler(context: context),
-                  label: "go"
-                )
-            )
+                    handler: handler(context: context), label: "go"))
           ],
         )));
   }
@@ -47,7 +56,7 @@ class Logins extends HookWidget {
 void Function()? handler({
   required BuildContext context,
 }) {
-  return ()async{
+  return () async {
     context.go("/hub");
   };
 }
