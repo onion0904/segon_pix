@@ -16,12 +16,16 @@ class SignUp extends HookWidget {
       TextEditingController(),
     ]);
 
-    return Column(children: [
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      mainAxisSize: MainAxisSize.max,
+      children: [
       InputForm(
           controllers: controllers.value,
           validators: validators,
           labels: labels),
       SegonButton(
+        isFixed: true,
           handler: () async {
               UserManager.email = controllers.value[0].text;
               UserManager.password = controllers.value[1].text;
