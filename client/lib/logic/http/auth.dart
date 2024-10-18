@@ -29,7 +29,7 @@ Future<http.Response> verify({
   );
 }
 
-Future<http.Response> getJWT({
+Future<http.Response> getJWT({//login
   required String email,
   required String password,
 }){

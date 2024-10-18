@@ -30,18 +30,17 @@ class CheckCode extends HookConsumerWidget {
       Form(
           key: formKey,
           child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
-            Text(UserManager.email),
             InputForm(
                 validators: validators,
                 controllers: controllers.value,
                 labels: labels),
             SegonButton(
-                handler: 
+                handler:
                   handler(
                       code: controllers.value[0].text,
                       context: context,
                       changeIndex: changeIndex),
-                
+
                 label: "Enter")
           ]))
     ]);

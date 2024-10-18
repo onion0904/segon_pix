@@ -11,24 +11,26 @@ class SignUp extends HookWidget {
 
   @override
   Widget build(context) {
-final controllers = useState([
-  TextEditingController(),
-  TextEditingController(),
-]);
+    final controllers = useState([
+      TextEditingController(),
+      TextEditingController(),
+    ]);
 
     return Column(children: [
       InputForm(
-          controllers: controllers.value, validators: validators, labels: labels),
+          controllers: controllers.value,
+          validators: validators,
+          labels: labels),
       SegonButton(
           handler: () async {
+              UserManager.email = controllers.value[0].text;
+              UserManager.password = controllers.value[1].text;
             auth.signUp(email: UserManager.email);
             changeIndex(4);
           },
           label: "create"),
       SegonButton(
           handler: () async {
-            UserManager.email = controllers.value[0].text;
-            UserManager.password = controllers.value[1].text;
             changeIndex(1);
           },
           label: "Go to Sign in")
