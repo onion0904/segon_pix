@@ -30,17 +30,18 @@ class CheckCode extends HookConsumerWidget {
       Form(
           key: formKey,
           child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
+            Text(UserManager.email),
             InputForm(
                 validators: validators,
                 controllers: controllers.value,
                 labels: labels),
             SegonButton(
-                handler: () async {
+                handler: 
                   handler(
                       code: controllers.value[0].text,
                       context: context,
-                      changeIndex: changeIndex);
-                },
+                      changeIndex: changeIndex),
+                
                 label: "Enter")
           ]))
     ]);
@@ -62,17 +63,22 @@ void Function() handler({
         password: UserManager.password,
         code: code,
       );
+      print("1");
 
       if (response.statusCode == 200) {
         final json = jsonDecode(response.body);
+        print("json $json");
         UserManager.token = json["token"];
       }
+
+      print("2");
 
       UserManager.user = await getUserWithAuth(
           token: UserManager.token,
           email: UserManager.email,
           password: UserManager.password);
 
+      print("4");
       if (context.mounted) {
         context.go("/hub");
       }

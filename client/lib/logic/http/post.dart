@@ -14,7 +14,7 @@ Future<http.Response> createUser({
   required String token,
 }) async {
   final response =
-      await http.post(Uri.parse("http://localhost:8080/segon_pix/add/user"),
+      await http.post(Uri.parse("http://localhost:8080/segon_pix_auth/add/user"),
           headers: {
             "Content-Type": "application/json; charset=UTF-8",
             "Authorization": "Bearer $token"
