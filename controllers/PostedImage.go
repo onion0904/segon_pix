@@ -42,17 +42,18 @@ func (con *Controller) AddPostedImage(c echo.Context) error {
         return c.JSON(http.StatusServiceUnavailable, map[string]string{"message": "サービスが利用できません"})
     }
 
-    // ユーザーIDを取得し、uintに変換
-    userID := c.QueryParam("ID")
+    userID := c.QueryParam("userID")
     if userID == "" {
-        return c.JSON(http.StatusBadRequest, map[string]string{"message": "ユーザーIDが必要です"})
+        return c.JSON(http.StatusBadRequest, map[string]string{"error": "User ID is required"})
     }
-    uintID64, err := strconv.ParseUint(userID, 10, 64)
-    if err != nil {
-        log.Printf("Invalid userID: %v", err)
-        return c.JSON(http.StatusBadRequest, map[string]string{"message": "無効なユーザーIDです"})
+    uintID := uintID(userID)
+    if uintID == 0 {
+        return c.JSON(http.StatusBadRequest, map[string]string{"error": "Invalid user ID"})
     }
-    uintID := uint(uintID64)
+    err = con.VerifyUserID(c, uintID)
+    if err!= nil {
+        return c.JSON(http.StatusUnauthorized, map[string]string{"error": "Invalid user ID"})
+    }
 
     // マルチパートフォームデータを取得
     form, err := c.MultipartForm()
@@ -89,7 +90,20 @@ func (con *Controller) AddPostedImage(c echo.Context) error {
 func (con *Controller) DeletePostedImage(c echo.Context) error {
     ctx := c.Request().Context()
 
-    imageID := c.QueryParam("ID")
+    userID := c.QueryParam("userID")
+    if userID == "" {
+        return c.JSON(http.StatusBadRequest, map[string]string{"error": "User ID is required"})
+    }
+    uintuserID := uintID(userID)
+    if uintuserID == 0 {
+        return c.JSON(http.StatusBadRequest, map[string]string{"error": "Invalid user ID"})
+    }
+    err := con.VerifyUserID(c, uintuserID)
+    if err!= nil {
+        return c.JSON(http.StatusUnauthorized, map[string]string{"error": "Invalid user ID"})
+    }
+
+    imageID := c.QueryParam("imageID")
     if imageID == "" {
         log.Printf("Image ID is missing in request")
         return c.JSON(http.StatusBadRequest, map[string]string{"error": "Image ID is required"})

@@ -8,3 +8,8 @@
 - search実装
 
 ## server
+
+- 変更点
+    - 認証が必要なエンドポイントにuserIDを追加してIssuesを解決
+    - 今までIDとかだったエンドポイントをuserID,imageIDとかに変更
+    - VerifyをVerifyAddUserに変更し、AddUserエンドポイントを削除。VerifyAddUserでUserを作成

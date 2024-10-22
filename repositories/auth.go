@@ -8,21 +8,21 @@ import (
 )
 
 
-func (repo *Repository) ExistUser(email string, password string) (bool,error) {
+func (repo *Repository) ExistUser(email string, password string) (uint,error) {
     var user models.User
     // Emailでユーザーを検索
     if err := repo.db.
         Where("email = ?", email).First(&user).Error; err != nil {
         if errors.Is(err, gorm.ErrRecordNotFound) {
-            return false,nil
+            return 0,nil
         }
-        return false,err
+        return 0,err
     }
 
     // パスワードの照合
     if err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(password)); err != nil {
-        return false,errors.New("invalid password")
+        return 0,errors.New("invalid password")
     }
 
-    return true,nil
+    return user.ID,nil
 }

@@ -11,58 +11,46 @@ import (
 )
 
 
-func (con *Controller) AddUser(c echo.Context) error {
+func (con *Controller) AddUser(c echo.Context) (uint,error) {
     user := models.User{}
     
     // リクエストボディのバインド
     if err := c.Bind(&user); err != nil {
         log.Printf("Failed to bind request data: %v", err)
-        return c.JSON(http.StatusBadRequest, map[string]string{"error": "Invalid request data"})
-    }
-
-    // フォロワー・フォローリストの初期化
-    if user.Followers == nil {
-        user.Followers = make([]models.User, 0)
-    }
-    if user.Follows == nil {
-        user.Follows = make([]models.User, 0)
+        return 0,c.JSON(http.StatusBadRequest, map[string]string{"error": "Invalid request data"})
     }
 
     // リポジトリの作成
     repo, err := repositories.NewRepository(con.db)
     if err != nil {
         log.Printf("Failed to create repository: %v", err)
-        return c.JSON(http.StatusInternalServerError, map[string]string{"error": "Failed to create repository"})
+        return 0,c.JSON(http.StatusInternalServerError, map[string]string{"error": "Failed to create repository"})
     }
 
     // リポジトリを使ってユーザーを追加
     if err := repo.AddUser(&user); err != nil {
         log.Printf("Failed to add user: %v", err)
-        return c.JSON(http.StatusInternalServerError, map[string]string{"error": "Failed to add user"})
+        return 0,c.JSON(http.StatusInternalServerError, map[string]string{"error": "Failed to add user"})
     }
 
-    return c.JSON(http.StatusOK, map[string]string{"message": "User added successfully"})
+    return user.ID,nil
 }
 
 func (con *Controller) UserInfo(c echo.Context) error {
-    userID := c.QueryParam("ID")
+    userID := c.QueryParam("userID")
     if userID == "" {
         return c.JSON(http.StatusBadRequest, map[string]string{"error": "User ID is required"})
     }
-
-    uintID64, err := strconv.ParseUint(userID, 10, 64)
-    if err != nil {
-        log.Printf("Invalid user ID format: %v", err)
-        return c.JSON(http.StatusBadRequest, map[string]string{"error": "Invalid user ID format"})
+    uintID := uintID(userID)
+    if uintID == 0 {
+        return c.JSON(http.StatusBadRequest, map[string]string{"error": "Invalid user ID"})
     }
-    uintID := uint(uintID64)
 
     repo, err := repositories.NewRepository(con.db)
     if err != nil {
         log.Printf("Failed to create repository: %v", err)
         return c.JSON(http.StatusServiceUnavailable, map[string]string{"error": "Service Unavailable"})
     }
-
     user, err := repo.UserInfo(uintID)
     if err != nil {
         log.Printf("Failed to retrieve user info: %v", err)
@@ -73,6 +61,18 @@ func (con *Controller) UserInfo(c echo.Context) error {
 }
 
 func (con *Controller) UserInfoAuth(c echo.Context) error {
+    userID := c.QueryParam("userID")
+    if userID == "" {
+        return c.JSON(http.StatusBadRequest, map[string]string{"error": "User ID is required"})
+    }
+    uintID := uintID(userID)
+    if uintID == 0 {
+        return c.JSON(http.StatusBadRequest, map[string]string{"error": "Invalid user ID"})
+    }
+    err := con.VerifyUserID(c, uintID)
+    if err!= nil {
+        return c.JSON(http.StatusUnauthorized, map[string]string{"error": "Invalid user ID"})
+    }
     email := c.QueryParam("email")
     password := c.QueryParam("password")
 
@@ -96,17 +96,18 @@ func (con *Controller) UserInfoAuth(c echo.Context) error {
 }
 
 func (con *Controller) DeleteUser(c echo.Context) error {
-    userID := c.QueryParam("ID")
+    userID := c.QueryParam("userID")
     if userID == "" {
         return c.JSON(http.StatusBadRequest, map[string]string{"error": "User ID is required"})
     }
-
-    uintID64, err := strconv.ParseUint(userID, 10, 64)
-    if err != nil {
-        log.Printf("Invalid user ID format: %v", err)
-        return c.JSON(http.StatusBadRequest, map[string]string{"error": "Invalid user ID format"})
+    uintID := uintID(userID)
+    if uintID == 0 {
+        return c.JSON(http.StatusBadRequest, map[string]string{"error": "Invalid user ID"})
     }
-    uintID := uint(uintID64)
+    err := con.VerifyUserID(c, uintID)
+    if err!= nil {
+        return c.JSON(http.StatusUnauthorized, map[string]string{"error": "Invalid user ID"})
+    }
 
     var existinguser models.User
     if err := con.db.First(&existinguser, uintID).Error; err != nil {
@@ -134,17 +135,18 @@ func (con *Controller) DeleteUser(c echo.Context) error {
 }
 
 func (con *Controller) UpdateUserIcon(c echo.Context) error {
-    idStr := c.QueryParam("ID")
-    if idStr == "" {
+    userID := c.QueryParam("userID")
+    if userID == "" {
         return c.JSON(http.StatusBadRequest, map[string]string{"error": "User ID is required"})
     }
-
-    idUint64, err := strconv.ParseUint(idStr, 10, 64)
-    if err != nil {
-        log.Printf("Invalid user ID format: %v", err)
-        return c.JSON(http.StatusBadRequest, map[string]string{"error": "Invalid user ID format"})
+    uintID := uintID(userID)
+    if uintID == 0 {
+        return c.JSON(http.StatusBadRequest, map[string]string{"error": "Invalid user ID"})
     }
-    userID := uint(idUint64)
+    err := con.VerifyUserID(c, uintID)
+    if err!= nil {
+        return c.JSON(http.StatusUnauthorized, map[string]string{"error": "Invalid user ID"})
+    }
 
     // アップロードされたファイルを取得
     file, err := c.FormFile("File")
@@ -176,7 +178,7 @@ func (con *Controller) UpdateUserIcon(c echo.Context) error {
     }
 
     // ユーザーのIconフィールドを更新
-    err = repo.UpdateUserIcon(userID, url)
+    err = repo.UpdateUserIcon(uintID, url)
     if err != nil {
         log.Printf("Failed to update user icon: %v", err)
         return c.JSON(http.StatusInternalServerError, map[string]string{"error": "Failed to update user icon"})
@@ -188,7 +190,7 @@ func (con *Controller) UpdateUserIcon(c echo.Context) error {
 
 func (con *Controller) UpdateUserHeader(c echo.Context) error {
     // クエリパラメータからユーザーIDを取得
-    idStr := c.QueryParam("ID")
+    idStr := c.QueryParam("userID")
     if idStr == "" {
         log.Printf("User ID is missing in request")
         return c.JSON(http.StatusBadRequest, map[string]string{"error": "User ID is required"})
@@ -244,19 +246,18 @@ func (con *Controller) UpdateUserHeader(c echo.Context) error {
 
 func (con *Controller) UpdateUserInfo(c echo.Context) error {
     // クエリパラメータからユーザーIDを取得
-    idStr := c.QueryParam("userID")
-    if idStr == "" {
-        log.Printf("User ID is missing in request")
+    userID := c.QueryParam("userID")
+    if userID == "" {
         return c.JSON(http.StatusBadRequest, map[string]string{"error": "User ID is required"})
     }
-
-    // 文字列のIDをuintに変換
-    idUint64, err := strconv.ParseUint(idStr, 10, 64)
-    if err != nil {
-        log.Printf("Invalid user ID format: %v", err)
-        return c.JSON(http.StatusBadRequest, map[string]string{"error": "Invalid user ID format"})
+    uintID := uintID(userID)
+    if uintID == 0 {
+        return c.JSON(http.StatusBadRequest, map[string]string{"error": "Invalid user ID"})
     }
-    userID := uint(idUint64)
+    err := con.VerifyUserID(c, uintID)
+    if err!= nil {
+        return c.JSON(http.StatusUnauthorized, map[string]string{"error": "Invalid user ID"})
+    }
 
     name := c.QueryParam("name")
     if name == "" {
@@ -285,7 +286,7 @@ func (con *Controller) UpdateUserInfo(c echo.Context) error {
     }
 
     // ユーザー情報を更新
-    err = repo.UpdateUserInfo(userID, name, description, email, birthday)
+    err = repo.UpdateUserInfo(uintID, name, description, email, birthday)
     if err != nil {
         log.Printf("Failed to update user info: %v", err)
         return c.JSON(http.StatusInternalServerError, map[string]string{"error": "Failed to update user info"})

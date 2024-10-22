@@ -23,10 +23,10 @@ func NewRepository(db *gorm.DB) (*Repository, error) {
     return &Repository{db: db, gcsClient: client}, nil
 }
 
-
-
 // Closeメソッドを追加して、クライアントのリソースを適切に解放
 func (r *Repository) Close() error {
     return r.gcsClient.Close()
 }
+
+
 

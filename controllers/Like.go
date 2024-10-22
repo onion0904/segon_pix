@@ -17,12 +17,14 @@ func (con *Controller) AddLike(c echo.Context) error {
         return c.JSON(http.StatusBadRequest, map[string]string{"message": "ユーザーIDと画像IDが必要です"})
     }
 
-    uintUserID64, err := strconv.ParseUint(userID, 10, 64)
-    if err != nil {
-        log.Printf("Invalid userID: %v", err)
-        return c.JSON(http.StatusBadRequest, map[string]string{"message": "無効なユーザーIDです"})
+    uintuserID := uintID(userID)
+    if uintuserID == 0 {
+        return c.JSON(http.StatusBadRequest, map[string]string{"error": "Invalid user ID"})
     }
-    uintUserID := uint(uintUserID64)
+    err := con.VerifyUserID(c, uintuserID)
+    if err!= nil {
+        return c.JSON(http.StatusUnauthorized, map[string]string{"error": "Invalid user ID"})
+    }
 
     uintImageID64, err := strconv.ParseUint(imageID, 10, 64)
     if err != nil {
@@ -37,7 +39,7 @@ func (con *Controller) AddLike(c echo.Context) error {
         return c.JSON(http.StatusServiceUnavailable, map[string]string{"message": "サービスが利用できません"})
     }
 
-    if err := repo.AddLike(uintUserID, uintImageID); err != nil {
+    if err := repo.AddLike(uintuserID, uintImageID); err != nil {
         log.Printf("Error adding like: %v", err)
         return c.JSON(http.StatusInternalServerError, map[string]string{"message": "「いいね」の追加に失敗しました"})
     }
@@ -53,12 +55,14 @@ func (con *Controller) RemoveLike(c echo.Context) error {
         return c.JSON(http.StatusBadRequest, map[string]string{"message": "ユーザーIDと画像IDが必要です"})
     }
 
-    uintUserID64, err := strconv.ParseUint(userID, 10, 64)
-    if err != nil {
-        log.Printf("Invalid userID: %v", err)
-        return c.JSON(http.StatusBadRequest, map[string]string{"message": "無効なユーザーIDです"})
+    uintuserID := uintID(userID)
+    if uintuserID == 0 {
+        return c.JSON(http.StatusBadRequest, map[string]string{"error": "Invalid user ID"})
     }
-    uintUserID := uint(uintUserID64)
+    err := con.VerifyUserID(c, uintuserID)
+    if err!= nil {
+        return c.JSON(http.StatusUnauthorized, map[string]string{"error": "Invalid user ID"})
+    }
 
     uintImageID64, err := strconv.ParseUint(imageID, 10, 64)
     if err != nil {
@@ -73,7 +77,7 @@ func (con *Controller) RemoveLike(c echo.Context) error {
         return c.JSON(http.StatusServiceUnavailable, map[string]string{"message": "サービスが利用できません"})
     }
 
-    if err := repo.RemoveLike(uintUserID, uintImageID); err != nil {
+    if err := repo.RemoveLike(uintuserID, uintImageID); err != nil {
         log.Printf("Error removing like: %v", err)
         return c.JSON(http.StatusInternalServerError, map[string]string{"message": "「いいね」の削除に失敗しました"})
     }
