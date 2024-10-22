@@ -82,3 +82,18 @@ curl -X POST -H "Authorization: Bearer <JWTトークン>" \
     ```
     curl -X POST -H "Authorization: Bearer <JWTトークン>" \"http://localhost:8080/segon_pix_auth/add/comment?userID=1234&imageID=5678&comment=aiueo"
     ```
+
+- /add/follow(token必要)
+    - 入力できる値(queryでの受け取り)
+    - followingIDのユーザーのFollows(自分がフォローしてるユーザー)にfollowedIDのユーザーを追加する。
+
+    | 変数      |     説明     |
+    |-----------|-----------|
+    |followingID     |  フォローするユーザーID  |
+    |followedID    |  フォローされるユーザーID  |
+
+    - 使用例
+
+    ```
+    curl -X POST -H "Authorization: Bearer <JWTトークン>" \"http://localhost:8080/segon_pix_auth/add/follow?followingID=1234&followedID=5678"
+    ```

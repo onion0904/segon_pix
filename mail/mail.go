@@ -29,6 +29,7 @@ func SendEmail(email string, code string) {
         recipientEmail,
     )
 
+    
     // コンテキストの作成（タイムアウト設定）
     ctx, cancel := context.WithTimeout(context.Background(), time.Second*10)
     defer cancel()

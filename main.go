@@ -59,6 +59,9 @@ func main() {
 	
 	method := e.Group("/segon_pix")
 	{	
+		method.POST("/add/user", con.AddUser)
+		method.POST("/add/follow", con.AddFollow)
+		method.DELETE("/delete/follow", con.RemoveFollow)
 		method.GET("/get/user", con.UserInfo)
 		method.GET("/get/list/search", con.SearchImage)
 		method.GET("/get/list/like", con.GetLikeImages)
@@ -82,7 +85,6 @@ func main() {
 
 	// 認証が必要なルート
 	{
-		r.POST("/add/user", con.AddUser)
 		r.POST("/add/image", con.AddPostedImage)
 		r.POST("/add/like", con.AddLike)
 		r.POST("/add/comment", con.AddComment)
