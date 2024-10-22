@@ -1,9 +1,10 @@
 # POST
 
-- /add/user(token必要)
+
+
+- /add/user(token必要)これは使えない
 
     - 入力できる値(JSONでの受け取り)
-    - 絶対に
     - ユーザーを登録する。
 
     | 変数      |     説明     |
@@ -35,7 +36,7 @@ http://localhost:8080/segon_pix_auth/add/user
 
     | 変数      | 説明|
     |-----------|-----|
-    |ID       |   ユーザーID   |
+    |userID       |   ユーザーID   |
     |File    |   画像ファイル   |
     |Hashtags     | ハッシュタグ（複数可） |
 
@@ -44,7 +45,7 @@ http://localhost:8080/segon_pix_auth/add/user
 
 ```bash
 curl -X POST -H "Authorization: Bearer <JWTトークン>" \
-"http://localhost:8080/segon_pix_auth/add/image?ID=1234" \
+"http://localhost:8080/segon_pix_auth/add/image?userID=1234" \
 -F "File=@/path/to/your/image.jpg" \
 -F "Hashtags=tag1" \
 -F "Hashtags=tag2" \

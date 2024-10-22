@@ -17,12 +17,14 @@ func (con *Controller) AddFollow(c echo.Context) error {
         return c.JSON(http.StatusBadRequest, map[string]string{"message": "フォローするユーザーIDとフォローされるユーザーIDが必要です"})
     }
 
-    uintFollowingID64, err := strconv.ParseUint(followingID, 10, 64)
-    if err != nil {
-        log.Printf("Invalid followingID: %v", err)
-        return c.JSON(http.StatusBadRequest, map[string]string{"message": "無効なフォローするユーザーIDです"})
+    uintFollowingID := uintID(followingID)
+    if uintFollowingID == 0 {
+        return c.JSON(http.StatusBadRequest, map[string]string{"error": "Invalid user ID"})
     }
-    uintFollowingID := uint(uintFollowingID64)
+    err := con.VerifyUserID(c, uintFollowingID)
+    if err!= nil {
+        return c.JSON(http.StatusUnauthorized, map[string]string{"error": "Invalid user ID"})
+    }
 
     uintFollowedID64, err := strconv.ParseUint(followedID, 10, 64)
     if err != nil {
@@ -53,12 +55,14 @@ func (con *Controller) RemoveFollow(c echo.Context) error {
         return c.JSON(http.StatusBadRequest, map[string]string{"message": "フォロー解除するユーザーIDとフォロー解除されるユーザーIDが必要です"})
     }
 
-    uintFollowingID64, err := strconv.ParseUint(followingID, 10, 64)
-    if err != nil {
-        log.Printf("Invalid followingID: %v", err)
-        return c.JSON(http.StatusBadRequest, map[string]string{"message": "無効なフォロー解除するユーザーIDです"})
+    uintFollowingID := uintID(followingID)
+    if uintFollowingID == 0 {
+        return c.JSON(http.StatusBadRequest, map[string]string{"error": "Invalid user ID"})
     }
-    uintFollowingID := uint(uintFollowingID64)
+    err := con.VerifyUserID(c, uintFollowingID)
+    if err!= nil {
+        return c.JSON(http.StatusUnauthorized, map[string]string{"error": "Invalid user ID"})
+    }
 
     uintFollowedID64, err := strconv.ParseUint(followedID, 10, 64)
     if err != nil {

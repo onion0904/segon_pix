@@ -15,21 +15,32 @@
     curl -X POST http://localhost:8080/signup?email=user@example.com
     ```
 
-- /verify
+- /verifyAddUser
 
-    - 入力できる値
+    - 入力できる値(JSONでの受け取り)
     - 認証コードから判断してtokenを返す
 
     | 変数      |     説明     |
     |-----------|-----------|
-    |Email     |  メールアドレス  |
-    |password|パスワード|
+    |Name       |  ユーザー名   |
+    |Description（任意）   |  プロフィール欄に書くメッセージ  |
+    |Email      |  メールアドレス  |
+    |Password       | パスワード  |
+    |Birthday   |  誕生日      |
     |code|認証コード|
 
     - 使用例
 
-    ```
-    curl -X POST http://localhost:8080/verify?email=user@example&password=pas&code=ABCDEF
+    ```bash
+    curl -X POST -H "Authorization: Bearer <JWTトークン>" \
+-H "Content-Type: application/json" \
+-d '{
+    "name": "John Doe",
+    "email": "john@example.com",
+    "password": "password",
+    "birthday": 20241015
+}' \
+http://localhost:8080/verify?code=ABCDEF
     ```
 
 - /login

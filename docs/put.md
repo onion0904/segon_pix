@@ -6,6 +6,7 @@
 
     | 変数      |     説明     |
     |-----------|-----------|
+    |userID    |  userのID  |
     |commentID       |  コメントのID  |
     |imageID    |  画像のID  |
     |newContent       |  更新後のコメントの内容  |
@@ -14,7 +15,7 @@
     - 使用例
 
     ```
-   curl -X PUT -H "Authorization: Bearer <JWTトークン>" \"http://localhost:8080/segon_pix_auth/update/comment?commentID=5678&imageID=1234&newContent=更新されたコメント内容"
+   curl -X PUT -H "Authorization: Bearer <JWTトークン>" \"http://localhost:8080/segon_pix_auth/update/comment?userID=1234&commentID=5678&imageID=1234&newContent=更新されたコメント内容"
     ```
 
 - /update/user/header(token必要)
@@ -24,14 +25,14 @@
 
     | 変数      | 説明|
     |-----------|-----|
-    |ID       |   ユーザーID   |
+    |userID       |   ユーザーID   |
     |File    |   画像ファイル   |
 
 
     - 使用例
 
     ```
-    curl -X POST -H "Authorization: Bearer <JWTトークン>" \"http://localhost:8080/segon_pix_auth/update/user/header?ID=1234" \
+    curl -X POST -H "Authorization: Bearer <JWTトークン>" \"http://localhost:8080/segon_pix_auth/update/user/header?userID=1234" \
   -F "File=@/path/to/your/image.jpg"
     ```
 
@@ -42,14 +43,14 @@
 
     | 変数      | 説明|
     |-----------|-----|
-    |ID       |   ユーザーID   |
+    |userID       |   ユーザーID   |
     |File    |   画像ファイル   |
 
 
     - 使用例
 
     ```
-    curl -X POST -H "Authorization: Bearer <JWTトークン>" \"http://localhost:8080/segon_pix_auth/update/user/icon?ID=1234" \
+    curl -X POST -H "Authorization: Bearer <JWTトークン>" \"http://localhost:8080/segon_pix_auth/update/user/icon?userID=1234" \
   -F "File=@/path/to/your/image.jpg"
     ```
 

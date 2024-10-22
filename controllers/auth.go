@@ -49,7 +49,7 @@ func generateVerificationCode() (string, error) {
     return base64.StdEncoding.EncodeToString(b), nil
 }
 
-func (con *Controller) Verify(c echo.Context) error {
+func (con *Controller) VerifyAddUser(c echo.Context) error {
     secret := os.Getenv("JWT_SECRET_KEY")
     if secret == "" {
         log.Printf("JWT secret key is not set")
@@ -57,9 +57,16 @@ func (con *Controller) Verify(c echo.Context) error {
     }
     jwtSecret := []byte(secret)
 
-    email := c.FormValue("email")
-    password := c.FormValue("password")
-    code := c.FormValue("code")
+    jsonData := models.User{}
+    
+    // リクエストボディのバインド
+    if err := c.Bind(&jsonData); err != nil {
+        log.Printf("Failed to bind request data: %v", err)
+        return c.JSON(http.StatusBadRequest, map[string]string{"error": "Invalid request data"})
+    }
+    email := jsonData.Email
+    password := jsonData.Password
+    code := c.QueryParam("code")
 
     if email == "" || password == "" || code == "" {
         return c.JSON(http.StatusBadRequest, map[string]string{"message": "全ての項目を入力してください"})
@@ -77,7 +84,7 @@ func (con *Controller) Verify(c echo.Context) error {
         return c.JSON(http.StatusInternalServerError, map[string]string{"message": "ユーザー確認中にエラーが発生しました"})
     }
 
-    if ok {
+    if ok!=0 {
         return c.JSON(http.StatusConflict, map[string]string{"message": "すでにユーザーが登録されています"})
     }
 
@@ -103,8 +110,15 @@ func (con *Controller) Verify(c echo.Context) error {
     delete(con.auth.VerificationCodes, email)
     con.auth.CodeMutex.Unlock()
 
+    userID,err := con.AddUser(c)
+    if err != nil{
+        log.Printf("Error adding user: %v", err)
+        return c.JSON(http.StatusInternalServerError, map[string]string{"message": "ユーザーの追加に失敗しました"})
+    }
+
     claims := &models.MyCustomClaims{
         Email: email,
+        UserID: userID,
         RegisteredClaims: jwt.RegisteredClaims{
             Subject:   email,
             ExpiresAt: jwt.NewNumericDate(time.Now().Add(time.Hour * 24)), // 有効期限
@@ -143,18 +157,19 @@ func (con *Controller) Login(c echo.Context) error {
     }
 
     // ユーザーの存在を確認
-    userExists, err := repo.ExistUser(email, password)
+    userID, err := repo.ExistUser(email, password)
     if err != nil {
         log.Printf("Error checking user existence: %v", err)
         return c.JSON(http.StatusInternalServerError, map[string]string{"message": "ユーザー確認中にエラーが発生しました"})
     }
-    if !userExists {
+    if userID==0 {
         return c.JSON(http.StatusConflict, map[string]string{"message": "ユーザーが登録されていません"})
     }
 
     // JWTのクレーム作成
     claims := &models.MyCustomClaims{
         Email: email,
+        UserID: userID,
         RegisteredClaims: jwt.RegisteredClaims{
             Subject:   email,
             ExpiresAt: jwt.NewNumericDate(time.Now().Add(time.Hour * 24)), // 有効期限24時間
@@ -194,4 +209,28 @@ func (con *Controller) Restricted(c echo.Context) error {
     return c.String(http.StatusOK, "Welcome "+email+"!")
 }
 
+func (con *Controller) VerifyUserID(c echo.Context,userID uint) error {
+    userToken, ok := c.Get("user").(*jwt.Token)
+    if !ok {
+        log.Printf("Failed to get JWT token from context")
+        return c.JSON(http.StatusUnauthorized, map[string]string{"message": "認証が必要です"})
+    }
 
+    claims, ok := userToken.Claims.(*models.MyCustomClaims)
+    if !ok {
+        log.Printf("Invalid claims in JWT token")
+        return c.JSON(http.StatusUnauthorized, map[string]string{"message": "トークンのクレームが無効です"})
+    }
+
+    VerifyUserID := claims.UserID
+    if VerifyUserID == 0 {
+        log.Printf("No userID found in JWT claims")
+        return c.JSON(http.StatusUnauthorized, map[string]string{"message": "トークンにuserIDが含まれていません"})
+    }
+
+    //userIDとJWTのuserIDが一致するかの確認
+    if userID != VerifyUserID {
+        return c.JSON(http.StatusUnauthorized, map[string]string{"error": "Invalid or expired token"})
+    }
+    return nil
+}

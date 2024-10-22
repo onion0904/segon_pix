@@ -11,7 +11,7 @@
     - 使用例
 
     ```
-    curl -X GET "http://localhost:8080/segon_pix/get/user?ID=1234"
+    curl -X GET "http://localhost:8080/segon_pix/get/user?userID=1234"
     ```
 
 - /get/user(token必要)
@@ -22,6 +22,7 @@
     | 変数      |     説明     |
     |-----------|-----------|
     |JWTトークン     |  verifyで返ってきたやつ(24時間使用可能)  |
+    |ID       |  ユーザーID   |
     |  email   |  メールアドレス  |
     |  password   |  パスワード  |
 
@@ -30,7 +31,7 @@
 
 ```bash
 curl -X GET -H "Authorization: Bearer <JWTトークン>" \
-"http://localhost:8080/segon_pix_auth/get/user?email=john@example.com&password=password"
+"http://localhost:8080/segon_pix_auth/get/user?userID=1234&email=john@example.com&password=password"
 ```
 
 

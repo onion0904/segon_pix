@@ -17,16 +17,18 @@ func (con *Controller) AddComment(c echo.Context) error {
         return c.JSON(http.StatusBadRequest, map[string]string{"message": "コメントとユーザーIDが必要です"})
     }
 
-    uintUserID64, err := strconv.ParseUint(userID, 10, 64)
-    if err != nil {
-        log.Printf("Invalid userID: %v", err)
-        return c.JSON(http.StatusBadRequest, map[string]string{"message": "無効なユーザーIDです"})
+    uintID := uintID(userID)
+    if uintID == 0 {
+        return c.JSON(http.StatusBadRequest, map[string]string{"error": "Invalid user ID"})
     }
-    uintUserID := uint(uintUserID64)
+    err := con.VerifyUserID(c, uintID)
+    if err!= nil {
+        return c.JSON(http.StatusUnauthorized, map[string]string{"error": "Invalid user ID"})
+    }
 
     comment := models.Comment{
         Message: newComment,
-        UserID:  uintUserID,
+        UserID:  uintID,
     }
 
     imageID := c.QueryParam("imageID")
@@ -56,6 +58,19 @@ func (con *Controller) AddComment(c echo.Context) error {
 }
 
 func (con *Controller) UpdateComment(c echo.Context) error {
+	userID := c.QueryParam("userID")
+    if userID == "" {
+        return c.JSON(http.StatusBadRequest, map[string]string{"error": "User ID is required"})
+    }
+    uintID := uintID(userID)
+    if uintID == 0 {
+        return c.JSON(http.StatusBadRequest, map[string]string{"error": "Invalid user ID"})
+    }
+    err := con.VerifyUserID(c, uintID)
+    if err!= nil {
+        return c.JSON(http.StatusUnauthorized, map[string]string{"error": "Invalid user ID"})
+    }
+
     commentID := c.QueryParam("commentID")
     if commentID == "" {
         return c.JSON(http.StatusBadRequest, map[string]string{"message": "コメントIDが必要です"})
@@ -100,6 +115,19 @@ func (con *Controller) UpdateComment(c echo.Context) error {
 }
 
 func (con *Controller) DeleteComment(c echo.Context) error {
+	userID := c.QueryParam("userID")
+    if userID == "" {
+        return c.JSON(http.StatusBadRequest, map[string]string{"error": "User ID is required"})
+    }
+    uintID := uintID(userID)
+    if uintID == 0 {
+        return c.JSON(http.StatusBadRequest, map[string]string{"error": "Invalid user ID"})
+    }
+    err := con.VerifyUserID(c, uintID)
+    if err!= nil {
+        return c.JSON(http.StatusUnauthorized, map[string]string{"error": "Invalid user ID"})
+    }
+
     commentID := c.QueryParam("commentID")
     if commentID == "" {
         return c.JSON(http.StatusBadRequest, map[string]string{"message": "コメントIDが必要です"})
