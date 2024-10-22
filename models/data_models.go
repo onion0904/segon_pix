@@ -23,22 +23,21 @@ type User struct {
 type PostedImage struct {
     gorm.Model
     URL         string    `gorm:"not null"`        
-    UserID      uint      `gorm:"not null"` //画像を投稿した人のID       
+    UserID      uint      `gorm:"not null"` // 画像を投稿した人のID       
     PostUser    User      `gorm:"foreignKey:UserID;constraint:OnDelete:CASCADE"`  // 投稿者が削除されたら関連する画像も削除
     ObjectName  string    `gorm:"not null;index"`  // バックエンドの処理で使用
     Likes       []User    `gorm:"many2many:posted_image_likes;constraint:OnDelete:CASCADE"` // いいねしたユーザー
-    Comments    []Comment 
+    Comments    []Comment `gorm:"constraint:OnDelete:CASCADE"` // コメントが削除されたときにリレーションを更新
     Hashtags    []Hashtag `gorm:"many2many:posted_image_hashtags;"` 
 }
-
 
 type Comment struct {
     gorm.Model
     PostedImageID uint   `gorm:"not null"` // コメント元のPostedImageのID
     UserID        uint   `gorm:"not null"` // コメントしたユーザーのID (外部キー)
-    PostUser      User   `gorm:"foreignKey:UserID;constraint:OnDelete:CASCADE"` // 外部キーを明示的に指定
     Message       string // コメント内容
 }
+
 
 
 type Hashtag struct {

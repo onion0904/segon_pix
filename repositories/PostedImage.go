@@ -206,7 +206,12 @@ func (repo *Repository) SearchImage(Qhashtag string) ([]models.Image, error) {
 
 func (repo *Repository) ImageInfo(id uint) (*models.PostedImage, error) {
     var image models.PostedImage
-    if err := repo.db.First(&image, id).Error; err != nil {
+    if err := repo.db.
+    Preload("PostUser").
+    Preload("Likes").
+    Preload("Comments").
+    Preload("Hashtags").
+    First(&image, id).Error; err != nil {
         if errors.Is(err, gorm.ErrRecordNotFound) {
             return nil, nil // またはカスタムエラーを返す
         }

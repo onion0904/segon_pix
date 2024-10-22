@@ -16,7 +16,7 @@ Future<User> getUser({required final String userID}) async {
 Future<List<SimpleImage>> getRecentImages() async {
   final url = Uri.http(
     "localhost:8080",
-    "/get/list/recent"
+    "/segon_pix/get/list/recent"
   );
   final response = await http.get(url, headers: {"Content-Type": "application/json"});
 
@@ -48,14 +48,14 @@ Future<User> getUserWithAuth({
   }
 }
 
-Future<SimpleImages> getSimpleImages({
+Future<SimpleImage> getSimpleImages({
   required final String hashTag,
 }) async {
   final url = Uri.http(
       "localhost:8080", "/segon_pix/get/list/image", {"Hashtag": hashTag});
   final response = await http.get(url);
   if (response.statusCode == 200) {
-    return SimpleImages.fromJson(jsonDecode(response.body));
+    return SimpleImage.fromJson(jsonDecode(response.body));
   } else {
     throw Exception("Failed getSimpleImages method");
   }

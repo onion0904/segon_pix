@@ -65,4 +65,20 @@ curl -X POST -H "Authorization: Bearer <JWTトークン>" \
     ```
     curl -X POST -H "Authorization: Bearer <JWTトークン>" \"http://localhost:8080/segon_pix_auth/add/like?userID=1234&imageID=5678"
     ```
-- /add/comment
+
+
+- /add/comment(token必要)
+    - 入力できる値(queryでの受け取り)
+    -指定された画像にユーザー情報とコメントを追加する。
+
+    | 変数      |     説明     |
+    |-----------|-----------|
+    |userID     |  ユーザーID  |
+    |imageID    |  画像ID  |
+    |comment | コメント内容|
+
+    - 使用例
+
+    ```
+    curl -X POST -H "Authorization: Bearer <JWTトークン>" \"http://localhost:8080/segon_pix_auth/add/comment?userID=1234&imageID=5678&comment=aiueo"
+    ```

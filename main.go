@@ -56,7 +56,7 @@ func main() {
 	e.POST("/signup", con.Signup)
     e.POST("/verify", con.Verify)
 	e.POST("/login", con.Login)
-
+	
 	method := e.Group("/segon_pix")
 	{	
 		method.GET("/get/user", con.UserInfo)

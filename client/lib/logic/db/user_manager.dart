@@ -1,5 +1,5 @@
 import 'package:shared_preferences/shared_preferences.dart';
-import '../../logic/http/auth.dart';
+import '../http/auth.dart';
 import "dart:convert";
 import '../../model/user.dart';
 

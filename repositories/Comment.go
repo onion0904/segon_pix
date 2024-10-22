@@ -2,121 +2,76 @@ package repositories
 
 import (
     "PixApp/models"
+    "gorm.io/gorm"
 )
 
 
 // AddComment 新しいコメントをPostedImageに追加する
-func (repo *Repository) AddComment (model *models.Comment,imageID uint) error {
- 	// トランザクションを開始
-    tx := repo.db.Begin()
-    defer func() {
-        if r := recover(); r != nil {
-            tx.Rollback()
+func (repo *Repository) AddComment(model *models.Comment, imageID uint) error {
+    return repo.db.Transaction(func(tx *gorm.DB) error {
+        // 画像の存在確認
+        var image models.PostedImage
+        if err := tx.First(&image, imageID).Error; err != nil {
+            return err
         }
-    }()
 
-	//コメントをDBに追加
-	if err := tx.Create(model).Error; err != nil {
-		tx.Rollback()
-		return err
-	}
+        // コメントのPostedImageIDを設定
+        model.PostedImageID = imageID
 
-	// コメントを追加するPostedImageを取得
-	var image models.PostedImage
-    if err := tx.First(&image, imageID).Error; err != nil {
-        tx.Rollback()
-        return err
-    }
+        // コメントを作成
+        if err := tx.Create(model).Error; err != nil {
+            return err
+        }
 
-	// コメントをPostedImageに追加
-	if err := tx.Model(&image).Association("Comments").Append(&model); err != nil {
-        tx.Rollback()
-        return err
-    }
-
-	return tx.Commit().Error
+        return nil // トランザクションをコミット
+    })
 }
+
+
 
 
 // UpdateComment は指定されたコメントの内容を更新する
 func (repo *Repository) UpdateComment(commentID uint, newContent string, imageID uint) error {
-    // トランザクションを開始
-    tx := repo.db.Begin()
-    defer func() {
-        if r := recover(); r != nil {
-            tx.Rollback()
+    return repo.db.Transaction(func(tx *gorm.DB) error {
+        // 更新するコメントを取得
+        var comment models.Comment
+        if err := tx.First(&comment, commentID).Error; err != nil {
+            return err
         }
-    }()
 
-    // 更新するコメントを取得
-    var comment models.Comment
-    if err := tx.First(&comment, commentID).Error; err != nil {
-        tx.Rollback()
-        return err
-    }
-
-    // DBのコメント内容を更新
-    comment.Message = newContent
-    if err := tx.Save(&comment).Error; err != nil {
-        tx.Rollback()
-        return err
-    }
-
-	// コメントを変更するPostedImageを取得
-	var image models.PostedImage
-    if err := tx.First(&image, imageID).Error; err != nil {
-        tx.Rollback()
-        return err
-    }
-
-	// ここで、特定のコメントが更新されたことをリフレッシュする操作
-    for i, c := range image.Comments {
-        if c.ID == comment.ID {
-            image.Comments[i] = comment
-            break
+        // コメント内容を更新
+        comment.Message = newContent
+        if err := tx.Save(&comment).Error; err != nil {
+            return err
         }
-    }
 
-    // トランザクションをコミット
-    return tx.Commit().Error
+        // 画像が存在するかを確認（必要に応じて画像の存在確認を行います）
+        var image models.PostedImage
+        if err := tx.First(&image, imageID).Error; err != nil {
+            return err
+        }
+
+        // トランザクションが自動的にコミットされる
+        return nil
+    })
 }
 
 
 
-func (repo *Repository) DeleteComment (commentID uint, imageID uint) error {
-	// トランザクションを開始
-    tx := repo.db.Begin()
-    defer func() {
-        if r := recover(); r != nil {
-            tx.Rollback()
+
+func (repo *Repository) DeleteComment(commentID uint) error {
+    return repo.db.Transaction(func(tx *gorm.DB) error {
+        // コメントの取得
+        var comment models.Comment
+        if err := tx.First(&comment, commentID).Error; err != nil {
+            return err
         }
-    }()
-	
-	//コメントを消す画像の取得
-	var image models.PostedImage
-    if err := tx.First(&image, imageID).Error; err != nil {
-        tx.Rollback()
-        return err
-    }
 
-	// 消すコメントの取得
-	var comment models.Comment
-    if err := tx.First(&comment, commentID).Error; err != nil {
-        tx.Rollback()
-        return err
-    }
+        // コメントの削除（OnDelete:CASCADEで依存関係も削除される）
+        if err := tx.Delete(&comment).Error; err != nil {
+            return err
+        }
 
-	//コメントをPostedImageから消す
-	if err := tx.Model(&image).Association("Comments").Delete(&comment); err != nil {
-        tx.Rollback()
-        return err
-    }
-
-	// コメントをDBから消す
-	if err := tx.Delete(&models.Comment{},commentID).Error; err != nil {
-		tx.Rollback()
-		return err
-	}
-
-	return tx.Commit().Error
+        return nil // コミットされる
+    })
 }
