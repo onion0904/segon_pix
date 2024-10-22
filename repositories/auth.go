@@ -11,7 +11,7 @@ import (
 func (repo *Repository) ExistUser(email string, password string) (bool,error) {
     var user models.User
     // Emailでユーザーを検索
-    if err := repo.db.Preload("PostedImages").Preload("LikedImages").
+    if err := repo.db.
         Where("email = ?", email).First(&user).Error; err != nil {
         if errors.Is(err, gorm.ErrRecordNotFound) {
             return false,nil

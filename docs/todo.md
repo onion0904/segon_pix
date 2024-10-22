@@ -8,7 +8,3 @@
 - search実装
 
 ## server
-
-- followする機能の実装
-- controllerのエラーハンドリング
-- コメントを分かりやすくする

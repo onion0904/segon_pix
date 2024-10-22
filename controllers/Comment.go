@@ -6,79 +6,122 @@ import (
 	"github.com/labstack/echo/v4"
 	"PixApp/models"
 	"PixApp/repositories"
+	"log"
 )
 
 
-
 func (con *Controller) AddComment(c echo.Context) error {
-	newcomment := c.QueryParam("comment")
-	userID := c.QueryParam("userID")
-	comment := models.Comment{}
-	comment.Message = newcomment
-	uintUserID64, err := strconv.ParseUint(userID, 10, 64)
-	if err!= nil {
-        return c.NoContent(http.StatusBadRequest) // 400エラー
+    newComment := c.QueryParam("comment")
+    userID := c.QueryParam("userID")
+    if newComment == "" || userID == "" {
+        return c.JSON(http.StatusBadRequest, map[string]string{"message": "コメントとユーザーIDが必要です"})
     }
-	uintUserID := uint(uintUserID64)
-	comment.UserID = uintUserID
-	if err := c.Bind(&comment); err != nil {
-		return c.NoContent(http.StatusServiceUnavailable) // 503エラー
-	}
-	imageID := c.QueryParam("imageID")
-	uintImageID64, err := strconv.ParseUint(imageID, 10, 64)
-	if err!= nil {
-        return c.NoContent(http.StatusBadRequest) // 400エラー
-    }
-	uintImageID := uint(uintImageID64)
-	repo ,err := repositories.NewRepository(con.db)
-	if err != nil {
-        return c.NoContent(http.StatusServiceUnavailable) // 503エラー
-    }
-	if err := repo.AddComment(&comment,uintImageID); err != nil {
-		return c.NoContent(http.StatusServiceUnavailable) // 503エラー
-	}
-	return c.NoContent(http.StatusOK)
-}
 
+    uintUserID64, err := strconv.ParseUint(userID, 10, 64)
+    if err != nil {
+        log.Printf("Invalid userID: %v", err)
+        return c.JSON(http.StatusBadRequest, map[string]string{"message": "無効なユーザーIDです"})
+    }
+    uintUserID := uint(uintUserID64)
+
+    comment := models.Comment{
+        Message: newComment,
+        UserID:  uintUserID,
+    }
+
+    imageID := c.QueryParam("imageID")
+    if imageID == "" {
+        return c.JSON(http.StatusBadRequest, map[string]string{"message": "画像IDが必要です"})
+    }
+
+    uintImageID64, err := strconv.ParseUint(imageID, 10, 64)
+    if err != nil {
+        log.Printf("Invalid imageID: %v", err)
+        return c.JSON(http.StatusBadRequest, map[string]string{"message": "無効な画像IDです"})
+    }
+    uintImageID := uint(uintImageID64)
+
+    repo, err := repositories.NewRepository(con.db)
+    if err != nil {
+        log.Printf("Error initializing repository: %v", err)
+        return c.JSON(http.StatusServiceUnavailable, map[string]string{"message": "サービスが利用できません"})
+    }
+
+    if err := repo.AddComment(&comment, uintImageID); err != nil {
+        log.Printf("Error adding comment: %v", err)
+        return c.JSON(http.StatusInternalServerError, map[string]string{"message": "コメントの追加に失敗しました"})
+    }
+
+    return c.JSON(http.StatusOK, map[string]string{"message": "コメントが追加されました"})
+}
 
 func (con *Controller) UpdateComment(c echo.Context) error {
-	commentID := c.QueryParam("commentID")
-	uintCommentID64, err := strconv.ParseUint(commentID, 10, 64)
-	if err!= nil {
-        return c.NoContent(http.StatusBadRequest) // 400エラー
+    commentID := c.QueryParam("commentID")
+    if commentID == "" {
+        return c.JSON(http.StatusBadRequest, map[string]string{"message": "コメントIDが必要です"})
     }
-	uintCommentID := uint(uintCommentID64)
-	imageID := c.QueryParam("imageID")
-	uintImageID64, err := strconv.ParseUint(imageID, 10, 64)
-	if err!= nil {
-        return c.NoContent(http.StatusBadRequest) // 400エラー
+
+    uintCommentID64, err := strconv.ParseUint(commentID, 10, 64)
+    if err != nil {
+        log.Printf("Invalid commentID: %v", err)
+        return c.JSON(http.StatusBadRequest, map[string]string{"message": "無効なコメントIDです"})
     }
-	uintImageID := uint(uintImageID64)
-	newContent := c.QueryParam("newContent")
-	repo ,err := repositories.NewRepository(con.db)
-	if err != nil {
-        return c.NoContent(http.StatusServiceUnavailable) // 503エラー
+    uintCommentID := uint(uintCommentID64)
+
+    imageID := c.QueryParam("imageID")
+    if imageID == "" {
+        return c.JSON(http.StatusBadRequest, map[string]string{"message": "画像IDが必要です"})
     }
-	if err := repo.UpdateComment(uintCommentID,newContent,uintImageID); err != nil {
-		return c.NoContent(http.StatusServiceUnavailable) // 503エラー
-	}
-	return c.NoContent(http.StatusOK)
+
+    uintImageID64, err := strconv.ParseUint(imageID, 10, 64)
+    if err != nil {
+        log.Printf("Invalid imageID: %v", err)
+        return c.JSON(http.StatusBadRequest, map[string]string{"message": "無効な画像IDです"})
+    }
+    uintImageID := uint(uintImageID64)
+
+    newContent := c.QueryParam("newContent")
+    if newContent == "" {
+        return c.JSON(http.StatusBadRequest, map[string]string{"message": "新しいコメント内容が必要です"})
+    }
+
+    repo, err := repositories.NewRepository(con.db)
+    if err != nil {
+        log.Printf("Error initializing repository: %v", err)
+        return c.JSON(http.StatusServiceUnavailable, map[string]string{"message": "サービスが利用できません"})
+    }
+
+    if err := repo.UpdateComment(uintCommentID, newContent, uintImageID); err != nil {
+        log.Printf("Error updating comment: %v", err)
+        return c.JSON(http.StatusInternalServerError, map[string]string{"message": "コメントの更新に失敗しました"})
+    }
+
+    return c.JSON(http.StatusOK, map[string]string{"message": "コメントが更新されました"})
 }
 
-
 func (con *Controller) DeleteComment(c echo.Context) error {
-	commentID := c.QueryParam("commentID")
-	uintCommentID64, err := strconv.ParseUint(commentID, 10, 64)
-	if err!= nil {
-        return c.NoContent(http.StatusBadRequest) // 400エラー
+    commentID := c.QueryParam("commentID")
+    if commentID == "" {
+        return c.JSON(http.StatusBadRequest, map[string]string{"message": "コメントIDが必要です"})
     }
-	uintCommentID := uint(uintCommentID64)	
-	repo ,err := repositories.NewRepository(con.db)
-	if err != nil {
-        return c.NoContent(http.StatusServiceUnavailable) // 503エラー
+
+    uintCommentID64, err := strconv.ParseUint(commentID, 10, 64)
+    if err != nil {
+        log.Printf("Invalid commentID: %v", err)
+        return c.JSON(http.StatusBadRequest, map[string]string{"message": "無効なコメントIDです"})
     }
-	if err := repo.DeleteComment(uintCommentID); err != nil {
-		return c.NoContent(http.StatusServiceUnavailable) // 503エラー
-	}
-	return c.NoContent(http.StatusOK)
+    uintCommentID := uint(uintCommentID64)
+
+    repo, err := repositories.NewRepository(con.db)
+    if err != nil {
+        log.Printf("Error initializing repository: %v", err)
+        return c.JSON(http.StatusServiceUnavailable, map[string]string{"message": "サービスが利用できません"})
+    }
+
+    if err := repo.DeleteComment(uintCommentID); err != nil {
+        log.Printf("Error deleting comment: %v", err)
+        return c.JSON(http.StatusInternalServerError, map[string]string{"message": "コメントの削除に失敗しました"})
+    }
+
+    return c.JSON(http.StatusOK, map[string]string{"message": "コメントが削除されました"})
 }

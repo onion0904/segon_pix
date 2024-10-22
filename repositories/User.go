@@ -31,7 +31,6 @@ func (repo *Repository) UserInfo(id uint) (*models.User, error) {
     return &user, nil
 }
 
-
 // 認証付きでユーザー情報を返す
 func (repo *Repository) UserInfoAuth(email, password string) (*models.User, error) {
     var user models.User
@@ -63,7 +62,6 @@ func (repo *Repository) UserInfoAuth(email, password string) (*models.User, erro
     return &user, nil
 }
 
-
 func (repo *Repository) AddUser(user *models.User) error {
     // パスワードをハッシュ化する
     hashedPassword, err := bcrypt.GenerateFromPassword([]byte(user.Password), bcrypt.DefaultCost)
@@ -78,7 +76,6 @@ func (repo *Repository) AddUser(user *models.User) error {
     }
     return nil
 }
-
 
 func (repo *Repository) DeleteUser(userID uint) error {
     return repo.db.Transaction(func(tx *gorm.DB) error {
@@ -134,7 +131,6 @@ func (repo *Repository) UpdateUserHeader(userID uint, iconURL string) error {
 
     return nil
 }
-
 
 func (repo *Repository) UpdateUserInfo(userID uint, name ,description , email string, birthday int) error {
     var user models.User

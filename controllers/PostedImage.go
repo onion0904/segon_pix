@@ -20,13 +20,15 @@ func (con *Controller) AddPostedImage(c echo.Context) error {
     // フォームデータからファイルを取得
     fileHeader, err := c.FormFile("File")
     if err != nil {
-        return c.NoContent(http.StatusBadRequest) // 400エラー
+        log.Printf("Error retrieving file: %v", err)
+        return c.JSON(http.StatusBadRequest, map[string]string{"message": "ファイルの取得に失敗しました"})
     }
 
     // ファイルを開く
     file, err := fileHeader.Open()
     if err != nil {
-        return c.NoContent(http.StatusInternalServerError) // 500エラー
+        log.Printf("Error opening file: %v", err)
+        return c.JSON(http.StatusInternalServerError, map[string]string{"message": "ファイルの読み込みに失敗しました"})
     }
     defer file.Close()
 
@@ -36,21 +38,27 @@ func (con *Controller) AddPostedImage(c echo.Context) error {
     // リポジトリを初期化
     repo, err := repositories.NewRepository(con.db)
     if err != nil {
-        return c.NoContent(http.StatusServiceUnavailable) // 503エラー
+        log.Printf("Error initializing repository: %v", err)
+        return c.JSON(http.StatusServiceUnavailable, map[string]string{"message": "サービスが利用できません"})
     }
 
     // ユーザーIDを取得し、uintに変換
     userID := c.QueryParam("ID")
+    if userID == "" {
+        return c.JSON(http.StatusBadRequest, map[string]string{"message": "ユーザーIDが必要です"})
+    }
     uintID64, err := strconv.ParseUint(userID, 10, 64)
     if err != nil {
-        return c.NoContent(500) // 400エラー
+        log.Printf("Invalid userID: %v", err)
+        return c.JSON(http.StatusBadRequest, map[string]string{"message": "無効なユーザーIDです"})
     }
     uintID := uint(uintID64)
 
     // マルチパートフォームデータを取得
     form, err := c.MultipartForm()
     if err != nil {
-        return c.NoContent(http.StatusBadRequest) // 400エラー
+        log.Printf("Error retrieving form data: %v", err)
+        return c.JSON(http.StatusBadRequest, map[string]string{"message": "フォームデータの取得に失敗しました"})
     }
 
     // "Hashtags"フィールドからハッシュタグを取得
@@ -71,25 +79,28 @@ func (con *Controller) AddPostedImage(c echo.Context) error {
     // 画像をGCSにアップロード
     err = repo.AddPostedImage(ctx, file, filename, uintID, hashtagsSlice)
     if err != nil {
-        return c.NoContent(http.StatusInternalServerError) // 500エラー
+        log.Printf("Error uploading image to GCS: %v", err)
+        return c.JSON(http.StatusInternalServerError, map[string]string{"message": "画像のアップロードに失敗しました"})
     }
 
-    return c.NoContent(http.StatusOK)
+    return c.JSON(http.StatusOK, map[string]string{"message": "画像がアップロードされました"})
 }
 
-
-
-// DeleteImage は指定された画像をGCSおよびデータベースから削除します
 func (con *Controller) DeletePostedImage(c echo.Context) error {
     ctx := c.Request().Context()
 
     imageID := c.QueryParam("ID")
+    if imageID == "" {
+        log.Printf("Image ID is missing in request")
+        return c.JSON(http.StatusBadRequest, map[string]string{"error": "Image ID is required"})
+    }
+    
     log.Printf("Received delete request for image ID: %s", imageID)
     
     uintID64, err := strconv.ParseUint(imageID, 10, 64)
     if err != nil {
         log.Printf("Invalid image ID format: %v", err)
-        return c.NoContent(http.StatusBadRequest)
+        return c.JSON(http.StatusBadRequest, map[string]string{"error": "Invalid image ID format"})
     }
     uintID := uint(uintID64)
 
@@ -117,63 +128,93 @@ func (con *Controller) DeletePostedImage(c echo.Context) error {
         return c.JSON(http.StatusInternalServerError, map[string]string{"error": "Failed to delete image from storage"})
     }
 
-    log.Printf("Successfully completed delete operation for image ID: %d", uintID)
-    return c.NoContent(http.StatusOK)
+    log.Printf("Successfully deleted image with ID: %d", uintID)
+    return c.JSON(http.StatusOK, map[string]string{"message": "Image deleted successfully"})
 }
 
 func (con *Controller) SearchImage(c echo.Context) error {
-	Qhashtag := c.QueryParam("Hashtag")
-	repo ,err := repositories.NewRepository(con.db)
-	if err != nil {
-        return c.NoContent(http.StatusServiceUnavailable) // 503エラー
+    Qhashtag := c.QueryParam("Hashtag")
+    if Qhashtag == "" {
+        return c.JSON(http.StatusBadRequest, map[string]string{"error": "Hashtag is required"})
     }
-	PostedImage, err := repo.SearchImage(Qhashtag)
-	if err != nil {
-		return c.NoContent(http.StatusServiceUnavailable) // 503エラー
-	}
-	return c.JSON(http.StatusOK, PostedImage)
+
+    repo, err := repositories.NewRepository(con.db)
+    if err != nil {
+        log.Printf("Failed to create repository: %v", err)
+        return c.JSON(http.StatusServiceUnavailable, map[string]string{"error": "Service Unavailable"})
+    }
+
+    PostedImage, err := repo.SearchImage(Qhashtag)
+    if err != nil {
+        log.Printf("Error searching for image by hashtag: %v", err)
+        return c.JSON(http.StatusInternalServerError, map[string]string{"error": "Failed to search image"})
+    }
+
+    return c.JSON(http.StatusOK, PostedImage)
 }
 
 func (con *Controller) ImageInfo(c echo.Context) error {
-	id := c.QueryParam("imageID")
-	repo ,err := repositories.NewRepository(con.db)
-	if err != nil {
-        return c.NoContent(http.StatusServiceUnavailable) // 503エラー
+    imageID := c.QueryParam("imageID")
+    if imageID == "" {
+        return c.JSON(http.StatusBadRequest, map[string]string{"error": "Image ID is required"})
     }
-    uintID64, err := strconv.ParseUint(id, 10, 64)
+
+    repo, err := repositories.NewRepository(con.db)
+    if err != nil {
+        log.Printf("Failed to create repository: %v", err)
+        return c.JSON(http.StatusServiceUnavailable, map[string]string{"error": "Service Unavailable"})
+    }
+
+    uintID64, err := strconv.ParseUint(imageID, 10, 64)
     if err != nil {
         log.Printf("Invalid image ID format: %v", err)
-        return c.NoContent(http.StatusBadRequest)
+        return c.JSON(http.StatusBadRequest, map[string]string{"error": "Invalid image ID format"})
     }
     uintID := uint(uintID64)
-	PostedImage, err := repo.ImageInfo(uintID)
-	if err != nil {
-		return c.NoContent(http.StatusServiceUnavailable) // 503エラー
-	}
-	return c.JSON(http.StatusOK, PostedImage)
+
+    PostedImage, err := repo.ImageInfo(uintID)
+    if err != nil {
+        log.Printf("Error fetching image info: %v", err)
+        return c.JSON(http.StatusInternalServerError, map[string]string{"error": "Failed to retrieve image information"})
+    }
+
+    return c.JSON(http.StatusOK, PostedImage)
 }
 
-
 func (con *Controller) GetRecentImages(c echo.Context) error {
-	repo ,err := repositories.NewRepository(con.db)
-	if err != nil {
-        return c.NoContent(http.StatusServiceUnavailable) // 503エラー
+    // リポジトリを初期化
+    repo, err := repositories.NewRepository(con.db)
+    if err != nil {
+        log.Printf("Failed to create repository: %v", err)
+        return c.JSON(http.StatusServiceUnavailable, map[string]string{"error": "サービスが利用できません"})
     }
-	PostedImage, err := repo.GetRecentImages()
-	if err != nil {
-		return c.NoContent(http.StatusServiceUnavailable) // 503エラー
-	}
-	return c.JSON(http.StatusOK, PostedImage)
+
+    // 最近の画像を取得
+    PostedImage, err := repo.GetRecentImages()
+    if err != nil {
+        log.Printf("Failed to get recent images: %v", err)
+        return c.JSON(http.StatusInternalServerError, map[string]string{"error": "最近の画像の取得に失敗しました"})
+    }
+
+    // 成功時に画像を返す
+    return c.JSON(http.StatusOK, PostedImage)
 }
 
 func (con *Controller) GetLikeImages(c echo.Context) error {
-	repo ,err := repositories.NewRepository(con.db)
-	if err != nil {
-        return c.NoContent(http.StatusServiceUnavailable) // 503エラー
+    // リポジトリを初期化
+    repo, err := repositories.NewRepository(con.db)
+    if err != nil {
+        log.Printf("Failed to create repository: %v", err)
+        return c.JSON(http.StatusServiceUnavailable, map[string]string{"error": "サービスが利用できません"})
     }
-	PostedImage, err := repo.GetLikeImages()
-	if err != nil {
-		return c.NoContent(http.StatusServiceUnavailable) // 503エラー
-	}
-	return c.JSON(http.StatusOK, PostedImage)
+
+    // 「いいね」が多い画像を取得
+    PostedImage, err := repo.GetLikeImages()
+    if err != nil {
+        log.Printf("Failed to get liked images: %v", err)
+        return c.JSON(http.StatusInternalServerError, map[string]string{"error": "人気の画像の取得に失敗しました"})
+    }
+
+    // 成功時に画像を返す
+    return c.JSON(http.StatusOK, PostedImage)
 }

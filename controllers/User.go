@@ -5,7 +5,7 @@ import (
 	"PixApp/repositories"
 	"net/http"
 	"strconv"
-
+    "log"
 	"github.com/labstack/echo/v4"
 	"gorm.io/gorm"
 )
@@ -16,8 +16,11 @@ func (con *Controller) AddUser(c echo.Context) error {
     
     // リクエストボディのバインド
     if err := c.Bind(&user); err != nil {
-        return c.JSON(http.StatusBadRequest, "Invalid request data")
+        log.Printf("Failed to bind request data: %v", err)
+        return c.JSON(http.StatusBadRequest, map[string]string{"error": "Invalid request data"})
     }
+
+    // フォロワー・フォローリストの初期化
     if user.Followers == nil {
         user.Followers = make([]models.User, 0)
     }
@@ -28,225 +31,267 @@ func (con *Controller) AddUser(c echo.Context) error {
     // リポジトリの作成
     repo, err := repositories.NewRepository(con.db)
     if err != nil {
-        return c.JSON(http.StatusInternalServerError, "Failed to create repository")
+        log.Printf("Failed to create repository: %v", err)
+        return c.JSON(http.StatusInternalServerError, map[string]string{"error": "Failed to create repository"})
     }
 
     // リポジトリを使ってユーザーを追加
     if err := repo.AddUser(&user); err != nil {
-        return c.JSON(http.StatusInternalServerError, "Failed to add user")
+        log.Printf("Failed to add user: %v", err)
+        return c.JSON(http.StatusInternalServerError, map[string]string{"error": "Failed to add user"})
     }
 
-    return c.JSON(http.StatusOK, nil) // 正常終了
+    return c.JSON(http.StatusOK, map[string]string{"message": "User added successfully"})
 }
-
 
 func (con *Controller) UserInfo(c echo.Context) error {
-	userID := c.QueryParam("ID")
-	uintID64, err := strconv.ParseUint(userID, 10, 64)
-	if err!= nil {
-        return c.NoContent(http.StatusBadRequest) // 400エラー
+    userID := c.QueryParam("ID")
+    if userID == "" {
+        return c.JSON(http.StatusBadRequest, map[string]string{"error": "User ID is required"})
     }
-	uintID := uint(uintID64)
-	repo ,err := repositories.NewRepository(con.db)
-	if err != nil {
-        return c.NoContent(http.StatusServiceUnavailable) // 503エラー
+
+    uintID64, err := strconv.ParseUint(userID, 10, 64)
+    if err != nil {
+        log.Printf("Invalid user ID format: %v", err)
+        return c.JSON(http.StatusBadRequest, map[string]string{"error": "Invalid user ID format"})
     }
-	User, err := repo.UserInfo(uintID)
-	if err != nil {
-		return c.NoContent(http.StatusServiceUnavailable) // 503エラー
-	}
-	return c.JSON(http.StatusOK, User)
-}
-
-
-func (con *Controller) UserInfoAuth(c echo.Context) error {
-    email := c.QueryParam("email")
-    password := c.QueryParam("password")
+    uintID := uint(uintID64)
 
     repo, err := repositories.NewRepository(con.db)
     if err != nil {
-        return c.JSON(http.StatusServiceUnavailable,err) // 503エラー
+        log.Printf("Failed to create repository: %v", err)
+        return c.JSON(http.StatusServiceUnavailable, map[string]string{"error": "Service Unavailable"})
     }
 
-    user ,err := repo.UserInfoAuth(email,password)
-	if err!= nil {
-        return c.JSON(http.StatusUnauthorized, map[string]string{"message": "メールアドレスまたはパスワードが間違っています"})
+    user, err := repo.UserInfo(uintID)
+    if err != nil {
+        log.Printf("Failed to retrieve user info: %v", err)
+        return c.JSON(http.StatusInternalServerError, map[string]string{"error": "Failed to retrieve user information"})
     }
 
     return c.JSON(http.StatusOK, user)
 }
 
+func (con *Controller) UserInfoAuth(c echo.Context) error {
+    email := c.QueryParam("email")
+    password := c.QueryParam("password")
 
-func (con *Controller) DeleteUser(c echo.Context) error {
-	userID := c.QueryParam("ID")
-	uintID64, err := strconv.ParseUint(userID, 10, 64)
-	if err!= nil {
-        return c.NoContent(http.StatusBadRequest) // 400エラー
+    if email == "" || password == "" {
+        return c.JSON(http.StatusBadRequest, map[string]string{"error": "Email and password are required"})
     }
-	uintID := uint(uintID64)
 
-	var existinguser models.User
-	if err := con.db.First(&existinguser, uintID).Error; err != nil {
-		if err == gorm.ErrRecordNotFound {
-			return c.NoContent(http.StatusNotFound) // 404エラー
-		}
-		return c.NoContent(http.StatusServiceUnavailable) // 503エラー
-	}
-
-	repo ,err := repositories.NewRepository(con.db)
-	if err != nil {
-        return c.NoContent(http.StatusServiceUnavailable) // 503エラー
+    repo, err := repositories.NewRepository(con.db)
+    if err != nil {
+        log.Printf("Failed to create repository: %v", err)
+        return c.JSON(http.StatusServiceUnavailable, map[string]string{"error": "Service Unavailable"})
     }
-	if err := repo.DeleteUser(uintID); err != nil {
-		return c.NoContent(http.StatusServiceUnavailable) // 503エラー
-	}
-	return c.NoContent(http.StatusOK)
+
+    user, err := repo.UserInfoAuth(email, password)
+    if err != nil {
+        log.Printf("Authentication failed: %v", err)
+        return c.JSON(http.StatusUnauthorized, map[string]string{"error": "Invalid email or password"})
+    }
+
+    return c.JSON(http.StatusOK, user)
 }
 
-
-func (con *Controller) UpdateUserIcon(c echo.Context) error {
-    // クエリパラメータからユーザーIDを取得
-    idStr := c.QueryParam("ID")
-    if idStr == "" {
-        return c.String(http.StatusBadRequest, "IDクエリパラメータが必要です")
+func (con *Controller) DeleteUser(c echo.Context) error {
+    userID := c.QueryParam("ID")
+    if userID == "" {
+        return c.JSON(http.StatusBadRequest, map[string]string{"error": "User ID is required"})
     }
 
-    // 文字列のIDをuintに変換
+    uintID64, err := strconv.ParseUint(userID, 10, 64)
+    if err != nil {
+        log.Printf("Invalid user ID format: %v", err)
+        return c.JSON(http.StatusBadRequest, map[string]string{"error": "Invalid user ID format"})
+    }
+    uintID := uint(uintID64)
+
+    var existinguser models.User
+    if err := con.db.First(&existinguser, uintID).Error; err != nil {
+        if err == gorm.ErrRecordNotFound {
+            log.Printf("User not found: %d", uintID)
+            return c.JSON(http.StatusNotFound, map[string]string{"error": "User not found"})
+        }
+        log.Printf("Database error: %v", err)
+        return c.JSON(http.StatusInternalServerError, map[string]string{"error": "Failed to retrieve user from database"})
+    }
+
+    repo, err := repositories.NewRepository(con.db)
+    if err != nil {
+        log.Printf("Failed to create repository: %v", err)
+        return c.JSON(http.StatusServiceUnavailable, map[string]string{"error": "Service unavailable"})
+    }
+
+    if err := repo.DeleteUser(uintID); err != nil {
+        log.Printf("Failed to delete user: %v", err)
+        return c.JSON(http.StatusInternalServerError, map[string]string{"error": "Failed to delete user"})
+    }
+
+    log.Printf("User deleted successfully: %d", uintID)
+    return c.JSON(http.StatusOK, map[string]string{"message": "User deleted successfully"})
+}
+
+func (con *Controller) UpdateUserIcon(c echo.Context) error {
+    idStr := c.QueryParam("ID")
+    if idStr == "" {
+        return c.JSON(http.StatusBadRequest, map[string]string{"error": "User ID is required"})
+    }
+
     idUint64, err := strconv.ParseUint(idStr, 10, 64)
     if err != nil {
-        return c.String(http.StatusBadRequest, "無効なIDの形式です")
+        log.Printf("Invalid user ID format: %v", err)
+        return c.JSON(http.StatusBadRequest, map[string]string{"error": "Invalid user ID format"})
     }
     userID := uint(idUint64)
 
     // アップロードされたファイルを取得
     file, err := c.FormFile("File")
     if err != nil {
-        return c.String(http.StatusBadRequest, "ファイルが必要です")
+        log.Printf("Failed to retrieve file: %v", err)
+        return c.JSON(http.StatusBadRequest, map[string]string{"error": "File is required"})
     }
 
     // ファイルを開く
     src, err := file.Open()
     if err != nil {
-        return c.String(http.StatusInternalServerError, "ファイルを開けませんでした")
+        log.Printf("Failed to open file: %v", err)
+        return c.JSON(http.StatusInternalServerError, map[string]string{"error": "Failed to open file"})
     }
     defer src.Close()
 
     // リポジトリを取得
     repo, err := repositories.NewRepository(con.db)
     if err != nil {
-        return c.NoContent(http.StatusServiceUnavailable) // 503エラー
+        log.Printf("Failed to create repository: %v", err)
+        return c.JSON(http.StatusServiceUnavailable, map[string]string{"error": "Service unavailable"})
     }
 
     // アイコン画像をアップロードし、URLを取得
     url, _, err := repo.UploadImageToGCS(c.Request().Context(), src, file.Filename)
     if err != nil {
-        return c.String(http.StatusInternalServerError, "画像のアップロードに失敗しました")
+        log.Printf("Failed to upload image: %v", err)
+        return c.JSON(http.StatusInternalServerError, map[string]string{"error": "Failed to upload image"})
     }
 
     // ユーザーのIconフィールドを更新
     err = repo.UpdateUserIcon(userID, url)
     if err != nil {
-        return c.String(http.StatusInternalServerError, "ユーザーのアイコン更新に失敗しました")
+        log.Printf("Failed to update user icon: %v", err)
+        return c.JSON(http.StatusInternalServerError, map[string]string{"error": "Failed to update user icon"})
     }
 
-    return c.NoContent(http.StatusOK)
+    log.Printf("User icon updated successfully for user ID: %d", userID)
+    return c.JSON(http.StatusOK, map[string]string{"message": "User icon updated successfully"})
 }
-
 
 func (con *Controller) UpdateUserHeader(c echo.Context) error {
     // クエリパラメータからユーザーIDを取得
     idStr := c.QueryParam("ID")
     if idStr == "" {
-        return c.String(http.StatusBadRequest, "IDクエリパラメータが必要です")
+        log.Printf("User ID is missing in request")
+        return c.JSON(http.StatusBadRequest, map[string]string{"error": "User ID is required"})
     }
 
     // 文字列のIDをuintに変換
     idUint64, err := strconv.ParseUint(idStr, 10, 64)
     if err != nil {
-        return c.String(http.StatusBadRequest, "無効なIDの形式です")
+        log.Printf("Invalid user ID format: %v", err)
+        return c.JSON(http.StatusBadRequest, map[string]string{"error": "Invalid user ID format"})
     }
     userID := uint(idUint64)
 
     // アップロードされたファイルを取得
     file, err := c.FormFile("File")
     if err != nil {
-        return c.String(http.StatusBadRequest, "ファイルが必要です")
+        log.Printf("Failed to retrieve file: %v", err)
+        return c.JSON(http.StatusBadRequest, map[string]string{"error": "File is required"})
     }
 
     // ファイルを開く
     src, err := file.Open()
     if err != nil {
-        return c.String(http.StatusInternalServerError, "ファイルを開けませんでした")
+        log.Printf("Failed to open file: %v", err)
+        return c.JSON(http.StatusInternalServerError, map[string]string{"error": "Failed to open file"})
     }
     defer src.Close()
 
     // リポジトリを取得
     repo, err := repositories.NewRepository(con.db)
     if err != nil {
-        return c.NoContent(http.StatusServiceUnavailable) // 503エラー
+        log.Printf("Failed to create repository: %v", err)
+        return c.JSON(http.StatusServiceUnavailable, map[string]string{"error": "Service unavailable"})
     }
 
     // アイコン画像をアップロードし、URLを取得
     url, _, err := repo.UploadImageToGCS(c.Request().Context(), src, file.Filename)
     if err != nil {
-        return c.String(http.StatusInternalServerError, "画像のアップロードに失敗しました")
+        log.Printf("Failed to upload image: %v", err)
+        return c.JSON(http.StatusInternalServerError, map[string]string{"error": "Failed to upload image"})
     }
 
-    // ユーザーのIconフィールドを更新
+    // ユーザーのHeaderフィールドを更新
     err = repo.UpdateUserHeader(userID, url)
     if err != nil {
-        return c.String(http.StatusInternalServerError, "ユーザーのアイコン更新に失敗しました")
+        log.Printf("Failed to update user header: %v", err)
+        return c.JSON(http.StatusInternalServerError, map[string]string{"error": "Failed to update user header"})
     }
 
-    return c.NoContent(http.StatusOK)
+    log.Printf("User header updated successfully for user ID: %d", userID)
+    return c.JSON(http.StatusOK, map[string]string{"message": "User header updated successfully"})
 }
-
-
 
 func (con *Controller) UpdateUserInfo(c echo.Context) error {
     // クエリパラメータからユーザーIDを取得
     idStr := c.QueryParam("userID")
     if idStr == "" {
-        return c.String(http.StatusBadRequest, "IDクエリパラメータが必要です")
+        log.Printf("User ID is missing in request")
+        return c.JSON(http.StatusBadRequest, map[string]string{"error": "User ID is required"})
     }
 
     // 文字列のIDをuintに変換
     idUint64, err := strconv.ParseUint(idStr, 10, 64)
     if err != nil {
-        return c.String(http.StatusBadRequest, "無効なIDの形式です")
+        log.Printf("Invalid user ID format: %v", err)
+        return c.JSON(http.StatusBadRequest, map[string]string{"error": "Invalid user ID format"})
     }
     userID := uint(idUint64)
 
-	name := c.QueryParam("name")
+    name := c.QueryParam("name")
     if name == "" {
-        return c.String(http.StatusBadRequest,"nothing name")
+        return c.JSON(http.StatusBadRequest, map[string]string{"error": "Name is required"})
     }
 
-	description := c.QueryParam("description")
+    description := c.QueryParam("description")
 
     birthdayStr := c.QueryParam("birthday")
     birthday, err := strconv.Atoi(birthdayStr)
     if err != nil {
-        return c.JSON(http.StatusBadRequest, map[string]string{"message": "誕生日は数値で指定してください"})
+        log.Printf("Invalid birthday format: %v", err)
+        return c.JSON(http.StatusBadRequest, map[string]string{"error": "Birthday must be a number"})
     }
 
-
-	email := c.QueryParam("email")
+    email := c.QueryParam("email")
     if email == "" {
-        return c.String(http.StatusBadRequest, "nothing email")
+        return c.JSON(http.StatusBadRequest, map[string]string{"error": "Email is required"})
     }
 
     // リポジトリを取得
     repo, err := repositories.NewRepository(con.db)
     if err != nil {
-        return c.NoContent(http.StatusServiceUnavailable) // 503エラー
+        log.Printf("Failed to create repository: %v", err)
+        return c.JSON(http.StatusServiceUnavailable, map[string]string{"error": "Service unavailable"})
     }
 
-    // ユーザーのIconフィールドを更新
-    err = repo.UpdateUserInfo(userID, name,description,email,birthday)
+    // ユーザー情報を更新
+    err = repo.UpdateUserInfo(userID, name, description, email, birthday)
     if err != nil {
-        return c.String(http.StatusInternalServerError, "ユーザーのアイコン更新に失敗しました")
+        log.Printf("Failed to update user info: %v", err)
+        return c.JSON(http.StatusInternalServerError, map[string]string{"error": "Failed to update user info"})
     }
 
-    return c.NoContent(http.StatusOK)
+    log.Printf("User info updated successfully for user ID: %d", userID)
+    return c.JSON(http.StatusOK, map[string]string{"message": "User info updated successfully"})
 }
+
