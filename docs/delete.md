@@ -49,9 +49,8 @@ curl -X DELETE -H "Authorization: Bearer <JWTトークン>" \
     | 変数      |     説明     |
     |-----------|-----------|
     |commentID       |  コメントのID  |
-    |imageID    |  画像のID  |
     - 使用例
 
     ```
-    curl -X DELETE -H "Authorization: Bearer <JWTトークン>" \"http://localhost:8080/segon_pix_auth/delete/comment?commentID=5678&imageID=1234"
+    curl -X DELETE -H "Authorization: Bearer <JWTトークン>" \"http://localhost:8080/segon_pix_auth/delete/comment?commentID=5678"
     ```

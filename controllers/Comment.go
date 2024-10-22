@@ -11,7 +11,16 @@ import (
 
 
 func (con *Controller) AddComment(c echo.Context) error {
+	newcomment := c.QueryParam("comment")
+	userID := c.QueryParam("userID")
 	comment := models.Comment{}
+	comment.Message = newcomment
+	uintUserID64, err := strconv.ParseUint(userID, 10, 64)
+	if err!= nil {
+        return c.NoContent(http.StatusBadRequest) // 400エラー
+    }
+	uintUserID := uint(uintUserID64)
+	comment.UserID = uintUserID
 	if err := c.Bind(&comment); err != nil {
 		return c.NoContent(http.StatusServiceUnavailable) // 503エラー
 	}
@@ -63,18 +72,12 @@ func (con *Controller) DeleteComment(c echo.Context) error {
 	if err!= nil {
         return c.NoContent(http.StatusBadRequest) // 400エラー
     }
-	uintCommentID := uint(uintCommentID64)
-	imageID := c.QueryParam("imageID")
-	uintImageID64, err := strconv.ParseUint(imageID, 10, 64)
-	if err!= nil {
-        return c.NoContent(http.StatusBadRequest) // 400エラー
-    }
-	uintImageID := uint(uintImageID64)
+	uintCommentID := uint(uintCommentID64)	
 	repo ,err := repositories.NewRepository(con.db)
 	if err != nil {
         return c.NoContent(http.StatusServiceUnavailable) // 503エラー
     }
-	if err := repo.DeleteComment(uintCommentID,uintImageID); err != nil {
+	if err := repo.DeleteComment(uintCommentID); err != nil {
 		return c.NoContent(http.StatusServiceUnavailable) // 503エラー
 	}
 	return c.NoContent(http.StatusOK)

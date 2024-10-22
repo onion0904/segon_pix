@@ -126,17 +126,17 @@ class HashTag {
   HashTag({required this.id, required this.tag, required this.postedImages});
 }
 
-class SimpleImages {
+class SimpleImage {
   final int imageID;
   final String imageURL;
 
-  SimpleImages({
+  SimpleImage({
     required this.imageID,
     required this.imageURL,
   });
 
-  factory SimpleImages.fromJson(Map<String, dynamic> json) {
-    return SimpleImages(
+  factory SimpleImage.fromJson(Map<String, dynamic> json) {
+    return SimpleImage(
       imageID: json["ID"],
       imageURL: json["URL"],
     );
