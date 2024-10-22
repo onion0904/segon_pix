@@ -54,3 +54,18 @@ curl -X DELETE -H "Authorization: Bearer <JWTトークン>" \
     ```
     curl -X DELETE -H "Authorization: Bearer <JWTトークン>" \"http://localhost:8080/segon_pix_auth/delete/comment?commentID=5678"
     ```
+
+- /delete/follow(token必要)
+    - 入力できる値(queryでの受け取り)
+    - followingIDのユーザーのFollows(自分がフォローしてるユーザー)からfollowedIDのユーザーを削除する。
+
+    | 変数      |     説明     |
+    |-----------|-----------|
+    |followingID     |  フォローしてるユーザーID  |
+    |followedID    |  フォローされてるユーザーID  |
+
+    - 使用例
+
+    ```
+    curl -X DELETE -H "Authorization: Bearer <JWTトークン>" \"http://localhost:8080/segon_pix_auth/delete/follow?followingID=1234&followedID=5678"
+    ```

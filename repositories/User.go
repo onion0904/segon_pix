@@ -7,12 +7,18 @@ import (
 	"context"
     "fmt"
     "golang.org/x/crypto/bcrypt"
+    "gorm.io/gorm/clause"
 )
 
 // 与えられたidのユーザー情報を返す
 func (repo *Repository) UserInfo(id uint) (*models.User, error) {
     var user models.User
-    if err := repo.db.Preload("PostedImages").Preload("LikedImages").First(&user, id).Error; err != nil {
+    if err := repo.db.
+        Preload("PostedImages").
+        Preload("LikedImages").
+        Preload("Follows").
+        Preload("Followers").
+        First(&user, id).Error; err != nil {
         if errors.Is(err, gorm.ErrRecordNotFound) {
             return nil, nil // またはカスタムエラーを返す
         }
@@ -34,7 +40,8 @@ func (repo *Repository) UserInfoAuth(email, password string) (*models.User, erro
     fmt.Println("Searching for user with email:", email)
 
     // Emailでユーザーを検索
-    if err := repo.db.Preload("PostedImages").Preload("LikedImages").
+    if err := repo.db.
+        Preload(clause.Associations).
         Where("email = ?", email).First(&user).Error; err != nil {
 
         // エラーの詳細を出力
