@@ -15,6 +15,7 @@ require (
 	gorm.io/gorm v1.25.12
 )
 
+
 require (
 	cloud.google.com/go v0.115.0 // indirect
 	cloud.google.com/go/auth v0.6.1 // indirect
