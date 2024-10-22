@@ -59,9 +59,6 @@ func main() {
 	
 	method := e.Group("/segon_pix")
 	{	
-		method.POST("/add/user", con.AddUser)
-		method.POST("/add/follow", con.AddFollow)
-		method.DELETE("/delete/follow", con.RemoveFollow)
 		method.GET("/get/user", con.UserInfo)
 		method.GET("/get/list/search", con.SearchImage)
 		method.GET("/get/list/like", con.GetLikeImages)
@@ -85,9 +82,11 @@ func main() {
 
 	// 認証が必要なルート
 	{
+		r.POST("/add/user", con.AddUser)
 		r.POST("/add/image", con.AddPostedImage)
 		r.POST("/add/like", con.AddLike)
 		r.POST("/add/comment", con.AddComment)
+		r.POST("/add/follow", con.AddFollow)
 		r.GET("", con.Restricted)
 		r.GET("/get/user",con.UserInfoAuth)
 		r.PUT("/update/user", con.UpdateUserInfo)
@@ -98,6 +97,7 @@ func main() {
 		r.DELETE("/delete/image", con.DeletePostedImage)
 		r.DELETE("/delete/like", con.RemoveLike)
 		r.DELETE("/delete/comment", con.DeleteComment)
+		r.DELETE("/delete/follow", con.RemoveFollow)
 	}
 	// サーバーの開始
 	e.Logger.Fatal(e.Start(":8080"))
