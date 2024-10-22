@@ -184,7 +184,6 @@ func (con *Controller) UpdateUserIcon(c echo.Context) error {
         return c.JSON(http.StatusInternalServerError, map[string]string{"error": "Failed to update user icon"})
     }
 
-    log.Printf("User icon updated successfully for user ID: %d", userID)
     return c.JSON(http.StatusOK, map[string]string{"message": "User icon updated successfully"})
 }
 
@@ -240,7 +239,6 @@ func (con *Controller) UpdateUserHeader(c echo.Context) error {
         return c.JSON(http.StatusInternalServerError, map[string]string{"error": "Failed to update user header"})
     }
 
-    log.Printf("User header updated successfully for user ID: %d", userID)
     return c.JSON(http.StatusOK, map[string]string{"message": "User header updated successfully"})
 }
 
@@ -292,7 +290,6 @@ func (con *Controller) UpdateUserInfo(c echo.Context) error {
         return c.JSON(http.StatusInternalServerError, map[string]string{"error": "Failed to update user info"})
     }
 
-    log.Printf("User info updated successfully for user ID: %d", userID)
     return c.JSON(http.StatusOK, map[string]string{"message": "User info updated successfully"})
 }
 
