@@ -5,97 +5,14 @@ import (
     "fmt"
     "io"
 	"context"
-    "time"
 	"os"
 	"log"
-	"github.com/joho/godotenv"
 	"gorm.io/gorm"
     "errors"
-    "cloud.google.com/go/storage"
+    "gorm.io/gorm/clause"
 )
 
-
-
-// UploadImageToGCS は画像を Google Cloud Storage にアップロードし、その URL を返します。
-func (repo *Repository) UploadImageToGCS(ctx context.Context, file io.Reader, filename string) (string,string, error) {
-    // .envファイルの読み込み
-	err := godotenv.Load()
-	if err != nil {
-		log.Fatalf("Error loading .env file")
-	}
-	bucketName := os.Getenv("GCS_BUCKET_NAME")
-	if bucketName == "" {
-        return "","", fmt.Errorf("GCS bucket name is not set")
-    }
-    objectName := fmt.Sprintf("%v-%v", time.Now().Unix(), filename)
-    object := repo.gcsClient.Bucket(bucketName).Object(objectName)
-    wc := object.NewWriter(ctx)
-    // ファイルの書き込み
-    if _, err := io.Copy(wc, file); err != nil {
-        wc.Close()
-        return "","", err
-    }
-    if err := wc.Close(); err != nil {
-        return "","", err
-    }
-
-    baseURL := "https://storage.googleapis.com/"
-    url := fmt.Sprintf("%s%s/%s", baseURL, bucketName, objectName)
-    return url, objectName, nil
-}
-
-
-// ensureHashtag は指定された名前のハッシュタグを取得、または存在しない場合は作成します。
-func (repo *Repository) ensureHashtag(tx *gorm.DB, name string) (models.Hashtag, error) {
-    var hashtag models.Hashtag
-    err := tx.Where("Name = ?", name).First(&hashtag).Error
-    if err != nil {
-        if errors.Is(err, gorm.ErrRecordNotFound) {
-            // ハッシュタグが存在しない場合は作成
-            //この時、エラーが出るが気にしなくてよい
-            hashtag = models.Hashtag{Name: name}
-            if err := tx.Create(&hashtag).Error; err != nil {
-                return models.Hashtag{}, fmt.Errorf("failed to create hashtag: %v", err)
-            }
-            return hashtag, nil
-        } 
-        return hashtag, nil
-    }
-    return hashtag, err
-}
-
-
-func (repo *Repository) DeleteImageFromGCS(w io.Writer,ctx context.Context, objectName string) error {
-    bucketName := os.Getenv("GCS_BUCKET_NAME")
-    if bucketName == "" {
-        log.Printf("GCS bucket name is not set in environment variables")
-        return fmt.Errorf("GCS bucket name is not set")
-    }
-
-    log.Printf("Attempting to delete object: %s from bucket: %s", objectName, bucketName)
-    
-    o := repo.gcsClient.Bucket(bucketName).Object(objectName)
-
-    attrs, err := o.Attrs(ctx)
-    if err != nil {
-        return fmt.Errorf("object.Attrs: %w", err)
-    }
-    o = o.If(storage.Conditions{GenerationMatch: attrs.Generation})
-    
-    if err := o.Delete(ctx); err != nil {
-        return fmt.Errorf("Object(%q).Delete: %w", objectName, err)
-    }
-    
-
-    fmt.Fprintf(w, "Blob %v deleted.\n", objectName)
-    return nil
-}
-
-
-
 //以下二つの関数を使う
-
-// AddPostedImageは、GCSへのアップロードを伴う投稿画像の追加を処理します。
 func (repo *Repository) AddPostedImage(ctx context.Context, file io.Reader, filename string, userID uint, hashtags []models.Hashtag) error {
     url, objectName, err := repo.UploadImageToGCS(ctx, file, filename)
     if err != nil {
@@ -137,7 +54,6 @@ func (repo *Repository) AddPostedImage(ctx context.Context, file io.Reader, file
     return tx.Commit().Error
 }
 
-
 func (repo *Repository) DeletePostedImage(ctx context.Context, imageID uint) error {
     log.Printf("Starting deletion process for image ID: %d", imageID)
     
@@ -165,17 +81,10 @@ func (repo *Repository) DeletePostedImage(ctx context.Context, imageID uint) err
     })
 }
 
-
-
-
-// 与えられたハッシュタグの部分一致の画像のスライスを返す
 func (repo *Repository) SearchImage(Qhashtag string) ([]models.Image, error) {
     var images []models.PostedImage
     query := repo.db.
-        Preload("PostUser").
-        Preload("Likes").
-        Preload("Comments").
-        Preload("Hashtags").
+        Preload(clause.Associations).
         Joins("JOIN posted_image_hashtags ON posted_image_hashtags.posted_image_id = posted_images.id").
         Joins("JOIN hashtags ON posted_image_hashtags.hashtag_id = hashtags.id")
 
@@ -202,15 +111,10 @@ func (repo *Repository) SearchImage(Qhashtag string) ([]models.Image, error) {
     return image, nil
 }
 
-
-
 func (repo *Repository) ImageInfo(id uint) (*models.PostedImage, error) {
     var image models.PostedImage
     if err := repo.db.
-    Preload("PostUser").
-    Preload("Likes").
-    Preload("Comments").
-    Preload("Hashtags").
+    Preload(clause.Associations).
     First(&image, id).Error; err != nil {
         if errors.Is(err, gorm.ErrRecordNotFound) {
             return nil, nil // またはカスタムエラーを返す
@@ -220,17 +124,10 @@ func (repo *Repository) ImageInfo(id uint) (*models.PostedImage, error) {
     return &image, nil
 }
 
-
-
-
-// GetRecentImages retrieves the most recently posted images.
 func (repo *Repository) GetRecentImages() ([]models.Image, error) {
     var postedImages []models.PostedImage
     err := repo.db.
-        Preload("PostUser").
-        Preload("Likes").
-        Preload("Comments").
-        Preload("Hashtags").
+        Preload(clause.Associations).
         Order("posted_images.created_at DESC"). // 作成日時の降順で並び替え
         Find(&postedImages).Error
 
@@ -249,14 +146,10 @@ func (repo *Repository) GetRecentImages() ([]models.Image, error) {
     return images, nil
 }
 
-// GetPopularImages retrieves images ordered by the number of likes in descending order.
 func (repo *Repository) GetLikeImages() ([]models.Image, error) {
     var postedImages []models.PostedImage
     err := repo.db.
-        Preload("PostUser").
-        Preload("Likes").
-        Preload("Comments").
-        Preload("Hashtags").
+        Preload(clause.Associations).
         Select("posted_images.*, COUNT(posted_image_likes.user_id) as likes_count").
         Joins("LEFT JOIN posted_image_likes ON posted_image_likes.posted_image_id = posted_images.id").
         Group("posted_images.id").

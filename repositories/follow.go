@@ -2,17 +2,11 @@ package repositories
 
 import (
     "PixApp/models"
+	"gorm.io/gorm"
 )
 
 func (repo *Repository) AddFollow(followingID uint,followedID uint) error {
-    // トランザクションを開始
-    tx := repo.db.Begin()
-    defer func() {
-        if r := recover(); r != nil {
-            tx.Rollback()
-        }
-    }()
-
+    return repo.db.Transaction(func(tx *gorm.DB) error {
     // ユーザーを取得
     var followinguser models.User
     if err := tx.First(&followinguser, followingID).Error; err != nil {
@@ -32,17 +26,13 @@ func (repo *Repository) AddFollow(followingID uint,followedID uint) error {
         return err
     }
     // トランザクションをコミット
-    return tx.Commit().Error
+    return nil
+	})
 }
 
 func (repo *Repository) RemoveFollow(followingID uint,followedID uint) error {
     // トランザクションを開始
-    tx := repo.db.Begin()
-    defer func() {
-        if r := recover(); r != nil {
-            tx.Rollback()
-        }
-    }()
+    return repo.db.Transaction(func(tx *gorm.DB) error {
 
     // ユーザーを取得
     var followinguser models.User
@@ -64,5 +54,6 @@ func (repo *Repository) RemoveFollow(followingID uint,followedID uint) error {
     }
 
     // トランザクションをコミット
-    return tx.Commit().Error
+    return nil
+	})
 }

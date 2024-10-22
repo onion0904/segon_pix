@@ -6,7 +6,6 @@ import (
 )
 
 
-// AddComment 新しいコメントをPostedImageに追加する
 func (repo *Repository) AddComment(model *models.Comment, imageID uint) error {
     return repo.db.Transaction(func(tx *gorm.DB) error {
         // 画像の存在確認
@@ -27,10 +26,6 @@ func (repo *Repository) AddComment(model *models.Comment, imageID uint) error {
     })
 }
 
-
-
-
-// UpdateComment は指定されたコメントの内容を更新する
 func (repo *Repository) UpdateComment(commentID uint, newContent string, imageID uint) error {
     return repo.db.Transaction(func(tx *gorm.DB) error {
         // 更新するコメントを取得
@@ -55,9 +50,6 @@ func (repo *Repository) UpdateComment(commentID uint, newContent string, imageID
         return nil
     })
 }
-
-
-
 
 func (repo *Repository) DeleteComment(commentID uint) error {
     return repo.db.Transaction(func(tx *gorm.DB) error {

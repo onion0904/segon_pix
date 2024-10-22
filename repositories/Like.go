@@ -2,17 +2,12 @@ package repositories
 
 import (
     "PixApp/models"
+    "gorm.io/gorm"
 )
 
-// AddLike はユーザーが画像にいいねをする処理
 func (repo *Repository) AddLike(userID uint, imageID uint) error {
     // トランザクションを開始
-    tx := repo.db.Begin()
-    defer func() {
-        if r := recover(); r != nil {
-            tx.Rollback()
-        }
-    }()
+    return repo.db.Transaction(func(tx *gorm.DB) error {
 
     // いいねする画像を取得
     var image models.PostedImage
@@ -41,18 +36,13 @@ func (repo *Repository) AddLike(userID uint, imageID uint) error {
     }
 
     // トランザクションをコミット
-    return tx.Commit().Error
+    return nil
+    })
 }
 
-// RemoveLike はユーザーが画像のいいねを取り消す処理
 func (repo *Repository) RemoveLike(userID uint, imageID uint) error {
     // トランザクションを開始
-    tx := repo.db.Begin()
-    defer func() {
-        if r := recover(); r != nil {
-            tx.Rollback()
-        }
-    }()
+    return repo.db.Transaction(func(tx *gorm.DB) error {
 
     // いいねを取り消す画像を取得
     var image models.PostedImage
@@ -81,5 +71,6 @@ func (repo *Repository) RemoveLike(userID uint, imageID uint) error {
     }
 
     // トランザクションをコミット
-    return tx.Commit().Error
+    return nil
+    })
 }

@@ -8,6 +8,3 @@
 - search実装
 
 ## server
-
-- controllerのエラーハンドリング
-- コメントを分かりやすくする
