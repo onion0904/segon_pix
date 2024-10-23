@@ -32,15 +32,15 @@
     - 使用例
 
     ```bash
-    curl -X POST -H "Authorization: Bearer <JWTトークン>" \
--H "Content-Type: application/json" \
--d '{
+    curl -X POST \
+    -H "Content-Type: application/json" \
+    -d '{
     "name": "John Doe",
     "email": "john@example.com",
     "password": "password",
     "birthday": 20241015
-}' \
-http://localhost:8080/verify?code=ABCDEF
+    }' \
+    http://localhost:8080/verify?code=ABCDEF
     ```
 
 - /login
