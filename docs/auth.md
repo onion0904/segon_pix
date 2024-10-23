@@ -35,8 +35,8 @@
     curl -X POST \
     -H "Content-Type: application/json" \
     -d '{
-    "name": "John Doe",
-    "email": "john@example.com",
+    "name": "onion gratin",
+    "email": "user@example.com",
     "password": "password",
     "birthday": 20241015
     }' \
