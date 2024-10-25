@@ -5,7 +5,7 @@ class User {
   String description;
   String headerImage;
   String email;
-  String password;// 多分これはいらない
+  String password;
   int birthday;
   List<PostedImage> postedImages;
   List<PostedImage> likedImages;
@@ -18,8 +18,8 @@ class User {
     required this.icon,
     required this.description,
     required this.headerImage,
-    required this.email,
-    this.password = "nothing",
+    this.email = "",
+    this.password = "",
     required this.birthday,
     this.postedImages = const [],
     this.likedImages = const [],
@@ -38,19 +38,19 @@ class User {
 
   factory User.fromJson(Map<String, dynamic> json) {
     return User(
-        id: json["ID"] as int,
-        name: json["Name"],
-        icon: json["Icon"],
-        description: json["Description"],
-        headerImage: json["HeaderImage"],
-        email: json["Email"],
-        birthday: json["Birthday"],
-postedImages: (json["PostedImages"] as List<dynamic>)
-    .map((item) => PostedImage.fromJson(item))
-    .toList(),
-likedImages: (json["LikedImages"] as List<dynamic>)
-    .map((item) => PostedImage.fromJson(item))
-    .toList(),
+      id: json["ID"] as int,
+      name: json["Name"],
+      icon: json["Icon"],
+      description: json["Description"],
+      headerImage: json["HeaderImage"],
+      email: json["Email"],
+      birthday: json["Birthday"],
+      postedImages: (json["PostedImages"] as List<dynamic>)
+          .map((item) => PostedImage.fromJson(item))
+          .toList(),
+      likedImages: (json["LikedImages"] as List<dynamic>)
+          .map((item) => PostedImage.fromJson(item))
+          .toList(),
 
       // followers: json['Followers'] != null
       //     ? (json['Followers'] as List).map((e) => User.fromJson(e)).toList()
@@ -58,7 +58,7 @@ likedImages: (json["LikedImages"] as List<dynamic>)
       // follows: json['Follows'] != null
       //     ? (json['Follows'] as List).map((e) => User.fromJson(e)).toList()
       //     : null,
-        );
+    );
   }
 }
 
@@ -95,13 +95,13 @@ class PostedImage {
 
   factory PostedImage.fromJson(Map<String, dynamic> json) {
     return PostedImage(
-        id: json["ID"],
-        userID: json["UserID"],
-        url: json["URL"],
-        user: json["PostUser"],
-        likes: json["Likes"],
-        comments: json["Comments"],
-        hashTag: json["Hashtags"],
+      id: json["ID"],
+      userID: json["UserID"],
+      url: json["URL"],
+      user: json["PostUser"],
+      likes: json["Likes"],
+      comments: json["Comments"],
+      hashTag: json["Hashtags"],
     );
   }
 }
