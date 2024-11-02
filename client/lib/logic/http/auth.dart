@@ -1,4 +1,5 @@
 import 'package:http/http.dart' as http;
+import 'dart:convert';
 
 Future<http.Response> signUp({required final String email}) async {
   final url = Uri.http("localhost:8080", "/signup", {"email": email});
@@ -15,21 +16,29 @@ Future<http.Response> verifyAddUser({
   final String description = "",
   required final String email,
   required final String password,
-  required final String birthday,
+  required final int birthday,
   required final String code,
 }) async {
-  final url = Uri.http("localhost:8080", "/verify");
+  final url = Uri.http("localhost:8080", "/verify", {"code": code});
 
-  final request = http.MultipartRequest("POST", url)
-    ..fields["name"] = name
-    ..fields["description"] = description
-    ..fields["email"] = email
-    ..fields["password"] = password
-    ..fields["birthday"] = birthday
-    ..fields["code"] = code;
+  final headers = {
+    "Content-Type": "application/json",
+  };
 
-  final streamedResponse = await request.send();
-  final response = await http.Response.fromStream(streamedResponse);
+  final body = jsonEncode({
+    "name": name,
+    "description": description,
+    "email": email,
+    "password": password,
+    "birthday": birthday,
+  });
+
+  // POSTリクエストを送信
+  final response = await http.post(
+    url,
+    headers: headers,
+    body: body,
+  );
 
   if (response.statusCode == 200) {
     return response;
@@ -37,6 +46,7 @@ Future<http.Response> verifyAddUser({
     throw Exception("Failed verifyAddUser lib/logic/http/auth.dart");
   }
 }
+
 
 Future<http.Response> login({
   required final String email,

@@ -24,14 +24,14 @@ class UserManager {
     password = p.getString("password") as String;
 
     //TODO syuusei
-    final response = await getJWT(email: email, password: password);
+    final response = await login(email: email, password: password);
     if (response.statusCode != 200) {
       return -1;
     }
 
     final json = jsonDecode(response.body);
     token = json["token"];
-    return 1;
+    return 0;
   }
 
   static Future<void> resetUserManager() async {

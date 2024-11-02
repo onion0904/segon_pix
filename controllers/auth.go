@@ -58,7 +58,7 @@ func (con *Controller) VerifyAddUser(c echo.Context) error {
     jwtSecret := []byte(secret)
 
     jsonData := models.User{}
-    
+
     // リクエストボディのバインド
     if err := c.Bind(&jsonData); err != nil {
         log.Printf("Failed to bind request data: %v", err)
