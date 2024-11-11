@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'splash.dart';
-import 'sign_in.dart';
-import 'sign_up.dart';
-import 'check_code.dart';
-import 'create_user.dart';
+import './signin/sign_in.dart';
+import './signup/sign_up.dart';
+import './signup/check_code.dart';
+import './signup/create_user.dart';
 import 'package:go_router/go_router.dart';
 import '../commons/button.dart';
 
@@ -27,10 +27,12 @@ class Logins extends HookWidget {
       SignUp(changeIndex: (int a) {
         index.value = a;
       }),
-      const CreateUser(),
-      CheckCode(changeIndex: (int a) {
-        index.value = a;
-      })
+      CreateUser(),
+      CheckCode(
+        changeIndex: (int a) {
+          index.value = a;
+        }
+      )
     ];
 
     return Scaffold(

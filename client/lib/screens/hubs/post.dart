@@ -7,6 +7,9 @@ import '../commons/button.dart';
 import '../../logic/http/post.dart';
 import '../../logic/db/user_manager.dart' ;
 
+import '../../../logic/http/put.dart';
+
+
 const double maxSize = 500;
 
 class Post extends HookWidget {
@@ -36,10 +39,10 @@ class Post extends HookWidget {
       SegonButton(
           handler: () async {
             if(image.value != null){
-            await postImage(
-              hashTags: controllers[0].text,
-              userId: UserManager.userID!,
-              imageFile: image.value!,
+            await addImage(
+              hashTag: controllers[0].text,
+              userID: UserManager.userID!,
+              file: image.value!,
               token: UserManager.token
             );
             }

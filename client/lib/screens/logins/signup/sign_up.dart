@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import '../commons/input_form.dart';
-import '../commons/button.dart';
-import '../../logic/http/auth.dart' as auth;
-import '../../logic/db/user_manager.dart';
+import '../../commons/input_form.dart';
+import '../../commons/button.dart';
+import '../../../logic/http/auth.dart' as auth;
+import '../../../logic/db/user_manager.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 
 class SignUp extends HookWidget {
@@ -28,7 +28,7 @@ class SignUp extends HookWidget {
           handler: () async {
               UserManager.email = controllers.value[0].text;
               UserManager.password = controllers.value[1].text;
-            auth.signUp(email: UserManager.email);
+            await auth.signUp(email: UserManager.email);
             changeIndex(4);
           },
           label: "create"),
