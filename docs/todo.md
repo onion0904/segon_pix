@@ -14,4 +14,5 @@
     - 今までIDとかだったエンドポイントをuserID,imageIDとかに変更
     - VerifyをVerifyAddUserに変更し、AddUserエンドポイントを削除。VerifyAddUserでUserを作成
 - TODO
+    - modelのN+1問題的なところを直す
     - 今回の変更点を確認する
