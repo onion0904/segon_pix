@@ -48,7 +48,7 @@ func (con *Controller) AddPostedImage(c echo.Context) error {
     }
     uintID := uintID(userID)
     if uintID == 0 {
-        return c.JSON(http.StatusBadRequest, map[string]string{"error": "Invalid user ID"})
+        return c.JSON(http.StatusBadRequest, map[string]string{"error": "fail to convert userID to uintID"})
     }
     err = con.VerifyUserID(c, uintID)
     if err!= nil {
@@ -96,7 +96,7 @@ func (con *Controller) DeletePostedImage(c echo.Context) error {
     }
     uintuserID := uintID(userID)
     if uintuserID == 0 {
-        return c.JSON(http.StatusBadRequest, map[string]string{"error": "Invalid user ID"})
+        return c.JSON(http.StatusBadRequest, map[string]string{"error": "fail to convert userID to uintID"})
     }
     err := con.VerifyUserID(c, uintuserID)
     if err!= nil {
@@ -189,7 +189,7 @@ func (con *Controller) ImageInfo(c echo.Context) error {
     PostedImage, err := repo.ImageInfo(uintID)
     if err != nil {
         log.Printf("Error fetching image info: %v", err)
-        return c.JSON(http.StatusInternalServerError, map[string]string{"error": "Failed to retrieve image information"})
+        return c.JSON(http.StatusInternalServerError, map[string]string{"error": "Failed to get image information"})
     }
 
     return c.JSON(http.StatusOK, PostedImage)

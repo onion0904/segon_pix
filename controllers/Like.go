@@ -19,7 +19,7 @@ func (con *Controller) AddLike(c echo.Context) error {
 
     uintuserID := uintID(userID)
     if uintuserID == 0 {
-        return c.JSON(http.StatusBadRequest, map[string]string{"error": "Invalid user ID"})
+        return c.JSON(http.StatusBadRequest, map[string]string{"error": "fail to convert userID to uintID"})
     }
     err := con.VerifyUserID(c, uintuserID)
     if err!= nil {
@@ -57,7 +57,7 @@ func (con *Controller) RemoveLike(c echo.Context) error {
 
     uintuserID := uintID(userID)
     if uintuserID == 0 {
-        return c.JSON(http.StatusBadRequest, map[string]string{"error": "Invalid user ID"})
+        return c.JSON(http.StatusBadRequest, map[string]string{"error": "fail to convert userID to uintID"})
     }
     err := con.VerifyUserID(c, uintuserID)
     if err!= nil {

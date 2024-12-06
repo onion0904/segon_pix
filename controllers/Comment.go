@@ -19,7 +19,7 @@ func (con *Controller) AddComment(c echo.Context) error {
 
     uintID := uintID(userID)
     if uintID == 0 {
-        return c.JSON(http.StatusBadRequest, map[string]string{"error": "Invalid user ID"})
+        return c.JSON(http.StatusBadRequest, map[string]string{"error": "fail to convert userID to uintID"})
     }
     err := con.VerifyUserID(c, uintID)
     if err!= nil {
@@ -64,7 +64,7 @@ func (con *Controller) UpdateComment(c echo.Context) error {
     }
     uintID := uintID(userID)
     if uintID == 0 {
-        return c.JSON(http.StatusBadRequest, map[string]string{"error": "Invalid user ID"})
+        return c.JSON(http.StatusBadRequest, map[string]string{"error": "fail to convert userID to uintID"})
     }
     err := con.VerifyUserID(c, uintID)
     if err!= nil {
@@ -121,7 +121,7 @@ func (con *Controller) DeleteComment(c echo.Context) error {
     }
     uintID := uintID(userID)
     if uintID == 0 {
-        return c.JSON(http.StatusBadRequest, map[string]string{"error": "Invalid user ID"})
+        return c.JSON(http.StatusBadRequest, map[string]string{"error": "fail to convert userID to uintID"})
     }
     err := con.VerifyUserID(c, uintID)
     if err!= nil {
