@@ -58,15 +58,15 @@ func (con *Controller) VerifyAddUser(c echo.Context) error {
     }
     jwtSecret := []byte(secret)
 
-    jsonData := models.User{}
+    user := models.User{}
     
     // リクエストボディのバインド
-    if err := c.Bind(&jsonData); err != nil {
+    if err := c.Bind(&user); err != nil {
         log.Printf("Failed to bind request data: %v", err)
         return c.JSON(http.StatusPreconditionFailed, map[string]string{"error": "リクエストをバインドできません"})
     }
-    email := jsonData.Email
-    password := jsonData.Password
+    email := user.Email
+    password := user.Password
     code := c.QueryParam("code")
 
     if email == "" || password == "" || code == "" {
@@ -111,15 +111,14 @@ func (con *Controller) VerifyAddUser(c echo.Context) error {
     delete(con.auth.VerificationCodes, email)
     con.auth.CodeMutex.Unlock()
 
-    userID,err := con.AddUser(c)
-    if err != nil{
-        log.Printf("Error adding user: %v", err)
-        return c.JSON(http.StatusInternalServerError, map[string]string{"message": "ユーザーの追加に失敗しました"})
+    if err := repo.AddUser(&user); err != nil {
+        log.Printf("Failed to add user: %v", err)
+        return c.JSON(http.StatusInternalServerError, map[string]string{"error": "Failed to add user"})
     }
 
     claims := &models.MyCustomClaims{
         Email: email,
-        UserID: userID,
+        UserID: user.ID,
         RegisteredClaims: jwt.RegisteredClaims{
             Subject:   email,
             ExpiresAt: jwt.NewNumericDate(time.Now().Add(time.Hour * 24)), // 有効期限
