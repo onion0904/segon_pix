@@ -72,7 +72,7 @@
     - 使用例
 
     ```
-    curl -H "Authorization: Bearer <JWTトークン>" http://localhost:8080/restricted
+    curl -H "Authorization: Bearer <JWTトークン>" http://localhost:8080/segon_pix_auth
     ```
 
 

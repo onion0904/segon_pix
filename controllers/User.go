@@ -10,7 +10,7 @@ import (
 	"gorm.io/gorm"
 )
 
-
+//AddUser使わない
 func (con *Controller) AddUser(c echo.Context) (uint,error) {
     user := models.User{}
     
