@@ -40,7 +40,7 @@
     "password": "password",
     "birthday": 20241015
     }' \
-    http://localhost:8080/verify?code=ABCDEF
+    http://localhost:8080/verifyAddUser?code=ABCDEF
     ```
 
 - /login
