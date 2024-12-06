@@ -1,7 +1,6 @@
 import 'package:http/http.dart' as http;
-import 'dart:convert';
 
-Future<http.Response> signUp({required String email}) async {
+Future<http.Response> signUp({required final String email}) async {
   final url = Uri.http("localhost:8080", "/signup", {"email": email});
   return http.post(
     url,
@@ -11,40 +10,49 @@ Future<http.Response> signUp({required String email}) async {
   );
 }
 
-Future<http.Response> verify({
-  required String email,
-  required String password,
-  required String code, // 認証コード 数値
+Future<http.Response> verifyAddUser({
+  required final String name,
+  final String description = "",
+  required final String email,
+  required final String password,
+  required final String birthday,
+  required final String code,
 }) async {
   final url = Uri.http("localhost:8080", "/verify");
 
   final request = http.MultipartRequest("POST", url)
-    ..fields["code"] = code
+    ..fields["name"] = name
+    ..fields["description"] = description
     ..fields["email"] = email
-    ..fields["password"] = password;
+    ..fields["password"] = password
+    ..fields["birthday"] = birthday
+    ..fields["code"] = code;
 
   final streamedResponse = await request.send();
   final response = await http.Response.fromStream(streamedResponse);
 
+  if (response.statusCode == 200) {
+    return response;
+  } else {
+    throw Exception("Failed verifyAddUser lib/logic/http/auth.dart");
+  }
+}
+
+Future<http.Response> login({
+  required final String email,
+  required final String password,
+}) async {
+  final url = Uri.http("localhost:8080", "/login");
+
+  final request = http.MultipartRequest("POST", url)
+    ..fields["email"] = email
+    ..fields["password"] = password;
+
+  final response = await http.Response.fromStream(await request.send());
 
   if (response.statusCode == 200) {
     return response;
   } else {
-    throw Exception("Failed verify lib/logic/http/auth.dart");
+    throw Exception("Failed login lib/logic/http/auth/dart");
   }
-}
-
-Future<http.Response> getJWT({
-  //login
-  required String email,
-  required String password,
-}) {
-  final url = Uri.http(
-      "localhost:8080", "/login", {"email": email, "password": password});
-  return http.post(
-    url,
-    headers: <String, String>{
-      "Content-Type": "application/json; charset=UTF-8"
-    },
-  );
 }
