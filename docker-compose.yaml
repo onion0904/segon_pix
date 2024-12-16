@@ -1,57 +1,55 @@
 services:
   db:
     container_name: DB
-    image: mysql:5.7
+    image: mysql
     command:
       - --character-set-server=utf8mb4
       - --explicit_defaults_for_timestamp
       - --collation-server=utf8mb4_unicode_ci
-      - --sql-mode=ONLY_FULL_GROUP_BY,NO_AUTO_CREATE_USER,NO_ENGINE_SUBSTITUTION
+      - --sql-mode=ONLY_FULL_GROUP_BY,NO_ENGINE_SUBSTITUTION
     environment:
-      MYSQL_ROOT_PASSWORD: ${ROOTPASS}
-      MYSQL_DATABASE: ${DB_NAME}
-      MYSQL_USER: ${DB_USER}
-      MYSQL_PASSWORD: ${DB_PASSWORD}
+      MYSQL_ROOT_PASSWORD: ${ROOTPASS} # ルートユーザーのパスワード
+      MYSQL_DATABASE: ${DB_NAME}       # 初期作成するデータベース名
+      MYSQL_USER: ${DB_USER}           # 作成するユーザー名
+      MYSQL_PASSWORD: ${DB_PASSWORD}   # 作成するユーザーのパスワード
     ports:
-      - "3306:3306"
+      - "3306:3306"                     # MySQLのポート
     networks:
       - app-network
     volumes:
-      - db_data:/var/lib/mysql
+      - db_data:/var/lib/mysql          # データ永続化のためのボリューム
     restart: always
     healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-uroot", "-ppass"]
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${ROOTPASS}"]
       interval: 10s
       timeout: 5s
       retries: 10
 
-
-
   api:
     build: .
     depends_on:
-      db :
-        condition: service_healthy
+      db:
+        condition: service_healthy       # DBサービスの健康チェック
     environment:
-      DB_HOST: db
-      DB_PORT: "3306"
-      DB_USER: ${DB_USER}
-      DB_PASSWORD: ${DB_PASSWORD}
-      DB_NAME: ${DB_NAME}
+      DB_HOST: db                       # DBのホスト名
+      DB_PORT: "3306"                  # DBのポート番号
+      DB_USER: ${DB_USER}              # DBユーザー名
+      DB_PASSWORD: ${DB_PASSWORD}      # DBユーザーパスワード
+      DB_NAME: ${DB_NAME}              # 使用するデータベース名
     ports:
-      - "8080:8080"
+      - "8080:8080"                    # APIのポート
     volumes:
-      - ./myapp-437007-bdde37cabb9b.json:/app/myapp-437007-bdde37cabb9b.json
-    working_dir: /app
-    tty: true
+      - ./myapp-437007-bdde37cabb9b.json:/app/myapp-437007-bdde37cabb9b.json # アプリ設定ファイルのボリュームマウント
+    working_dir: /app                  # 作業ディレクトリ
+    tty: true                          # TTYを有効にする
     restart: always
     networks:
       - app-network
 
 volumes:
   db_data:
-    driver: local
+    driver: local                      # ローカルボリュームの使用
 
 networks:
   app-network:
-    driver: bridge
+    driver: bridge                     # ブリッジネットワークの使用

@@ -9,7 +9,7 @@
     |userID    |  userのID  |
     |commentID       |  コメントのID  |
     |imageID    |  画像のID  |
-    |newContent       |  更新後のコメントの内容  |
+    |newComment       |  更新後のコメントの内容  |
 
 
     - 使用例

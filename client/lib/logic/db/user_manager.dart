@@ -19,10 +19,11 @@ class UserManager {
       return -1;
     }
 
-    userID = p.getInt("userID") as int;
+    userID = p.getInt("userID");
     email = p.getString("email") as String;
     password = p.getString("password") as String;
 
+    //TODO syuusei
     final response = await getJWT(email: email, password: password);
     if (response.statusCode != 200) {
       return -1;
