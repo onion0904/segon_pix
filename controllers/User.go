@@ -10,7 +10,7 @@ import (
 	"gorm.io/gorm"
 )
 
-
+//AddUser使わない
 func (con *Controller) AddUser(c echo.Context) (uint,error) {
     user := models.User{}
     
@@ -36,6 +36,7 @@ func (con *Controller) AddUser(c echo.Context) (uint,error) {
     return user.ID,nil
 }
 
+//他人のユーザー情報
 func (con *Controller) UserInfo(c echo.Context) error {
     userID := c.QueryParam("userID")
     if userID == "" {
@@ -54,12 +55,13 @@ func (con *Controller) UserInfo(c echo.Context) error {
     user, err := repo.UserInfo(uintID)
     if err != nil {
         log.Printf("Failed to retrieve user info: %v", err)
-        return c.JSON(http.StatusInternalServerError, map[string]string{"error": "Failed to retrieve user information"})
+        return c.JSON(http.StatusInternalServerError, map[string]string{"error": "Failed to get user information"})
     }
 
     return c.JSON(http.StatusOK, user)
 }
 
+//自分のユーザー情報
 func (con *Controller) UserInfoAuth(c echo.Context) error {
     userID := c.QueryParam("userID")
     if userID == "" {
@@ -102,7 +104,7 @@ func (con *Controller) DeleteUser(c echo.Context) error {
     }
     uintID := uintID(userID)
     if uintID == 0 {
-        return c.JSON(http.StatusBadRequest, map[string]string{"error": "Invalid user ID"})
+        return c.JSON(http.StatusBadRequest, map[string]string{"error": "fail to convert userID to uintID"})
     }
     err := con.VerifyUserID(c, uintID)
     if err!= nil {
@@ -116,7 +118,7 @@ func (con *Controller) DeleteUser(c echo.Context) error {
             return c.JSON(http.StatusNotFound, map[string]string{"error": "User not found"})
         }
         log.Printf("Database error: %v", err)
-        return c.JSON(http.StatusInternalServerError, map[string]string{"error": "Failed to retrieve user from database"})
+        return c.JSON(http.StatusInternalServerError, map[string]string{"error": "Failed to get user from database"})
     }
 
     repo, err := repositories.NewRepository(con.db)
@@ -141,7 +143,7 @@ func (con *Controller) UpdateUserIcon(c echo.Context) error {
     }
     uintID := uintID(userID)
     if uintID == 0 {
-        return c.JSON(http.StatusBadRequest, map[string]string{"error": "Invalid user ID"})
+        return c.JSON(http.StatusBadRequest, map[string]string{"error": "fail to convert userID to uintID"})
     }
     err := con.VerifyUserID(c, uintID)
     if err!= nil {
@@ -250,7 +252,7 @@ func (con *Controller) UpdateUserInfo(c echo.Context) error {
     }
     uintID := uintID(userID)
     if uintID == 0 {
-        return c.JSON(http.StatusBadRequest, map[string]string{"error": "Invalid user ID"})
+        return c.JSON(http.StatusBadRequest, map[string]string{"error": "fail to convert userID to uintID"})
     }
     err := con.VerifyUserID(c, uintID)
     if err!= nil {

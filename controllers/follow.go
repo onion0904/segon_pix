@@ -19,7 +19,7 @@ func (con *Controller) AddFollow(c echo.Context) error {
 
     uintFollowingID := uintID(followingID)
     if uintFollowingID == 0 {
-        return c.JSON(http.StatusBadRequest, map[string]string{"error": "Invalid user ID"})
+        return c.JSON(http.StatusBadRequest, map[string]string{"error": "fail to convert userID to uintID"})
     }
     err := con.VerifyUserID(c, uintFollowingID)
     if err!= nil {
@@ -57,7 +57,7 @@ func (con *Controller) RemoveFollow(c echo.Context) error {
 
     uintFollowingID := uintID(followingID)
     if uintFollowingID == 0 {
-        return c.JSON(http.StatusBadRequest, map[string]string{"error": "Invalid user ID"})
+        return c.JSON(http.StatusBadRequest, map[string]string{"error": "fail to convert userID to uintID"})
     }
     err := con.VerifyUserID(c, uintFollowingID)
     if err!= nil {

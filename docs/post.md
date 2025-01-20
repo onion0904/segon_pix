@@ -2,7 +2,7 @@
 
 
 
-- /add/user(token必要)これは使えない
+- /add/user(token必要)これは使えない/verifyAddUserを使う
 
     - 入力できる値(JSONでの受け取り)
     - ユーザーを登録する。

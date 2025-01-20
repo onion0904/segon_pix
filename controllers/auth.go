@@ -23,7 +23,7 @@ func (con *Controller) Signup(c echo.Context) error {
     }
 
     // ランダムな認証コードを生成
-    code, err := generateVerificationCode()
+    vcode, err := generateVerificationCode()
     if err != nil {
         log.Printf("Error generating verification code: %v", err)
         return c.JSON(http.StatusInternalServerError, map[string]string{"message": "認証コードの生成に失敗しました"})
@@ -31,45 +31,46 @@ func (con *Controller) Signup(c echo.Context) error {
 
     // 認証コードを保存
     con.auth.CodeMutex.Lock()
-    con.auth.VerificationCodes[email] = code
+    con.auth.VerificationCodes[email] = vcode
     con.auth.CodeMutex.Unlock()
 
     // 認証コードをメールで送信（デモではコンソールに出力）
-    fmt.Printf("認証コードを %s に送信しました: %s\n", email, code)
-    mail.SendEmail(email, code)
+    fmt.Printf("認証コードを %s に送信しました: %s\n", email, vcode)
+    mail.SendEmail(email, vcode)
     return c.JSON(http.StatusOK, map[string]string{"message": "認証コードをメールに送信しました"})
 }
 
 func generateVerificationCode() (string, error) {
-    b := make([]byte, 6)
-    if _, err := rand.Read(b); err != nil {
-        log.Printf("Error generating random bytes: %v", err)
+    vcode := make([]byte, 6)
+    if _, err := rand.Read(vcode); err != nil {
+        log.Printf("Error generating verification code: %v", err)
         return "", err
     }
-    return base64.StdEncoding.EncodeToString(b), nil
+    return base64.StdEncoding.EncodeToString(vcode), nil
 }
 
 func (con *Controller) VerifyAddUser(c echo.Context) error {
     secret := os.Getenv("JWT_SECRET_KEY")
     if secret == "" {
         log.Printf("JWT secret key is not set")
-        return c.JSON(http.StatusInternalServerError, map[string]string{"message": "サーバー設定に問題があります"})
+        // 500
+        return c.JSON(http.StatusServiceUnavailable, map[string]string{"message": "サーバー設定に問題があります"})
     }
     jwtSecret := []byte(secret)
 
-    jsonData := models.User{}
-
+    user := models.User{}
+    
     // リクエストボディのバインド
-    if err := c.Bind(&jsonData); err != nil {
+    if err := c.Bind(&user); err != nil {
         log.Printf("Failed to bind request data: %v", err)
-        return c.JSON(http.StatusBadRequest, map[string]string{"error": "Invalid request data"})
+        return c.JSON(http.StatusPreconditionFailed, map[string]string{"error": "リクエストをバインドできません"})
     }
-    email := jsonData.Email
-    password := jsonData.Password
+    email := user.Email
+    password := user.Password
     code := c.QueryParam("code")
 
     if email == "" || password == "" || code == "" {
-        return c.JSON(http.StatusBadRequest, map[string]string{"message": "全ての項目を入力してください"})
+        return c.JSON(http.StatusPreconditionFailed, map[string]string{"message": "空の項目があります"})
     }
 
     repo, err := repositories.NewRepository(con.db)
@@ -81,7 +82,7 @@ func (con *Controller) VerifyAddUser(c echo.Context) error {
     ok, err := repo.ExistUser(email, password)
     if err != nil {
         log.Printf("Error checking user existence: %v", err)
-        return c.JSON(http.StatusInternalServerError, map[string]string{"message": "ユーザー確認中にエラーが発生しました"})
+        return c.JSON(http.StatusInternalServerError, map[string]string{"message": "与えられたメールアドレスとパスワードに該当するユーザーが存在しません"})
     }
 
     if ok!=0 {
@@ -110,15 +111,14 @@ func (con *Controller) VerifyAddUser(c echo.Context) error {
     delete(con.auth.VerificationCodes, email)
     con.auth.CodeMutex.Unlock()
 
-    userID,err := con.AddUser(c)
-    if err != nil{
-        log.Printf("Error adding user: %v", err)
-        return c.JSON(http.StatusInternalServerError, map[string]string{"message": "ユーザーの追加に失敗しました"})
+    if err := repo.AddUser(&user); err != nil {
+        log.Printf("Failed to add user: %v", err)
+        return c.JSON(http.StatusInternalServerError, map[string]string{"error": "Failed to add user"})
     }
 
     claims := &models.MyCustomClaims{
         Email: email,
-        UserID: userID,
+        UserID: user.ID,
         RegisteredClaims: jwt.RegisteredClaims{
             Subject:   email,
             ExpiresAt: jwt.NewNumericDate(time.Now().Add(time.Hour * 24)), // 有効期限
@@ -146,7 +146,7 @@ func (con *Controller) Login(c echo.Context) error {
     email := c.QueryParam("email")
     password := c.QueryParam("password")
     if email == "" || password == "" {
-        return c.JSON(http.StatusBadRequest, map[string]string{"message": "メールアドレスとパスワードが必要です"})
+        return c.JSON(http.StatusBadRequest, map[string]string{"message": "メールアドレスまたはパスワードが空です"})
     }
 
     // リポジトリを初期化
@@ -158,13 +158,12 @@ func (con *Controller) Login(c echo.Context) error {
 
     // ユーザーの存在を確認
     userID, err := repo.ExistUser(email, password)
-    if err != nil {
-        log.Printf("Error checking user existence: %v", err)
-        return c.JSON(http.StatusInternalServerError, map[string]string{"message": "ユーザー確認中にエラーが発生しました"})
-    }
     if userID==0 {
         return c.JSON(http.StatusConflict, map[string]string{"message": "ユーザーが登録されていません"})
-    }
+    }else if err != nil {
+        log.Printf("Error checking user existence: %v", err)
+        return c.JSON(http.StatusInternalServerError, map[string]string{"message": "ユーザーの確認でエラーが発生しました"})
+    } 
 
     // JWTのクレーム作成
     claims := &models.MyCustomClaims{
@@ -180,7 +179,7 @@ func (con *Controller) Login(c echo.Context) error {
     token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
     tokenString, err := token.SignedString(jwtSecret)
     if err != nil {
-        log.Printf("Error signing JWT token: %v", err)
+        log.Printf("Error create JWT token: %v", err)
         return c.JSON(http.StatusInternalServerError, map[string]string{"message": "トークンの作成に失敗しました"})
     }
 
@@ -230,7 +229,7 @@ func (con *Controller) VerifyUserID(c echo.Context,userID uint) error {
 
     //userIDとJWTのuserIDが一致するかの確認
     if userID != VerifyUserID {
-        return c.JSON(http.StatusUnauthorized, map[string]string{"error": "Invalid or expired token"})
+        return c.JSON(http.StatusUnauthorized, map[string]string{"error": "ユーザーIDが一致しません"})
     }
     return nil
 }

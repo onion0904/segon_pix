@@ -14,4 +14,5 @@
     - 今までIDとかだったエンドポイントをuserID,imageIDとかに変更
     - VerifyをVerifyAddUserに変更し、AddUserエンドポイントを削除。VerifyAddUserでUserを作成
 - TODO
-    - 今回の変更点を確認する
+    - 機能を整理してディレクトリに分ける
+    - main.goの処理を他のディレクトリに分ける
