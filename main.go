@@ -78,9 +78,8 @@ func main() {
 
 	// 認証が必要なルートグループを作成
 	r := e.Group("/segon_pix_auth")
-	r.Use(echojwt.WithConfig(config))
-
 	// 認証が必要なルート
+	r.Use(echojwt.WithConfig(config))
 	{
 		r.POST("/add/image", con.AddPostedImage)
 		r.POST("/add/like", con.AddLike)
