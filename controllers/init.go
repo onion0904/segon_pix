@@ -12,7 +12,7 @@ type Controller struct {
     auth *Auth           // Auth構造体のインスタンスを保持
 }
 
-// コンストラクタ
+// controllerのコンストラクタ
 func NewController(db *gorm.DB) *Controller {
     return &Controller{
         db:   db,
@@ -26,7 +26,7 @@ type Auth struct {
 	CodeMutex         sync.Mutex
 }
 
-// コンストラクタ
+// authのコンストラクタ
 func NewAuth() *Auth {
 	return &Auth{
 		VerificationCodes: make(map[string]string),

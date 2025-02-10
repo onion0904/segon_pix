@@ -53,8 +53,8 @@ func main() {
 
 	// ルーティングの設定
 
-	e.POST("/signup", con.Signup)
-    e.POST("/verifyAddUser", con.VerifyAddUser)
+	e.POST("/sendEmailverifiedCode", con.SendEmailverifiedCode)
+    e.POST("/verifiedAddUser", con.VerifiedAddUser)
 	e.POST("/login", con.Login)
 	
 	method := e.Group("/segon_pix")
