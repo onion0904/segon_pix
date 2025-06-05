@@ -5,6 +5,7 @@ import (
     "github.com/golang-jwt/jwt/v5"
 )
 
+
 type User struct {
     gorm.Model
     Name         string        `gorm:"not null;index"` // ユーザー名

@@ -1,6 +1,6 @@
 # auth
 
-- /signup
+- /SendEmailverifiedCode
 
     - 入力できる値
     - メアドを入力して認証コードをメアド先に送信するに変更
@@ -12,10 +12,10 @@
     - 使用例
 
     ```
-    curl -X POST http://localhost:8080/signup?email=user@example.com
+    curl -X POST http://localhost:8080/sendEmailverifiedCode?email=user@example.com
     ```
 
-- /verifyAddUser
+- /verifiedAddUser
 
     - 入力できる値(JSONでの受け取り)
     - 認証コードから判断してtokenを返す
@@ -40,7 +40,7 @@
     "password": "password",
     "birthday": 20241015
     }' \
-    http://localhost:8080/verifyAddUser?code=ABCDEF
+    http://localhost:8080/verifiedAddUser?code=ABCDEF
     ```
 
 - /login

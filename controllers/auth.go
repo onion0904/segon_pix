@@ -16,7 +16,7 @@ import(
 )
 
 
-func (con *Controller) Signup(c echo.Context) error {
+func (con *Controller) SendEmailverifiedCode(c echo.Context) error {
     email := c.QueryParam("email")
     if email == "" {
         return c.JSON(http.StatusBadRequest, map[string]string{"message": "メールアドレスが必要です"})
@@ -49,7 +49,7 @@ func generateVerificationCode() (string, error) {
     return base64.StdEncoding.EncodeToString(vcode), nil
 }
 
-func (con *Controller) VerifyAddUser(c echo.Context) error {
+func (con *Controller) VerifiedAddUser(c echo.Context) error {
     secret := os.Getenv("JWT_SECRET_KEY")
     if secret == "" {
         log.Printf("JWT secret key is not set")
