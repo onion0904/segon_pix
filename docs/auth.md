@@ -12,7 +12,7 @@
     - 使用例
 
     ```
-    curl -X POST http://localhost:8080/SendEmailverifiedCode?email=user@example.com
+    curl -X POST http://localhost:8080/sendEmailverifiedCode?email=user@example.com
     ```
 
 - /verifiedAddUser
