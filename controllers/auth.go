@@ -171,7 +171,7 @@ func (con *Controller) Login(c echo.Context) error {
         UserID: userID,
         RegisteredClaims: jwt.RegisteredClaims{
             Subject:   email,
-            ExpiresAt: jwt.NewNumericDate(time.Now().Add(time.Hour * 24)), // 有効期限24時間
+            // ExpiresAt: jwt.NewNumericDate(time.Now().Add(time.Hour * 24)), // 有効期限24時間
         },
     }
 

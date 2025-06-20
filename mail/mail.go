@@ -1,45 +1,36 @@
 package mail
 
 import (
-    "context"
-    "fmt"
-    "time"
-    "github.com/mailgun/mailgun-go/v4"
+    "github.com/jordan-wright/email"
+	"log"
+	"net/smtp"
     "os"
 )
 
-func SendEmail(email string, code string) {
-    fmt.Println("メールをこれから送る")
+func SendEmail(toEmail string, code string) error {
+	gmailpass := os.Getenv("GMAIL_APP_PASS")
+	senderEmail := os.Getenv("SENDER_EMAIL")
 
-    mailgunDomain := os.Getenv("MAILGUN_DOMAIN")
-    mailgunPrivateAPIKey := os.Getenv("MAILGUN_PRIVATE_API_KEY")
-    senderEmail := os.Getenv("SENDER_EMAIL")
-    recipientEmail := email
-    
-    // Mailgunクライアントの作成
-    mg := mailgun.NewMailgun(mailgunDomain, mailgunPrivateAPIKey)
+	e := email.NewEmail()
+	e.From = senderEmail
+	e.To = []string{toEmail}
+	e.Subject = "segon_pixの確認コード"
+	e.Text = []byte("見覚えのない連絡でしたら無視してください\n確認コード:" + code)
+	// GmailのSMTPサーバ情報
+	smtpServer := "smtp.gmail.com"
+	smtpPort := "587"
+	smtpAddr := smtpServer + ":" + smtpPort
 
-    // メッセージの作成
-    subject := "segon_pixの認証コード"
-    body := "認証コード: "+code
-    message := mg.NewMessage(
-        senderEmail,
-        subject,
-        body,
-        recipientEmail,
-    )
+	err := e.Send(smtpAddr, smtp.PlainAuth(
+		"",          // identity（通常は空文字）
+		senderEmail, // Gmailアドレス
+		gmailpass,   // Appパスワード
+		smtpServer,  // ホスト名（smtp.gmail.com）
+	))
+	if err != nil {
+		log.Fatal(err)
+	}
 
-    
-    // コンテキストの作成（タイムアウト設定）
-    ctx, cancel := context.WithTimeout(context.Background(), time.Second*10)
-    defer cancel()
-
-    // メールの送信
-    resp, id, err := mg.Send(ctx, message)
-    if err != nil {
-        fmt.Println("メールの送信に失敗しました:", err)
-        return
-    }
-
-    fmt.Printf("メールが正常に送信されました。ID: %s Resp: %s\n", id, resp)
+	log.Println("Email sent successfully")
+	return nil
 }
