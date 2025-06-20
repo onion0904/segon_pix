@@ -53,8 +53,8 @@ type Hashtag struct {
 
 
 type MyCustomClaims struct {
-	Email string `json:"email"`
-    UserID uint
+	Email string `json:"email,omitempty"`
+    UserID uint `json:"userid,omitempty"`
 	jwt.RegisteredClaims
 }
 
