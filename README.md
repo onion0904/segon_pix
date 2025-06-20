@@ -24,3 +24,5 @@
 
 
 ## フロントエンド
+フロントエンドを以下に移行しました。
+[segon_pix_android](https://github.com/segnities007/segon_pix_android)
