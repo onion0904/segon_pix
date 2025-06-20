@@ -71,7 +71,7 @@ func (repo *Repository) DeletePostedImage(ctx context.Context, imageID uint) err
             return fmt.Errorf("failed to delete image from GCS: %w", err)
         }
 
-        if err := tx.Delete(&image).Error; err != nil {
+        if err := tx.Unscoped().Delete(&image).Error; err != nil {
             log.Printf("Failed to delete image from DB: %v", err)
             return fmt.Errorf("failed to delete image from DB: %w", err)
         }

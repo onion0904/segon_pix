@@ -48,7 +48,7 @@ func (repo *Repository) RemoveFollow(followingID uint,followedID uint) error {
         return err
     }
 
-    if err := tx.Model(&followinguser).Association("Follows").Delete(&followeduser); err != nil {
+    if err := tx.Model(&followinguser).Association("Follows").Unscoped().Delete(&followeduser); err != nil {
         tx.Rollback()
         return err
     }
