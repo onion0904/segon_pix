@@ -60,7 +60,7 @@ func (repo *Repository) DeleteComment(commentID uint) error {
         }
 
         // コメントの削除（OnDelete:CASCADEで依存関係も削除される）
-        if err := tx.Delete(&comment).Error; err != nil {
+        if err := tx.Unscoped().Delete(&comment).Error; err != nil {
             return err
         }
 

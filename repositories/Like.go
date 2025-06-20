@@ -59,13 +59,13 @@ func (repo *Repository) RemoveLike(userID uint, imageID uint) error {
     }
 
     // 画像のLikesからユーザーを削除
-    if err := tx.Model(&image).Association("Likes").Delete(&user); err != nil {
+    if err := tx.Model(&image).Association("Likes").Unscoped().Delete(&user); err != nil {
         tx.Rollback()
         return err
     }
 
     // ユーザーのLikedImagesから画像を削除
-    if err := tx.Model(&user).Association("LikedImages").Delete(&image); err != nil {
+    if err := tx.Model(&user).Association("LikedImages").Unscoped().Delete(&image); err != nil {
         tx.Rollback()
         return err
     }

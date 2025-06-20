@@ -94,7 +94,7 @@ func (repo *Repository) DeleteUser(userID uint) error {
         }
 
         // ユーザーを削除
-        if err := tx.Delete(&user).Error; err != nil {
+        if err := tx.Unscoped().Delete(&user).Error; err != nil {
             return err
         }
 
