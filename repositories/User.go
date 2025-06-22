@@ -88,7 +88,7 @@ func (repo *Repository) DeleteUser(userID uint) error {
         // ユーザーの投稿画像をGCSから削除
         for _, image := range user.PostedImages {
             // GCSから画像を削除
-            if err := repo.DeletePostedImage(context.Background(), image.ID); err != nil {
+            if err := repo.DeleteImage(context.Background(), image.ID); err != nil {
                 return err
             }
         }
