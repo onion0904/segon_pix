@@ -60,10 +60,8 @@ func main() {
 	method := e.Group("/segon_pix")
 	{	
 		method.GET("/get/user", con.UserInfo)
-		method.GET("/get/list/search", con.SearchImage)
-		method.GET("/get/list/like", con.GetLikeImages)
-		method.GET("/get/list/recent", con.GetRecentImages)
-		method.GET("/get/image_detail", con.ImageInfo)
+		method.GET("/get/list", con.GetImages)
+		method.GET("/get/image_detail", con.GetImageInfo)
 	}
 
 
@@ -81,7 +79,7 @@ func main() {
 	// 認証が必要なルート
 	r.Use(echojwt.WithConfig(config))
 	{
-		r.POST("/add/image", con.AddPostedImage)
+		r.POST("/add/image", con.AddImage)
 		r.POST("/add/like", con.AddLike)
 		r.POST("/add/comment", con.AddComment)
 		r.POST("/add/follow", con.AddFollow)
@@ -92,7 +90,7 @@ func main() {
 		r.PUT("/update/user/header", con.UpdateUserHeader)
 		r.PUT("/update/comment", con.UpdateComment)
 		r.DELETE("/delete/user", con.DeleteUser)
-		r.DELETE("/delete/image", con.DeletePostedImage)
+		r.DELETE("/delete/image", con.DeleteImage)
 		r.DELETE("/delete/like", con.RemoveLike)
 		r.DELETE("/delete/comment", con.DeleteComment)
 		r.DELETE("/delete/follow", con.RemoveFollow)

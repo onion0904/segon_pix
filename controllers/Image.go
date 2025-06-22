@@ -3,17 +3,20 @@ package controllers
 import (
 	"PixApp/models"
 	"PixApp/repositories"
+	"fmt"
 	"log"
 	"net/http"
+	"os"
 	"strconv"
 	"strings"
-    "os"
+
 	"github.com/labstack/echo/v4"
-    "fmt"
+    
+    "PixApp/util"
 )
 
 
-func (con *Controller) AddPostedImage(c echo.Context) error {
+func (con *Controller) AddImage(c echo.Context) error {
     // リクエストのコンテキストを取得
     ctx := c.Request().Context()
 
@@ -78,7 +81,7 @@ func (con *Controller) AddPostedImage(c echo.Context) error {
     }
 
     // 画像をGCSにアップロード
-    err = repo.AddPostedImage(ctx, file, filename, uintID, hashtagsSlice)
+    err = repo.AddImage(ctx, file, filename, uintID, hashtagsSlice)
     if err != nil {
         log.Printf("Error uploading image to GCS: %v", err)
         return c.JSON(http.StatusInternalServerError, map[string]string{"message": "画像のアップロードに失敗しました"})
@@ -87,7 +90,7 @@ func (con *Controller) AddPostedImage(c echo.Context) error {
     return c.JSON(http.StatusOK, map[string]string{"message": "画像がアップロードされました"})
 }
 
-func (con *Controller) DeletePostedImage(c echo.Context) error {
+func (con *Controller) DeleteImage(c echo.Context) error {
     ctx := c.Request().Context()
 
     userID := c.QueryParam("userID")
@@ -129,7 +132,7 @@ func (con *Controller) DeletePostedImage(c echo.Context) error {
         }
     }()
 
-    if err := repo.DeletePostedImage(ctx, uintID); err != nil {
+    if err := repo.DeleteImage(ctx, uintID); err != nil {
         log.Printf("Error in DeletePostedImage: %+v", err)
         
         if os.Getenv("DEBUG") == "true" {
@@ -146,28 +149,7 @@ func (con *Controller) DeletePostedImage(c echo.Context) error {
     return c.JSON(http.StatusOK, map[string]string{"message": "Image deleted successfully"})
 }
 
-func (con *Controller) SearchImage(c echo.Context) error {
-    Qhashtag := c.QueryParam("Hashtag")
-    if Qhashtag == "" {
-        return c.JSON(http.StatusBadRequest, map[string]string{"error": "Hashtag is required"})
-    }
-
-    repo, err := repositories.NewRepository(con.db)
-    if err != nil {
-        log.Printf("Failed to create repository: %v", err)
-        return c.JSON(http.StatusServiceUnavailable, map[string]string{"error": "Service Unavailable"})
-    }
-
-    PostedImage, err := repo.SearchImage(Qhashtag)
-    if err != nil {
-        log.Printf("Error searching for image by hashtag: %v", err)
-        return c.JSON(http.StatusInternalServerError, map[string]string{"error": "Failed to search image"})
-    }
-
-    return c.JSON(http.StatusOK, PostedImage)
-}
-
-func (con *Controller) ImageInfo(c echo.Context) error {
+func (con *Controller) GetImageInfo(c echo.Context) error {
     imageID := c.QueryParam("imageID")
     if imageID == "" {
         return c.JSON(http.StatusBadRequest, map[string]string{"error": "Image ID is required"})
@@ -195,40 +177,45 @@ func (con *Controller) ImageInfo(c echo.Context) error {
     return c.JSON(http.StatusOK, PostedImage)
 }
 
-func (con *Controller) GetRecentImages(c echo.Context) error {
-    // リポジトリを初期化
+func (con *Controller) GetImages(c echo.Context) error {
+    params, err := util.ParseListQueryParams(c)
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, map[string]string{"error": "Invalid query parameters"})
+	}
+
     repo, err := repositories.NewRepository(con.db)
     if err != nil {
         log.Printf("Failed to create repository: %v", err)
         return c.JSON(http.StatusServiceUnavailable, map[string]string{"error": "サービスが利用できません"})
     }
+    
+    var PostedImage []models.Image
 
-    // 最近の画像を取得
-    PostedImage, err := repo.GetRecentImages()
-    if err != nil {
-        log.Printf("Failed to get recent images: %v", err)
-        return c.JSON(http.StatusInternalServerError, map[string]string{"error": "最近の画像の取得に失敗しました"})
+    if params.Search && params.Like{
+        PostedImage, err = repo.GetLikeSearchImage(params.Hashtag,params.CurrentID,params.LikeNum)
+        if err != nil {
+            log.Printf("Error LikeSearching for image by hashtag: %v", err)
+            return c.JSON(http.StatusInternalServerError, map[string]string{"error": "検索した人気の画像の取得に失敗しました"})
+        }
+    } else if params.Search && !params.Like{
+        PostedImage, err = repo.GetSearchImage(params.Hashtag,params.CurrentID)
+        if err != nil {
+            log.Printf("Error searching for image by hashtag: %v", err)
+            return c.JSON(http.StatusInternalServerError, map[string]string{"error": "検索した画像の取得に失敗しました"})
+        }
+    } else if !params.Search && params.Like{
+        PostedImage, err = repo.GetLikeImages(params.CurrentID,params.LikeNum)
+        if err != nil {
+            log.Printf("Failed to get liked images: %v", err)
+            return c.JSON(http.StatusInternalServerError, map[string]string{"error": "人気の画像の取得に失敗しました"})
+        }
+    } else {
+        PostedImage, err = repo.GetRecentImages(params.CurrentID)
+        if err != nil {
+            log.Printf("Failed to get recent images: %v", err)
+            return c.JSON(http.StatusInternalServerError, map[string]string{"error": "最近の画像の取得に失敗しました"})
+        }
     }
 
-    // 成功時に画像を返す
-    return c.JSON(http.StatusOK, PostedImage)
-}
-
-func (con *Controller) GetLikeImages(c echo.Context) error {
-    // リポジトリを初期化
-    repo, err := repositories.NewRepository(con.db)
-    if err != nil {
-        log.Printf("Failed to create repository: %v", err)
-        return c.JSON(http.StatusServiceUnavailable, map[string]string{"error": "サービスが利用できません"})
-    }
-
-    // 「いいね」が多い画像を取得
-    PostedImage, err := repo.GetLikeImages()
-    if err != nil {
-        log.Printf("Failed to get liked images: %v", err)
-        return c.JSON(http.StatusInternalServerError, map[string]string{"error": "人気の画像の取得に失敗しました"})
-    }
-
-    // 成功時に画像を返す
     return c.JSON(http.StatusOK, PostedImage)
 }
