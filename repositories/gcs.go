@@ -1,102 +1,101 @@
 package repositories
 
 import (
-    "fmt"
-    "io"
+	"cloud.google.com/go/storage"
 	"context"
-    "time"
-	"os"
-	"log"
+	"errors"
+	"fmt"
 	"github.com/joho/godotenv"
 	"gorm.io/gorm"
-    "errors"
-	"cloud.google.com/go/storage"
+	"io"
+	"log"
+	"os"
+	"time"
 
-    "PixApp/models"
-    "PixApp/util"
+	"PixApp/models"
+	"PixApp/util"
 )
 
 // UploadImageToGCS は画像を Google Cloud Storage にアップロードし、そのURLを返す。
-func (repo *Repository) UploadImageToGCS(ctx context.Context, file io.Reader, filename string) (string,string, error) {
-    // .envファイルの読み込み
+func (repo *Repository) UploadImageToGCS(ctx context.Context, file io.Reader, filename string) (string, string, error) {
+	// .envファイルの読み込み
 	err := godotenv.Load()
 	if err != nil {
 		log.Fatalf("Error loading .env file")
 	}
 	bucketName := os.Getenv("GCS_BUCKET_NAME")
 	if bucketName == "" {
-        return "","", fmt.Errorf("GCS bucket name is not set")
-    }
-    objectName := fmt.Sprintf("%v-%v", time.Now().Unix(), filename)
-    object := repo.gcsClient.Bucket(bucketName).Object(objectName)
-    wc := object.NewWriter(ctx)
-    // ファイルの書き込み
-    if _, err := io.Copy(wc, file); err != nil {
-        wc.Close()
-        return "","", err
-    }
-    if err := wc.Close(); err != nil {
-        return "","", err
-    }
+		return "", "", fmt.Errorf("GCS bucket name is not set")
+	}
+	objectName := fmt.Sprintf("%v-%v", time.Now().Unix(), filename)
+	object := repo.gcsClient.Bucket(bucketName).Object(objectName)
+	wc := object.NewWriter(ctx)
+	// ファイルの書き込み
+	if _, err := io.Copy(wc, file); err != nil {
+		wc.Close()
+		return "", "", err
+	}
+	if err := wc.Close(); err != nil {
+		return "", "", err
+	}
 
-    baseURL := "https://storage.googleapis.com/"
-    url := fmt.Sprintf("%s%s/%s", baseURL, bucketName, objectName)
-    return url, objectName, nil
+	baseURL := "https://storage.googleapis.com/"
+	url := fmt.Sprintf("%s%s/%s", baseURL, bucketName, objectName)
+	return url, objectName, nil
 }
 
 // ensureHashtag は指定された名前のハッシュタグを取得、または存在しない場合は作成する。
 func (repo *Repository) ensureHashtag(tx *gorm.DB, name string) (models.Hashtag, error) {
-    var hashtag models.Hashtag
-    err := tx.Where("Name = ?", name).First(&hashtag).Error
-    if err != nil {
-        if errors.Is(err, gorm.ErrRecordNotFound) {
-            // ハッシュタグが存在しない場合は作成
-            //この時、エラーが出るが気にしなくてよい
-            hashtag = models.Hashtag{Name: name}
-            if err := tx.Create(&hashtag).Error; err != nil {
-                return models.Hashtag{}, fmt.Errorf("failed to create hashtag: %v", err)
-            }
-            return hashtag, nil
-        } 
-        return hashtag, nil
-    }
-    return hashtag, err
+	var hashtag models.Hashtag
+	err := tx.Where("Name = ?", name).First(&hashtag).Error
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			// ハッシュタグが存在しない場合は作成
+			//この時、エラーが出るが気にしなくてよい
+			hashtag = models.Hashtag{Name: name}
+			if err := tx.Create(&hashtag).Error; err != nil {
+				return models.Hashtag{}, fmt.Errorf("failed to create hashtag: %v", err)
+			}
+			return hashtag, nil
+		}
+		return hashtag, nil
+	}
+	return hashtag, err
 }
 
-func (repo *Repository) DeleteImageFromGCS(w io.Writer,ctx context.Context, objectName,bucketName string) error {
-    if bucketName == "" {
-        log.Printf("GCS bucket name is not set in environment variables")
-        return fmt.Errorf("GCS bucket name is not set")
-    }
+func (repo *Repository) DeleteImageFromGCS(w io.Writer, ctx context.Context, objectName, bucketName string) error {
+	if bucketName == "" {
+		log.Printf("GCS bucket name is not set in environment variables")
+		return fmt.Errorf("GCS bucket name is not set")
+	}
 
-    log.Printf("Attempting to delete object: %s from bucket: %s", objectName, bucketName)
-    
-    o := repo.gcsClient.Bucket(bucketName).Object(objectName)
+	log.Printf("Attempting to delete object: %s from bucket: %s", objectName, bucketName)
 
-    attrs, err := o.Attrs(ctx)
-    if err != nil {
-        return fmt.Errorf("object.Attrs: %w", err)
-    }
-    o = o.If(storage.Conditions{GenerationMatch: attrs.Generation})
-    
-    if err := o.Delete(ctx); err != nil {
-        return fmt.Errorf("Object(%q).Delete: %w", objectName, err)
-    }
-    
+	o := repo.gcsClient.Bucket(bucketName).Object(objectName)
 
-    fmt.Fprintf(w, "Blob %v deleted.\n", objectName)
-    return nil
+	attrs, err := o.Attrs(ctx)
+	if err != nil {
+		return fmt.Errorf("object.Attrs: %w", err)
+	}
+	o = o.If(storage.Conditions{GenerationMatch: attrs.Generation})
+
+	if err := o.Delete(ctx); err != nil {
+		return fmt.Errorf("Object(%q).Delete: %w", objectName, err)
+	}
+
+	fmt.Fprintf(w, "Blob %v deleted.\n", objectName)
+	return nil
 }
 
 // ファイルを本番バケットから一時保管バケットに移動します。
-func (repo *Repository) MoveImageToTemp(bucketName,subBucketName string ,ctx context.Context, objectName string) (string, error) {
+func (repo *Repository) MoveImageToTemp(bucketName, subBucketName string, ctx context.Context, objectName string) (string, error) {
 	// 移動元と移動先のGCSオブジェクトハンドルを取得
 	src := repo.gcsClient.Bucket(bucketName).Object(objectName)
 	dst := repo.gcsClient.Bucket(subBucketName).Object(objectName)
 
 	// 移動先のオブジェクト(dst)に、移動元の内容(src)をコピーする
 	copier := dst.CopierFrom(src)
-	
+
 	if _, err := copier.Run(ctx); err != nil {
 		return "", fmt.Errorf("GCSオブジェクトのコピーに失敗: %w", err)
 	}
@@ -104,9 +103,9 @@ func (repo *Repository) MoveImageToTemp(bucketName,subBucketName string ,ctx con
 	// コピーが成功したら、移動元のオブジェクトを削除する
 	if err := src.Delete(ctx); err != nil {
 		// コピーは成功したが削除に失敗した場合
-        // コピー元GCS画像削除のリトライ処理
+		// コピー元GCS画像削除のリトライ処理
 		const maxRetries = 5
-		var gcsSrcDeleteErr,gcsDstDeleteErr error
+		var gcsSrcDeleteErr error
 		for attempt := 1; attempt <= maxRetries; attempt++ {
 			gcsSrcDeleteErr = src.Delete(ctx)
 			if gcsSrcDeleteErr == nil {
@@ -121,43 +120,43 @@ func (repo *Repository) MoveImageToTemp(bucketName,subBucketName string ,ctx con
 		}
 
 		// リトライがすべて失敗した場合
-        // コピー先元GCS画像削除のリトライ処理
+		// コピー先元GCS画像削除のリトライ処理
 		if gcsSrcDeleteErr != nil {
-            const maxRetries = 5
-		    var gcsDstDeleteErr error
-		    for attempt := 1; attempt <= maxRetries; attempt++ {
-			    gcsDstDeleteErr = dst.Delete(ctx)
-		    	if gcsDstDeleteErr == nil {
-			    	// 削除に成功
-				    log.Printf("コピー先GCSオブジェクトのクリーンアップに成功しました。ObjectName: %s", objectName)
-    				// 成功したので、元のDBエラーを返して終了
-	    			return "", fmt.Errorf("GCSオブジェクトのコピーに失敗: %w", err)
-		    	}
-			    // 削除に失敗
-			    log.Printf("コピー先GCSオブジェクトのクリーンアップに失敗しました (試行 %d/%d)。エラー: %v", attempt, maxRetries, gcsDstDeleteErr)
-			    time.Sleep(2 * time.Second) // 2秒待ってからリトライ
-		    }
-        }
+			const maxRetries = 5
+			var gcsDstDeleteErr error
+			for attempt := 1; attempt <= maxRetries; attempt++ {
+				gcsDstDeleteErr = dst.Delete(ctx)
+				if gcsDstDeleteErr == nil {
+					// 削除に成功
+					log.Printf("コピー先GCSオブジェクトのクリーンアップに成功しました。ObjectName: %s", objectName)
+					// 成功したので、元のDBエラーを返して終了
+					return "", fmt.Errorf("GCSオブジェクトのコピーに失敗: %w", err)
+				}
+				// 削除に失敗
+				log.Printf("コピー先GCSオブジェクトのクリーンアップに失敗しました (試行 %d/%d)。エラー: %v", attempt, maxRetries, gcsDstDeleteErr)
+				time.Sleep(2 * time.Second) // 2秒待ってからリトライ
+			}
 
-        if gcsDstDeleteErr != nil{
-            // エラーメッセージを作成
-			errorMessage := fmt.Sprintf("[画像の保存先の移動] コピー先とコピー元のGCSオブジェクト '%s' の自動クリーンアップに5回失敗しました。手動での対応が必要です。最終エラー: 1:%v 2:%v", objectName, gcsSrcDeleteErr,gcsDstDeleteErr)
-			
-			// ログに致命的なエラーとして記録
-			log.Println(errorMessage)
-			
-			// DBに失敗記録を残すための関数呼び出し
-			err = repo.logFailToDB(objectName, gcsDstDeleteErr.Error())
-            if err != nil{
-                errorMessage = fmt.Sprintf("%s DBにログを残せませんでした: %v",errorMessage,err)
-            }
-			
-            //slackに送信
-			util.SlackNoticeTransaction(errorMessage)
-            
-            return "",fmt.Errorf(errorMessage)
-        }
-    }
+			if gcsDstDeleteErr != nil {
+				// エラーメッセージを作成
+				errorMessage := fmt.Sprintf("[画像の保存先の移動] コピー先とコピー元のGCSオブジェクト '%s' の自動クリーンアップに5回失敗しました。手動での対応が必要です。最終エラー: 1:%v 2:%v", objectName, gcsSrcDeleteErr, gcsDstDeleteErr)
+
+				// ログに致命的なエラーとして記録
+				log.Println(errorMessage)
+
+				// DBに失敗記録を残すための関数呼び出し
+				err = repo.logFailToDB(objectName, gcsDstDeleteErr.Error())
+				if err != nil {
+					errorMessage = fmt.Sprintf("%s DBにログを残せませんでした: %v", errorMessage, err)
+				}
+
+				//slackに送信
+				util.SlackNoticeTransaction(errorMessage)
+
+				return "", fmt.Errorf("%s", errorMessage)
+			}
+		}
+	}
 	// 移動先のオブジェクト名を返す
 	return objectName, nil
 }
