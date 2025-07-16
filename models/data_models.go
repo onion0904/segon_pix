@@ -39,8 +39,6 @@ type Comment struct {
     Message       string // コメント内容
 }
 
-
-
 type Hashtag struct {
     gorm.Model
     Name         string        `gorm:"unique;not null"` // ハッシュタグ名
