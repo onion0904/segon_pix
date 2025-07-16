@@ -45,6 +45,10 @@ type Hashtag struct {
     PostedImages []PostedImage `gorm:"many2many:posted_image_hashtags;"` // 同じハッシュタグを持つ画像
 }
 
+type LogFailDB struct {
+    ObjectName  string    `gorm:"not null;index"`
+    Error   string
+}
 
 
 
