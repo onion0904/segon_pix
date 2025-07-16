@@ -1,7 +1,7 @@
 package repositories
 
 import (
-	"PixApp/models"
+    "time"
     "fmt"
     "io"
 	"context"
@@ -10,48 +10,109 @@ import (
 	"gorm.io/gorm"
     "errors"
     "gorm.io/gorm/clause"
+
+	"PixApp/models"
+    "PixApp/util"
 )
 
-//以下二つの関数を使う
 func (repo *Repository) AddImage(ctx context.Context, file io.Reader, filename string, userID uint, hashtags []models.Hashtag) error {
-    url, objectName, err := repo.UploadImageToGCS(ctx, file, filename)
-    if err != nil {
-        return err
-    }
-    tx := repo.db.Begin()
-    if err := tx.Error; err != nil {
-        return err
-    }
-    defer tx.Rollback()
+	url, objectName, err := repo.UploadImageToGCS(ctx, file, filename)
+	if err != nil {
+		return err
+	}
 
-    var user models.User
-    if err = tx.First(&user, userID).Error; err != nil {
-        return err
-    }
+	// db.Transactionメソッドを使用
+	// 渡された関数内でエラーが返されれば自動でロールバック、nilが返れば自動でコミットされる
+	txErr := repo.db.Transaction(func(tx *gorm.DB) error {
+		var user models.User
+		if err := tx.First(&user, userID).Error; err != nil {
+			return err
+		}
 
-    image := models.PostedImage{
-        URL:        url,
-        UserID:     userID,
-        PostUser:   user,
+		image := models.PostedImage{
+			URL:        url,
+			UserID:     userID,
+			PostUser:   user,
+			ObjectName: objectName,
+		}
+		if err := tx.Create(&image).Error; err != nil {
+			return err
+		}
+
+		// ハッシュタグを確実に取得または作成
+		for _, tag := range hashtags {
+			hashtag, err := repo.ensureHashtag(tx, tag.Name)
+			if err != nil {
+				return err // エラーを返せばトランザクション全体がロールバックされる
+			}
+
+			// 画像にハッシュタグを関連付け
+			if err := tx.Model(&image).Association("Hashtags").Append(&hashtag); err != nil {
+				return err
+			}
+		}
+
+		// すべて成功した場合、nilを返すことでコミットされる
+		return nil
+	})
+
+    // トランザクションが失敗（Rollback）した場合の処理
+	if txErr != nil {
+		log.Printf("DBトランザクションが失敗しました。GCSオブジェクトのクリーンアップを開始します。ObjectName: %s", objectName)
+
+		// GCS画像削除のリトライ処理
+		const maxRetries = 5
+		var gcsDeleteErr error
+
+		for attempt := 1; attempt <= maxRetries; attempt++ {
+			gcsDeleteErr = repo.DeleteImageFromGCS(os.Stdout,ctx, objectName)
+			if gcsDeleteErr == nil {
+				// 削除に成功
+				log.Printf("GCSオブジェクトのクリーンアップに成功しました。ObjectName: %s", objectName)
+				// 成功したので、元のDBエラーを返して終了
+				return txErr
+			}
+			// 削除に失敗
+			log.Printf("GCSオブジェクトのクリーンアップに失敗しました (試行 %d/%d)。エラー: %v", attempt, maxRetries, gcsDeleteErr)
+			time.Sleep(2 * time.Second) // 2秒待ってからリトライ
+		}
+
+		// リトライがすべて失敗した場合
+		if gcsDeleteErr != nil {
+			// エラーメッセージを作成
+			errorMessage := fmt.Sprintf("[画像の追加機能] GCSオブジェクト '%s' の自動クリーンアップに5回失敗しました。手動での対応が必要です。最終エラー: %v", objectName, gcsDeleteErr)
+			
+			// ログに致命的なエラーとして記録
+			log.Println(errorMessage)
+			
+			// DBに失敗記録を残すための関数呼び出し
+			err = repo.logFailToDB(objectName, gcsDeleteErr.Error())
+            if err != nil{
+                errorMessage = fmt.Sprintf("%s DBにログを残せませんでした: %v",errorMessage,err)
+            }
+			
+            //slackに送信
+			util.SlackNoticeTransaction(errorMessage)
+		}
+
+		// 呼び出し元には、そもそもの原因であるDBエラーを返す
+		return txErr
+	}
+
+	return nil
+}
+
+func (repo *Repository) logFailToDB(objectName,gcsDeleteErr string) error {
+    logFailDB := &models.LogFailDB{
         ObjectName: objectName,
-    }
-    if err = tx.Create(&image).Error; err != nil {
-        return err
+        Error: gcsDeleteErr,
     }
 
-    // ハッシュタグを確実に取得または作成
-    for _, tag := range hashtags {
-        hashtag, err := repo.ensureHashtag(tx, tag.Name)
-        if err != nil {
-            return err
-        }
-        // 画像にハッシュタグを関連付け
-        if err = tx.Model(&image).Association("Hashtags").Append(&hashtag); err != nil {
-            return err
-        }
+    // 失敗ログを追加
+    if err := repo.db.Create(logFailDB).Error; err != nil {
+        return fmt.Errorf("failed to add fail gcs log to the database: %w", err)
     }
-
-    return tx.Commit().Error
+    return nil
 }
 
 func (repo *Repository) DeleteImage(ctx context.Context, imageID uint) error {
@@ -80,6 +141,7 @@ func (repo *Repository) DeleteImage(ctx context.Context, imageID uint) error {
         return nil
     })
 }
+
 
 func (repo *Repository) ImageInfo(id uint) (*models.PostedImage, error) {
     var image models.PostedImage
