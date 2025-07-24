@@ -120,7 +120,7 @@ func (repo *Repository) MoveImageToTemp(bucketName, subBucketName string, ctx co
 		}
 
 		// リトライがすべて失敗した場合
-		// コピー先元GCS画像削除のリトライ処理
+		// コピー先GCS画像削除のリトライ処理
 		if gcsSrcDeleteErr != nil {
 			const maxRetries = 5
 			var gcsDstDeleteErr error
