@@ -28,5 +28,8 @@ func (r *Repository) Close() error {
     return r.gcsClient.Close()
 }
 
+func (r *Repository) DB() *gorm.DB {
+    return r.db
+}
 
 
