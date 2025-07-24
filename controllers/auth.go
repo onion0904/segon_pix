@@ -36,7 +36,7 @@ func (con *Controller) SendEmailverifiedCode(c echo.Context) error {
 
     // 認証コードをメールで送信（デモではコンソールに出力）
     fmt.Printf("認証コードを %s に送信しました: %s\n", email, vcode)
-   util.SendEmail(email, vcode)
+    util.SendEmail(email, vcode)
     return c.JSON(http.StatusOK, map[string]string{"message": "認証コードをメールに送信しました"})
 }
 
