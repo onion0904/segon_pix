@@ -102,108 +102,84 @@ func (repo *Repository) AddImage(ctx context.Context, file io.Reader, filename s
 	return nil
 }
 
-func (repo *Repository) logFailToDB(objectName, gcsDeleteErr string) error {
-	logFailDB := &models.LogFailDB{
-		ObjectName: objectName,
-		Error:      gcsDeleteErr,
-	}
-
-	// 失敗ログを追加
-	if err := repo.db.Create(logFailDB).Error; err != nil {
-		return fmt.Errorf("failed to add fail gcs log to the database: %w", err)
-	}
-	return nil
-}
-
 func (repo *Repository) DeleteImage(ctx context.Context, imageID uint) error {
 	log.Printf("Starting deletion process for image ID: %d", imageID)
 	var image models.PostedImage
 	var objectName string
 
-	txErr := repo.db.Transaction(func(tx *gorm.DB) error {
-		if err := tx.First(&image, imageID).Error; err != nil {
-			log.Printf("Failed to find image with ID %d: %v", imageID, err)
-			return fmt.Errorf("failed to find image: %w", err)
-		}
-		objectName = image.ObjectName
-		log.Printf("Found image with ObjectName: %s", objectName)
+	if err := repo.db.First(&image, imageID).Error; err != nil {
+		log.Printf("Failed to find image with ID %d: %v", imageID, err)
+		return fmt.Errorf("failed to find image: %w", err)
+	}
+	objectName = image.ObjectName
+	log.Printf("Found image with ObjectName: %s", objectName)
 
-		//画像を一時的な場所に移動
-		bucketName := os.Getenv("GCS_BUCKET_NAME")
-		subBucketName := os.Getenv("GCS_SUB_BUCKET_NAME")
-		subObjectName, err := repo.MoveImageToTemp(bucketName, subBucketName, ctx, objectName)
-		if err != nil {
-			return fmt.Errorf("failed to move image bucket: %w", err)
-		}
+	//画像を一時的な場所に移動
+	bucketName := os.Getenv("GCS_BUCKET_NAME")
+	subBucketName := os.Getenv("GCS_SUB_BUCKET_NAME")
+	subObjectName, err := repo.MoveImageToTemp(bucketName, subBucketName, ctx, objectName)
+	if err != nil {
+		return fmt.Errorf("failed to move image bucket: %w", err)
+	}
 
-        //画像をDBから削除
-		if err := tx.Unscoped().Delete(&image).Error; err != nil {
-			log.Printf("Failed to delete image from DB: %v", err)
-			return fmt.Errorf("failed to delete image from DB: %w", err)
-		}
-
-		// 画像ファイルを一時的な場所から削除
-		if err := repo.DeleteImageFromGCS(os.Stdout, ctx, subObjectName, subBucketName); err != nil {
-			log.Printf("DBトランザクションが失敗しました。GCSオブジェクトのクリーンアップを開始します。ObjectName: %s", subObjectName)
-
-			// GCS画像削除のリトライ処理
-			const maxRetries = 5
-			var gcsDeleteErr error
-			for attempt := 1; attempt <= maxRetries; attempt++ {
-				gcsDeleteErr = repo.DeleteImageFromGCS(os.Stdout, ctx, subObjectName, subBucketName)
-				if gcsDeleteErr == nil {
-					// 削除に成功
-					log.Printf("GCSオブジェクトのクリーンアップに成功しました。ObjectName: %s", subObjectName)
-					// 成功したので、元のDBエラーを返して終了
-					return err
-				}
-				// 削除に失敗
-				log.Printf("GCSオブジェクトのクリーンアップに失敗しました (試行 %d/%d)。エラー: %v", attempt, maxRetries, gcsDeleteErr)
-				time.Sleep(2 * time.Second) // 2秒待ってからリトライ
-			}
-
-			// リトライがすべて失敗した場合
-			if gcsDeleteErr != nil {
-				// エラーメッセージを作成
-				errorMessage := fmt.Sprintf("[画像ファイル一時的な場所から削除] GCSオブジェクト '%s' の自動クリーンアップに5回失敗しました。手動での対応が必要です。最終エラー: %v", subObjectName, gcsDeleteErr)
-
-				// ログに致命的なエラーとして記録
-				log.Println(errorMessage)
-
-				// DBに失敗記録を残すための関数呼び出し
-				err = repo.logFailToDB(subObjectName, gcsDeleteErr.Error())
-				if err != nil {
-					errorMessage = fmt.Sprintf("%s DBにログを残せませんでした: %v", errorMessage, err)
-				}
-
-				//slackに送信
-				util.SlackNoticeTransaction(errorMessage)
-			}
-			return fmt.Errorf("failed to delete image from GCS: %w", err)
-		}
-
-		log.Printf("Successfully deleted image with ID: %d", imageID)
-		return nil
-	})
-
-	if txErr != nil {
+	//画像をDBから削除
+	deleteImageErr := repo.db.Unscoped().Delete(&image).Error
+	if deleteImageErr != nil {
 		log.Printf("DBトランザクションが失敗しました。GCSオブジェクトを元の場所に戻す作業をを開始します。ObjectName: %s", objectName)
 
 		bucketName := os.Getenv("GCS_BUCKET_NAME")
 		subBucketName := os.Getenv("GCS_SUB_BUCKET_NAME")
 		//MoveImageToTempにリトライ、報告機能があるのでそれは省略
-		_, gcsTempErr := repo.MoveImageToTemp(subBucketName, bucketName, ctx, objectName)
+		_, gcsTempErr := repo.MoveTempToImage(subBucketName, bucketName, ctx, objectName)
 		if gcsTempErr == nil {
 			log.Printf("GCSオブジェクトの移動に成功しました。ObjectName: %s", objectName)
 			// 成功したので、元のDBエラーを返して終了
-			return txErr
+			return deleteImageErr
 		}
-
-		// 呼び出し元には、そもそもの原因であるDBエラーを返す
-		return txErr
 	}
 
-    return nil
+	// 画像ファイルを一時的な場所から削除
+	if err := repo.DeleteImageFromGCS(os.Stdout, ctx, subObjectName, subBucketName); err != nil {
+		log.Printf("画像ファイルを一時的な場所から削除が失敗しました。GCSオブジェクトのクリーンアップを開始します。ObjectName: %s", subObjectName)
+
+		// GCS画像削除のリトライ処理
+		const maxRetries = 5
+		var gcsDeleteErr error
+		for attempt := 1; attempt <= maxRetries; attempt++ {
+			gcsDeleteErr = repo.DeleteImageFromGCS(os.Stdout, ctx, subObjectName, subBucketName)
+			if gcsDeleteErr == nil {
+				// 削除に成功
+				log.Printf("GCSオブジェクトのクリーンアップに成功しました。ObjectName: %s", subObjectName)
+				// 成功したので、元のDBエラーを返して終了
+				return err
+			}
+			// 削除に失敗
+			log.Printf("GCSオブジェクトのクリーンアップに失敗しました (試行 %d/%d)。エラー: %v", attempt, maxRetries, gcsDeleteErr)
+			time.Sleep(2 * time.Second) // 2秒待ってからリトライ
+		}
+
+		// リトライがすべて失敗した場合
+		if gcsDeleteErr != nil {
+			// エラーメッセージを作成
+			errorMessage := fmt.Sprintf("[画像ファイル一時的な場所から削除] GCSオブジェクト '%s' の自動クリーンアップに5回失敗しました。手動での対応が必要です。最終エラー: %v", subObjectName, gcsDeleteErr)
+
+			// ログに致命的なエラーとして記録
+			log.Println(errorMessage)
+
+			// DBに失敗記録を残すための関数呼び出し
+			err = repo.logFailToDB(subObjectName, gcsDeleteErr.Error())
+			if err != nil {
+				errorMessage = fmt.Sprintf("%s DBにログを残せませんでした: %v", errorMessage, err)
+			}
+
+			//slackに送信
+			util.SlackNoticeTransaction(errorMessage)
+		}
+		return fmt.Errorf("failed to delete image from GCS: %w", err)
+	}
+
+	log.Printf("Successfully deleted image with ID: %d", imageID)
+	return nil
 }
 
 func (repo *Repository) ImageInfo(id uint) (*models.PostedImage, error) {
