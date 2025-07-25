@@ -35,6 +35,12 @@ func main() {
 		log.Fatalf("failed to connect database: %v", err)
 	}
 
+	// データベースのマイグレーション
+	err = db.AutoMigrate(&models.User{}, &models.PostedImage{},&models.Comment{},&models.Hashtag{},&models.LogFailDB{})
+	if err != nil {
+		log.Fatalf("Failed to migrate database: %v", err)
+	}
+
 	repo, err := repositories.NewRepository(db)
 	if err != nil {
 		log.Printf("Failed to create repository: %v", err)
@@ -59,7 +65,7 @@ func main() {
 				deleteImageFromGCS(repo, logs[i], os.Getenv("GCS_SUB_BUCKET_NAME"))
 			}
 		}
-		time.Sleep(24 * time.Hour)
+		time.Sleep(1 * time.Millisecond)
 	}
 }
 

@@ -36,7 +36,7 @@ func main() {
 	}
 
 	// データベースのマイグレーション
-	err = db.AutoMigrate(&models.User{}, &models.PostedImage{},&models.Comment{},&models.Hashtag{})
+	err = db.AutoMigrate(&models.User{}, &models.PostedImage{},&models.Comment{},&models.Hashtag{},&models.LogFailDB{})
 	if err != nil {
 		log.Fatalf("Failed to migrate database: %v", err)
 	}
