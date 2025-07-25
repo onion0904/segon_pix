@@ -2,7 +2,6 @@ package models
 
 import (
     "gorm.io/gorm"
-    "github.com/golang-jwt/jwt/v5"
 )
 
 
@@ -48,20 +47,4 @@ type Hashtag struct {
 type LogFailDB struct {
     ObjectName  string    `gorm:"not null;index"`
     Error   string
-}
-
-
-
-
-
-type MyCustomClaims struct {
-	Email string `json:"email,omitempty"`
-    UserID uint `json:"userid,omitempty"`
-	jwt.RegisteredClaims
-}
-
-//repositoriesのPostedImageの中で画像を返す時に使用
-type Image struct{
-    ID       uint
-    URL      string
 }
